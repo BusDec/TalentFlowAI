@@ -1,3 +1,110 @@
-from django.test import TestCase
+"""Candidate portal test foundation — registration, OTP login, apply, withdraw."""
 
-# Create your tests here.
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import reverse
+
+from consent.models import Consent
+from portal.models import CandidatePortalUser
+from recruitment.models import Application
+
+# CandidatePortalUser is a separate model from accounts.User, so force_login
+# must pin the portal backend or the session user cannot be reloaded.
+PORTAL_BACKEND = "portal.backends.CandidatePortalBackend"
+
+RESUME_TEXT = (
+    b"Name: Aarav Sharma\nEmail: aarav@example.com\nPhone: 9876543210\n"
+    b"B.Tech Engineering\n2019 - Present | Assistant Manager | NEEPCO\n"
+)
+
+
+def _resume(filename="resume.txt"):
+    return SimpleUploadedFile(filename, RESUME_TEXT, content_type="text/plain")
+
+
+def test_candidate_register_login(api_client):
+    """Registration stores a simulated OTP; verifying it authenticates."""
+    response = api_client.post(
+        reverse("portal_register"),
+        {"email": "cand@example.com", "phone": "9876543210", "full_name": "Riya Verma"},
+    )
+    assert response.status_code == 302
+    assert response.url == reverse("portal_verify")
+
+    otp = api_client.session["pending_otp"]
+    assert otp  # simulated OTP is held in the session
+
+    response = api_client.post(reverse("portal_verify"), {"otp": otp})
+    assert response.status_code == 302
+
+    user = CandidatePortalUser.objects.get(email="cand@example.com")
+    assert user.otp_verified is True
+
+    # The session now belongs to the candidate portal user.
+    response = api_client.get(reverse("portal_dashboard"))
+    assert response.status_code == 200
+
+
+def test_apply_flow(api_client, candidate_portal_user, advertisement):
+    """A portal user can apply to a post with a resume + declaration."""
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    post = advertisement.posts.first()
+    response = api_client.post(
+        reverse("portal_apply", args=[advertisement.id]),
+        {"post": post.id, "resume": _resume(), "declare": "on"},
+    )
+    assert response.status_code == 302
+
+    application = Application.objects.get(
+        post=post, candidate__portal_user=candidate_portal_user
+    )
+    assert application.status == "received"
+    assert Consent.objects.filter(
+        candidate_portal_user=candidate_portal_user, application=application
+    ).exists()
+
+
+def test_withdraw(api_client, candidate_portal_user, application):
+    """Withdrawing records the terminal status and the stage it happened at."""
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+    application.status = "document_verification"
+    application.save()
+
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    response = api_client.post(
+        reverse("portal_application_withdraw", args=[application.application_id])
+    )
+    assert response.status_code == 302
+    application.refresh_from_db()
+    assert application.status == "withdrawn"
+    assert application.rejected_at_stage == "document_verification"
+
+
+def test_duplicate_application_blocked(api_client, candidate_portal_user, advertisement):
+    """A candidate may apply to an advertisement only once, across any post."""
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    first_post, second_post = advertisement.posts.all()[:2]
+
+    response = api_client.post(
+        reverse("portal_apply", args=[advertisement.id]),
+        {"post": first_post.id, "resume": _resume(), "declare": "on"},
+    )
+    assert response.status_code == 302
+
+    base_qs = Application.objects.filter(
+        candidate__portal_user=candidate_portal_user,
+        post__advertisement=advertisement,
+    )
+    assert base_qs.count() == 1
+
+    # Applying against a *different* post of the same advertisement is blocked.
+    response = api_client.post(
+        reverse("portal_apply", args=[advertisement.id]),
+        {"post": second_post.id, "resume": _resume("resume2.txt"), "declare": "on"},
+    )
+    assert response.status_code == 302
+    existing = base_qs.get()
+    assert response.url == reverse(
+        "portal_application_detail", args=[existing.application_id]
+    )
+    assert base_qs.count() == 1
