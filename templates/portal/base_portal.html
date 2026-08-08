@@ -7,8 +7,9 @@
     {% load static %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>:root{--tf-accent:{{ org_profile.accent_color|default:'#0b3d91' }}}</style>
     <link rel="stylesheet" href="{% static 'css/talentflow.css' %}">
+    {# Must come AFTER talentflow.css: :root --tf-accent is declared there too, and the later declaration wins the cascade. #}
+    <style>:root{--tf-accent:{{ org_profile.accent_color|default:'#0b3d91' }}}</style>
 </head>
 <body>
 <div class="tf-app">

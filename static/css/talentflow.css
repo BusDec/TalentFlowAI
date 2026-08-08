@@ -70,6 +70,10 @@ body {
     color: #fff;
     box-shadow: 0 6px 18px rgba(76, 201, 240, 0.4);
 }
+/* Portal org branding (base_portal.html) — org name/tagline from OrgProfile. */
+.tf-brand { flex-wrap: wrap; }
+.tf-brand .portal-brand { font-size: 1.02rem; line-height: 1.25; }
+.tf-brand .portal-tagline { width: 100%; font-size: 0.76rem; font-weight: 600; opacity: 0.72; }
 
 .tf-nav { display: flex; flex-direction: column; gap: 4px; }
 .tf-nav a {

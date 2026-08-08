@@ -121,6 +121,13 @@ def test_portal_page_renders_org_branding(api_client, tenant):
     body = resp.content.decode()
     assert "ACME Energy Ltd" in body
     assert "#123456" in body
+    # The accent override must come AFTER the stylesheet <link>: talentflow.css
+    # also declares --tf-accent on :root, and the later declaration wins the
+    # cascade — before this check the portal silently ignored the accent.
+    css_pos = body.find("talentflow.css")
+    style_pos = body.find("#123456")
+    assert css_pos != -1 and style_pos != -1
+    assert style_pos > css_pos
 
 
 def test_org_profile_admin_singleton():
