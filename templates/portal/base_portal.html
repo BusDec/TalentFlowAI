@@ -7,14 +7,16 @@
     {% load static %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--tf-accent:{{ org_profile.accent_color|default:'#0b3d91' }}}</style>
     <link rel="stylesheet" href="{% static 'css/talentflow.css' %}">
 </head>
 <body>
 <div class="tf-app">
     <aside class="tf-sidebar">
         <a class="tf-brand" href="{% url 'portal_dashboard' %}">
-            <span class="logo">TF</span>
-            <span>TalentFlow</span>
+            {% if org_profile.logo %}<img src="{{ org_profile.logo.url }}" alt="{{ org_profile.name_en }}" style="max-height:48px;margin-right:10px">{% endif %}
+            <span class="portal-brand">{{ org_profile.name_en }}{% if org_profile.name_hi %} <span lang="hi">{{ org_profile.name_hi }}</span>{% endif %}</span>
+            {% if org_profile.tagline_en %}<span class="portal-tagline">{{ org_profile.tagline_en }}</span>{% endif %}
         </a>
         <nav class="tf-nav">
             {% if user.is_authenticated %}
@@ -25,6 +27,9 @@
             {% endif %}
         </nav>
         <div class="tf-sidebar-footer">
+            {% if org_profile.footer_motto %}<p>{{ org_profile.footer_motto }}</p>{% endif %}
+            {% if org_profile.contact_email %}<p>{{ org_profile.contact_email }}</p>{% endif %}
+            {% if org_profile.website %}<p><a href="{{ org_profile.website }}">{{ org_profile.website }}</a></p>{% endif %}
             {% if user.is_authenticated %}
             <div class="tf-tenant-chip">
                 <span>◈</span>

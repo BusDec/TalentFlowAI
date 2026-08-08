@@ -1,4 +1,8 @@
+import re
+
+from django import forms
 from django.contrib import admin
+from django.utils.html import mark_safe
 from .models import (
     Advertisement,
     Post,
@@ -15,6 +19,7 @@ from .models import (
     DuplicateFlag,
     CommunicationLog,
     AuditEvent,
+    OrgProfile,
 )
 
 
@@ -141,3 +146,39 @@ class AuditEventAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+class OrgProfileForm(forms.ModelForm):
+    class Meta:
+        model = OrgProfile
+        fields = "__all__"
+
+    def clean_accent_color(self):
+        value = (self.cleaned_data.get("accent_color") or "").strip()
+        if not re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+            raise forms.ValidationError("Enter a hex color like #0b3d91.")
+        return value
+
+
+@admin.register(OrgProfile)
+class OrgProfileAdmin(admin.ModelAdmin):
+    form = OrgProfileForm
+    list_display = ["name_en", "tagline_en", "contact_email", "updated_at"]
+    fieldsets = (
+        ("Branding", {"fields": ("name_en", "name_hi", "tagline_en", "tagline_hi", "logo", "accent_color")}),
+        ("Contact", {"fields": ("address", "contact_email", "website", "footer_motto")}),
+        ("Payments", {"fields": ("sbi_epay_text",)}),
+    )
+    readonly_fields = ["logo_preview"]
+
+    def has_add_permission(self, request):
+        return False  # singleton — created by get_org_profile()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(description="Logo preview")
+    def logo_preview(self, obj):
+        if obj.logo:
+            return mark_safe(f'<img src="{obj.logo.url}" height="48">')
+        return "—"

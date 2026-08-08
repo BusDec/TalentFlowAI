@@ -106,3 +106,39 @@ def test_advertisement_has_no_company_fields():
     legacy = ("company_name", "company_tagline", "company_address", "contact_email", "registration_fee_text")
     for field in legacy:
         assert not hasattr(Advertisement, field)
+
+
+def test_portal_page_renders_org_branding(api_client, tenant):
+    from recruitment.org_profile import get_org_profile
+
+    org = get_org_profile()
+    org.name_en = "ACME Energy Ltd"
+    org.accent_color = "#123456"
+    org.save()
+
+    resp = api_client.get("/portal/login/")
+    assert resp.status_code == 200
+    body = resp.content.decode()
+    assert "ACME Energy Ltd" in body
+    assert "#123456" in body
+
+
+def test_org_profile_admin_singleton():
+    from django.contrib import admin as dj_admin
+
+    from recruitment.models import OrgProfile
+
+    model_admin = dj_admin.site._registry[OrgProfile]
+    assert model_admin.has_add_permission(None) is False
+    assert model_admin.has_delete_permission(None) is False
+
+
+def test_accent_color_validation():
+    from recruitment.admin import OrgProfileForm
+
+    bad = OrgProfileForm(data={"name_en": "X", "accent_color": "red"})
+    assert bad.is_valid() is False
+    assert "accent_color" in bad.errors
+
+    good = OrgProfileForm(data={"name_en": "X", "accent_color": "#0b3d91"})
+    assert good.is_valid() is True
