@@ -14,6 +14,7 @@ from .models import (
     InternalApplication,
     DuplicateFlag,
     CommunicationLog,
+    AuditEvent,
 )
 
 
@@ -123,3 +124,20 @@ class CommunicationLogAdmin(admin.ModelAdmin):
     list_display = ("application", "comm_type", "channel", "subject", "sent_at")
     list_filter = ("comm_type", "channel")
     readonly_fields = ("sent_at",)
+
+
+@admin.register(AuditEvent)
+class AuditEventAdmin(admin.ModelAdmin):
+    list_display = ("timestamp", "actor", "application", "field_name", "old_value", "new_value", "tenant_schema")
+    list_filter = ("field_name", "timestamp")
+    search_fields = ("application__application_id", "actor__username", "field_name")
+    readonly_fields = [f.name for f in AuditEvent._meta.fields]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
