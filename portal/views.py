@@ -16,7 +16,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods, require_POST
 
-from agents.duplicate_detection import flag_duplicates
 from agents.eligibility_verifier import verify_application
 from agents.resume_evaluator import evaluate_resume
 from agents.resume_parser import names_match
@@ -252,7 +251,6 @@ def apply(request, advt_id):
                         ),
                         ip_address=_client_ip(request),
                     )
-                    flag_duplicates(application)
                     for idx, cert in enumerate(post.required_certificates or []):
                         cert_file = request.FILES.get(f"cert_{post.id}_{idx}")
                         if cert_file:
