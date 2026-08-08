@@ -2,7 +2,7 @@ import re
 
 from django import forms
 from django.contrib import admin
-from django.utils.html import mark_safe
+from django.utils.html import escape, mark_safe
 from .models import (
     Advertisement,
     Post,
@@ -180,5 +180,5 @@ class OrgProfileAdmin(admin.ModelAdmin):
     @admin.display(description="Logo preview")
     def logo_preview(self, obj):
         if obj.logo:
-            return mark_safe(f'<img src="{obj.logo.url}" height="48">')
+            return mark_safe(f'<img src="{escape(obj.logo.url)}" height="48">')
         return "—"
