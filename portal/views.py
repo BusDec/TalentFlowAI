@@ -48,6 +48,18 @@ def _client_ip(request):
     return request.META.get("REMOTE_ADDR")
 
 
+def _clean_optional(value):
+    """POST value → None for blank / literal 'None'.
+
+    The profile template renders ``None`` model values as ``value="None"``,
+    so the browser submits the string "None"; treat it like an empty field.
+    """
+    if value is None:
+        return None
+    value = str(value).strip()
+    return None if value in ("", "None") else value
+
+
 def register(request):
     if request.method == "POST":
         form = CandidateRegistrationForm(request.POST)
@@ -395,7 +407,7 @@ def profile_view(request):
                     level=value,
                     discipline=request.POST.get(f"academic_discipline_{idx}", ""),
                     university_board=request.POST.get(f"academic_board_{idx}", ""),
-                    year_passed=request.POST.get(f"academic_year_{idx}") or None,
+                    year_passed=_clean_optional(request.POST.get(f"academic_year_{idx}")),
                     marking_type=request.POST.get(f"academic_marking_{idx}", "percentage"),
                     score=request.POST.get(f"academic_score_{idx}", ""),
                     is_ugc_recognized=request.POST.get(f"academic_ugc_{idx}") in ("on", "1", "true"),
@@ -406,8 +418,8 @@ def profile_view(request):
         for key, value in request.POST.items():
             if key.startswith("work_org_") and value:
                 idx = key.rsplit("_", 1)[1]
-                start = request.POST.get(f"work_start_{idx}") or None
-                end = request.POST.get(f"work_end_{idx}") or None
+                start = _clean_optional(request.POST.get(f"work_start_{idx}"))
+                end = _clean_optional(request.POST.get(f"work_end_{idx}"))
                 WorkExperience.objects.create(
                     candidate=candidate,
                     org_name=value,
@@ -415,18 +427,18 @@ def profile_view(request):
                     designation=request.POST.get(f"work_designation_{idx}", ""),
                     start_date=start,
                     end_date=end,
-                    annual_ctc_lakhs=request.POST.get(f"work_ctc_{idx}") or None,
-                    turnover_cr=request.POST.get(f"work_turnover_{idx}") or None,
+                    annual_ctc_lakhs=_clean_optional(request.POST.get(f"work_ctc_{idx}")),
+                    turnover_cr=_clean_optional(request.POST.get(f"work_turnover_{idx}")),
                 )
 
         # Exam disclosure.
         exam.exam_type = request.POST.get("exam_type", "")
-        exam.gate_year = request.POST.get("gate_year") or None
+        exam.gate_year = _clean_optional(request.POST.get("gate_year"))
         exam.paper_code = request.POST.get("paper_code", "")
-        exam.marks_out_100 = request.POST.get("marks_out_100") or None
-        exam.gate_score = request.POST.get("gate_score") or None
-        exam.air = request.POST.get("air") or None
-        exam.ese_total_score = request.POST.get("ese_total_score") or None
+        exam.marks_out_100 = _clean_optional(request.POST.get("marks_out_100"))
+        exam.gate_score = _clean_optional(request.POST.get("gate_score"))
+        exam.air = _clean_optional(request.POST.get("air"))
+        exam.ese_total_score = _clean_optional(request.POST.get("ese_total_score"))
         exam.public_disclosure_consent = request.POST.get("public_disclosure_consent") in ("on", "1", "true")
         exam.save()
 

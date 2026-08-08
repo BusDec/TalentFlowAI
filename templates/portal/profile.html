@@ -45,7 +45,7 @@
                 </select>
             </div>            <div class="tf-field">
                 <label class="tf-label">{% trans "Aadhaar Number" %}</label>
-                <input type="text" name="aadhar_no" class="tf-input" value="{{ profile.aadhar_no }}" placeholder="XXXX XXXX XXXX">
+                <input type="text" name="aadhar_no" class="tf-input" value="{{ profile.aadhar_no|default_if_none:'' }}" placeholder="XXXX XXXX XXXX">
             </div>
             <label class="tf-flex" style="gap:10px;cursor:pointer;align-self:end">
                 <input type="checkbox" name="is_pwbd" value="on" class="tf-input" style="width:18px;height:18px" {% if profile.is_pwbd %}checked{% endif %}>
@@ -85,7 +85,7 @@
                 <div class="tf-field"><label class="tf-label">{% trans "University / Board" %}</label>
                     <input name="academic_board_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.university_board }}" list="ugc-universities" autocomplete="off"></div>
                 <div class="tf-field"><label class="tf-label">{% trans "Year Passed" %}</label>
-                    <input name="academic_year_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.year_passed }}"></div>
+                    <input name="academic_year_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.year_passed|default_if_none:'' }}"></div>
                 <div class="tf-field"><label class="tf-label">{% trans "Marking" %}</label>
                     <select name="academic_marking_{{ forloop.counter0 }}" class="tf-select">
                         {% for value, label in rec.MARKING_CHOICES %}
@@ -131,9 +131,9 @@
                 <div class="tf-field"><label class="tf-label">{% trans "End" %}</label>
                     <input name="work_end_{{ forloop.counter0 }}" type="date" class="tf-input" value="{{ we.end_date|date:'Y-m-d' }}"></div>
                 <div class="tf-field"><label class="tf-label">{% trans "Annual CTC (Lakhs)" %}</label>
-                    <input name="work_ctc_{{ forloop.counter0 }}" class="tf-input" value="{{ we.annual_ctc_lakhs }}"></div>
+                    <input name="work_ctc_{{ forloop.counter0 }}" class="tf-input" value="{{ we.annual_ctc_lakhs|default_if_none:'' }}"></div>
                 <div class="tf-field"><label class="tf-label">{% trans "Org Turnover (Cr)" %}</label>
-                    <input name="work_turnover_{{ forloop.counter0 }}" class="tf-input" value="{{ we.turnover_cr }}"></div>
+                    <input name="work_turnover_{{ forloop.counter0 }}" class="tf-input" value="{{ we.turnover_cr|default_if_none:'' }}"></div>
                 <button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ {% trans "Remove record" %}</button>
             </div>
             {% endfor %}
@@ -154,17 +154,17 @@
                     {% endfor %}
                 </select></div>
             <div class="tf-field"><label class="tf-label">{% trans "GATE Year" %}</label>
-                <input name="gate_year" class="tf-input" value="{{ exam.gate_year }}"></div>
+                <input name="gate_year" class="tf-input" value="{{ exam.gate_year|default_if_none:'' }}"></div>
             <div class="tf-field"><label class="tf-label">{% trans "Paper Code" %}</label>
                 <input name="paper_code" class="tf-input" value="{{ exam.paper_code }}"></div>
             <div class="tf-field"><label class="tf-label">{% trans "Marks (out of 100)" %}</label>
-                <input name="marks_out_100" class="tf-input" value="{{ exam.marks_out_100 }}"></div>
+                <input name="marks_out_100" class="tf-input" value="{{ exam.marks_out_100|default_if_none:'' }}"></div>
             <div class="tf-field"><label class="tf-label">{% trans "GATE Score" %}</label>
-                <input name="gate_score" class="tf-input" value="{{ exam.gate_score }}"></div>
+                <input name="gate_score" class="tf-input" value="{{ exam.gate_score|default_if_none:'' }}"></div>
             <div class="tf-field"><label class="tf-label">{% trans "All India Rank (AIR)" %}</label>
-                <input name="air" class="tf-input" value="{{ exam.air }}"></div>
+                <input name="air" class="tf-input" value="{{ exam.air|default_if_none:'' }}"></div>
             <div class="tf-field"><label class="tf-label">{% trans "ESE Total Score" %}</label>
-                <input name="ese_total_score" class="tf-input" value="{{ exam.ese_total_score }}"></div>
+                <input name="ese_total_score" class="tf-input" value="{{ exam.ese_total_score|default_if_none:'' }}"></div>
             <label class="tf-flex" style="gap:10px;cursor:pointer;align-self:end;margin-bottom:18px">
                 <input type="checkbox" name="public_disclosure_consent" value="on" class="tf-input" style="width:18px;height:18px" {% if exam.public_disclosure_consent %}checked{% endif %}>
                 <span class="tf-muted" style="font-size:0.8rem">{% trans "Consent to disclose score publicly in merit list" %}</span>

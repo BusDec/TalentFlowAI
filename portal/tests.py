@@ -1,10 +1,13 @@
 """Candidate portal test foundation — registration, OTP login, apply, withdraw."""
 
+from decimal import Decimal
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from consent.models import Consent
 from portal.models import CandidatePortalUser
+from profiles.models import ExamDisclosure
 from recruitment.models import Application
 
 # CandidatePortalUser is a separate model from accounts.User, so force_login
@@ -108,3 +111,55 @@ def test_duplicate_application_blocked(api_client, candidate_portal_user, advert
         "portal_application_detail", args=[existing.application_id]
     )
     assert base_qs.count() == 1
+
+
+def test_profile_save_with_blank_exam_fields(api_client, candidate_portal_user):
+    """The profile template renders None as value=\"None\"; saving must not crash.
+
+    Regression: POSTing the literal string "None" for numeric/date fields used
+    to raise ValueError/ValidationError on ExamDisclosure.save().
+    """
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    response = api_client.post(
+        reverse("portal_profile"),
+        {
+            "gate_year": "None",
+            "paper_code": "",
+            "marks_out_100": "None",
+            "gate_score": "None",
+            "air": "None",
+            "ese_total_score": "None",
+            "work_start_0": "None",
+            "work_end_0": "None",
+        },
+    )
+    assert response.status_code == 302
+    exam = ExamDisclosure.objects.get(candidate__portal_user=candidate_portal_user)
+    assert exam.gate_year is None
+    assert exam.gate_score is None
+    assert exam.air is None
+    assert exam.ese_total_score is None
+
+
+def test_profile_save_with_filled_exam_fields(api_client, candidate_portal_user):
+    """Valid numeric exam values survive the round trip."""
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    response = api_client.post(
+        reverse("portal_profile"),
+        {
+            "exam_type": "gate",
+            "gate_year": "2024",
+            "paper_code": "CE",
+            "marks_out_100": "67.5",
+            "gate_score": "98.5",
+            "air": "42",
+            "ese_total_score": "111.25",
+        },
+    )
+    assert response.status_code == 302
+    exam = ExamDisclosure.objects.get(candidate__portal_user=candidate_portal_user)
+    assert exam.gate_year == 2024
+    assert exam.gate_score == Decimal("98.5")
+    assert exam.marks_out_100 == Decimal("67.5")
+    assert exam.air == 42
+    assert exam.ese_total_score == Decimal("111.25")
