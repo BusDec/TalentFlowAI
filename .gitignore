@@ -88,3 +88,6 @@ htmlcov/
 *.tar.gz
 *.zip
 *.whl
+
+# SDD per-plan scratch (ledger, briefs, review packages)
+.superpowers/
