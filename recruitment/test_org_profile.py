@@ -36,3 +36,41 @@ def test_get_org_profile_no_client_fallback(tenant, monkeypatch):
     OrgProfile.objects.all().delete()  # Defensive: drop any pre-existing row
     profile = get_org_profile()
     assert profile.name_en  # falls back to schema name, non-empty
+
+
+def test_generate_advt_text_uses_org_profile(tenant, advertisement):
+    from recruitment.org_profile import get_org_profile
+    from recruitment.views import generate_advt_text
+
+    org = get_org_profile()
+    org.name_en = "ACME Energy Ltd"
+    org.tagline_en = "Power For All"
+    org.address = "123 Test Street"
+    org.contact_email = "careers@acme.example"
+    org.sbi_epay_text = "Pay Rs 500 via SBI ePay"
+    org.save()
+    advertisement.description = "Test company profile description."
+    advertisement.save()
+
+    text = generate_advt_text(advertisement)
+    assert "ACME Energy Ltd" in text
+    assert "Power For All" in text
+    assert "123 Test Street" in text
+    assert "careers@acme.example" in text
+    assert "SBI ePay" in text
+    assert "North Eastern Electric Power Corporation Limited" not in text
+
+
+def test_generate_offer_text_uses_org_profile(tenant, application):
+    from recruitment.org_profile import get_org_profile
+    from recruitment.views import generate_offer_text
+
+    org = get_org_profile()
+    org.name_en = "ACME Energy Ltd"
+    org.address = "123 Test Street"
+    org.save()
+
+    text = generate_offer_text(application)
+    assert "ACME Energy Ltd" in text
+    assert "123 Test Street" in text
+    assert "North Eastern Electric Power Corporation Limited" not in text

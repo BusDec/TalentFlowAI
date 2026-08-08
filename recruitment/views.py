@@ -137,12 +137,21 @@ def advertisement_pdf(request, advt_id):
 
 def generate_advt_text(advt):
     """Build the full advertisement text in the exact NEEPCO/THDC format."""
+    from .org_profile import get_org_profile
+
+    org = get_org_profile()
+
     from .boilerplate import (
         DEFAULT_COMPANY_PROFILE,
         DEFAULT_HOW_TO_APPLY,
     )
 
     def _d(value):
+        if isinstance(value, str):
+            try:
+                value = datetime.date.fromisoformat(value)
+            except ValueError:
+                return value
         return value.strftime("%d-%m-%Y") if value else ""
 
     def _num_words(n):
@@ -152,9 +161,9 @@ def generate_advt_text(advt):
 
     lines = []
     # Header
-    lines.append(f"{advt.company_name or 'North Eastern Electric Power Corporation Limited'}")
-    lines.append(f"{advt.company_tagline or '(A Government of India Enterprise)'}")
-    lines.append(f"{advt.company_address or ''}")
+    lines.append(org.name_en or "North Eastern Electric Power Corporation Limited")
+    lines.append(org.tagline_en or "(A Government of India Enterprise)")
+    lines.append(org.address or "")
     lines.append("")
     lines.append(f"Date {_d(advt.published_date)}    Advertisement .No.{advt.advt_number}")
     lines.append("")
@@ -205,13 +214,13 @@ def generate_advt_text(advt):
     lines.append(advt.how_to_apply or DEFAULT_HOW_TO_APPLY)
     lines.append("")
 
-    if advt.registration_fee_text:
+    if org.sbi_epay_text:
         lines.append("REGISTRATION FEES")
-        lines.append(advt.registration_fee_text)
+        lines.append(org.sbi_epay_text)
         lines.append("")
 
-    if advt.contact_email:
-        lines.append(f"Contact e-mail ID of Recruitment Cell: {advt.contact_email}")
+    if org.contact_email:
+        lines.append(f"Contact e-mail ID of Recruitment Cell: {org.contact_email}")
 
     return "\n".join(lines)
 
@@ -706,10 +715,12 @@ def generate_offer_text(app):
     """Build a formal PSU-style offer letter in plain text."""
     cand = app.candidate
     post = app.post
-    org = "North Eastern Electric Power Corporation Limited"
+    from .org_profile import get_org_profile
+
+    _org = get_org_profile()
     lines = [
-        org,
-        "Brookland Compound, Lower New Colony, Shillong – 793003, Meghalaya",
+        _org.name_en or "North Eastern Electric Power Corporation Limited",
+        _org.address or "Brookland Compound, Lower New Colony, Shillong – 793003, Meghalaya",
         "",
         "OFFER OF APPOINTMENT",
         f"Advertisement No: {post.advertisement.advt_number}",
@@ -734,7 +745,7 @@ def generate_offer_text(app):
         "Please communicate your acceptance within 15 days of receipt of this letter.",
         "",
         "Yours faithfully,",
-        "For " + org,
+        "For " + _org.name_en,
         "",
         "(Authorised Signatory)",
         "Date: " + str(datetime.date.today()),

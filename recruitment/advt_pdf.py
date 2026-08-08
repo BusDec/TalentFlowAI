@@ -170,17 +170,21 @@ def generate_advertisement_pdf(advt):
 
     pdf = AdvtPDF(advt_number=advt.advt_number)
 
+    from .org_profile import get_org_profile
+
+    org = get_org_profile()
+
     # ---- Header ----
     pdf._set_f("B", 16)
     pdf.set_text_color(*COLOR_DARK)
-    pdf._mc(advt.company_name or "North Eastern Electric Power Corporation Limited", align="C")
+    pdf._mc(org.name_en or "North Eastern Electric Power Corporation Limited", align="C")
     pdf._set_f("", 10)
     pdf.set_text_color(*COLOR_PRIMARY)
-    pdf._mc(advt.company_tagline or "(A Government of India Enterprise)", align="C")
+    pdf._mc(org.tagline_en or "(A Government of India Enterprise)", align="C")
     pdf._set_f("", 8.5)
     pdf.set_text_color(*COLOR_MUTED)
-    if advt.company_address:
-        pdf._mc(advt.company_address, align="C")
+    if org.address:
+        pdf._mc(org.address, align="C")
     pdf.ln(2)
     pdf.set_draw_color(*COLOR_PRIMARY)
     pdf.set_line_width(0.6)
@@ -225,14 +229,14 @@ def generate_advertisement_pdf(advt):
     pdf._section("HOW TO APPLY")
     pdf._para(advt.how_to_apply or DEFAULT_HOW_TO_APPLY)
 
-    if advt.registration_fee_text:
+    if org.sbi_epay_text:
         pdf._section("REGISTRATION FEES")
-        pdf._para(advt.registration_fee_text)
+        pdf._para(org.sbi_epay_text)
 
-    if advt.contact_email:
+    if org.contact_email:
         pdf.ln(2)
         pdf._set_f("", 9.5)
         pdf.set_text_color(*COLOR_TEXT)
-        pdf._mc(f"Contact e-mail ID of Recruitment Cell: {advt.contact_email}")
+        pdf._mc(f"Contact e-mail ID of Recruitment Cell: {org.contact_email}")
 
     return bytes(pdf.output(dest="S"))
