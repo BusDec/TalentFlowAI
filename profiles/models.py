@@ -6,6 +6,8 @@ a profile follows the candidate across applications.
 
 from django.db import models
 
+from .fields import EncryptedTextField
+
 GENDER_CHOICES = (("M", "Male"), ("F", "Female"), ("O", "Other"))
 
 
@@ -26,7 +28,10 @@ class CandidateProfile(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, blank=True)
     is_pwbd = models.BooleanField(default=False)
-    aadhar_no = models.CharField(max_length=20, blank=True, help_text="Aadhaar number (proof document required)")
+    aadhar_no = EncryptedTextField(blank=True, help_text="Aadhaar number (proof document required) — encrypted at rest.")
+    aadhar_retention_date = models.DateField(
+        null=True, blank=True, help_text="Scheduled purge date for Aadhaar data."
+    )
     permanent_address = models.TextField(blank=True)
     current_address = models.TextField(blank=True)
     current_same_as_permanent = models.BooleanField(
@@ -45,6 +50,13 @@ class CandidateProfile(models.Model):
         if self.current_same_as_permanent:
             return self.permanent_address
         return self.current_address
+
+    @property
+    def display_aadhaar(self):
+        """Masked Aadhaar: only the last 4 digits are ever exposed."""
+        if self.aadhar_no and len(self.aadhar_no) >= 4:
+            return f"XXXX-XXXX-{self.aadhar_no[-4:]}"
+        return "Not provided"
 
 
 class AcademicRecord(models.Model):
