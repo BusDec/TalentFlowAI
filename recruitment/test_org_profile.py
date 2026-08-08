@@ -4,6 +4,9 @@
 def test_org_profile_model_created(tenant):
     from recruitment.models import OrgProfile
 
+    # Defensive: the 0010 seed creates the fallback row when a tenant schema
+    # is created, so drop any pre-existing row before exercising create().
+    OrgProfile.objects.all().delete()
     OrgProfile.objects.create(name_en="Test Org")
     assert OrgProfile.objects.filter(name_en="Test Org").exists()
     assert OrgProfile.objects.get(name_en="Test Org").accent_color == "#0b3d91"
@@ -95,3 +98,11 @@ def test_advertisement_report_uses_org_profile(api_client, tenant, advertisement
     resp = api_client.get(f"/advertisements/{advertisement.id}/report/")
     assert resp.status_code == 200
     assert "ACME Energy Ltd" in resp.content.decode()
+
+
+def test_advertisement_has_no_company_fields():
+    from recruitment.models import Advertisement
+
+    legacy = ("company_name", "company_tagline", "company_address", "contact_email", "registration_fee_text")
+    for field in legacy:
+        assert not hasattr(Advertisement, field)

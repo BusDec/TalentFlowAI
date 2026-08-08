@@ -15,13 +15,6 @@ class Advertisement(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Organisation header
-    company_name = models.CharField(max_length=200, blank=True, default="North Eastern Electric Power Corporation Limited")
-    company_tagline = models.CharField(max_length=200, blank=True, default="(A Government of India Enterprise)")
-    company_address = models.CharField(max_length=300, blank=True, default="Brookland Compound, Lower New Colony, Shillong – 793003, Meghalaya")
-    contact_email = models.CharField(max_length=120, blank=True, default="recruitment@neepco.co.in")
-    registration_fee_text = models.TextField(blank=True)
-
     # Boilerplate sections (pre-filled with standard NEEPCO text)
     health_text = models.TextField(blank=True)
     general_conditions = models.TextField(blank=True)
