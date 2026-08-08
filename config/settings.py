@@ -5,6 +5,8 @@ Multi-tenant recruitment intelligence platform using django-tenants
 (schema-per-tenant). Requires PostgreSQL.
 """
 
+import base64
+import hashlib
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -162,3 +164,23 @@ LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", "60"))
 # DigiLocker (mock during Phase I dev)
 # ---------------------------------------------------------------------------
 DIGILOCKER_MOCK = os.getenv("DIGILOCKER_MOCK", "True").lower() in ("true", "1", "yes")
+
+# ---------------------------------------------------------------------------
+# Phase 1: PII encryption (Fernet key for profiles.fields.EncryptedTextField)
+# ---------------------------------------------------------------------------
+_ENCRYPTION_KEY = os.getenv("DJANGO_ENCRYPTION_KEY", "")
+if not _ENCRYPTION_KEY:
+    # Dev fallback: derive a stable Fernet-compatible key from SECRET_KEY.
+    _ENCRYPTION_KEY = base64.urlsafe_b64encode(hashlib.sha256(SECRET_KEY.encode()).digest()).decode()
+ENCRYPTION_KEY = _ENCRYPTION_KEY
+
+# ---------------------------------------------------------------------------
+# Phase 1: Celery / async task processing
+# ---------------------------------------------------------------------------
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+# Run tasks synchronously in development (DEBUG=True) unless a broker is set up.
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", str(DEBUG)).lower() in ("true", "1", "yes")
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TASK_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]

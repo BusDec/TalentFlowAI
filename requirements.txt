@@ -11,3 +11,16 @@ Pillow>=10.0
 
 # --- LLM client (OpenAI-compatible: DeepSeek, OpenAI, Azure, etc.) ---
 openai>=1.30
+
+# --- Phase 1: async document processing ---
+celery>=5.4
+redis>=5.0
+
+# --- Phase 1: PII encryption (Fernet) ---
+cryptography>=42.0
+
+# --- Phase 1: test foundation ---
+pytest>=8.0
+pytest-django>=4.8
+pytest-cov>=5.0
+factory-boy>=3.3

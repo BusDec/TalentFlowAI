@@ -137,7 +137,28 @@ class Application(models.Model):
         import re
         if self.application_id:
             self.application_id = re.sub(r"[^A-Za-z0-9_-]", "", self.application_id)
+
+        previous = None
+        if self.pk:
+            try:
+                previous = Application.objects.only("status", "resume_score").get(pk=self.pk)
+            except Application.DoesNotExist:
+                previous = None
+
+        actor = kwargs.pop("audit_actor", None)
+        update_fields = kwargs.get("update_fields")
+
         super().save(*args, **kwargs)
+
+        if previous is not None:
+            from .audit import log_audit
+            # Respect update_fields: only audit fields that were actually written.
+            status_written = update_fields is None or "status" in update_fields
+            score_written = update_fields is None or "resume_score" in update_fields
+            if status_written and previous.status != self.status:
+                log_audit(actor, self, "status", previous.status, self.status)
+            if score_written and previous.resume_score != self.resume_score:
+                log_audit(actor, self, "resume_score", previous.resume_score, self.resume_score)
 
     def __str__(self):
         return self.application_id
@@ -216,6 +237,7 @@ class Resume(models.Model):
         default="pending",
     )
     parsed_at = models.DateTimeField(null=True, blank=True)
+    parse_error = models.TextField(blank=True, help_text="Parsing error message when parse_status='failed'.")
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -428,3 +450,45 @@ class CommunicationLog(models.Model):
 
     def __str__(self):
         return f"{self.comm_type} -> {self.application.application_id}"
+
+
+class AuditEvent(models.Model):
+    """Immutable record of who changed what on an application and when.
+
+    Written by recruitment.audit.log_audit(). Rows are never updated or
+    deleted through the admin — audit trails must survive for RTI requests.
+    """
+
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="audit_events",
+    )
+    tenant_schema = models.CharField(
+        max_length=63,
+        blank=True,
+        default="",
+        help_text="Tenant schema in which the change happened (schema == tenant identity).",
+    )
+    application = models.ForeignKey(
+        "Application",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="audit_events",
+    )
+    field_name = models.CharField(max_length=100)
+    old_value = models.TextField(blank=True)
+    new_value = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    reason = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
+        indexes = [models.Index(fields=["application", "-timestamp"])]
+        verbose_name = "Audit Event"
+
+    def __str__(self):
+        return f"{self.timestamp:%Y-%m-%d %H:%M} {self.field_name} on {self.application}"
