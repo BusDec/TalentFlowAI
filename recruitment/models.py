@@ -492,3 +492,34 @@ class AuditEvent(models.Model):
 
     def __str__(self):
         return f"{self.timestamp:%Y-%m-%d %H:%M} {self.field_name} on {self.application}"
+
+
+class OrgProfile(models.Model):
+    """Single per-tenant organisation identity row (schema == tenant)."""
+
+    name_en = models.CharField(max_length=200)
+    name_hi = models.CharField(max_length=200, blank=True)
+    tagline_en = models.CharField(max_length=200, blank=True)
+    tagline_hi = models.CharField(max_length=200, blank=True)
+    address = models.TextField(blank=True)
+    footer_motto = models.CharField(max_length=300, blank=True)
+    contact_email = models.EmailField(blank=True)
+    website = models.URLField(blank=True)
+    sbi_epay_text = models.TextField(
+        blank=True,
+        help_text="Registration fee / SBI ePay payment instructions (moved from Advertisement.registration_fee_text).",
+    )
+    logo = models.ImageField(upload_to="org_logos/", blank=True, null=True)
+    accent_color = models.CharField(
+        max_length=9,
+        default="#0b3d91",
+        help_text="CSS hex color (e.g. #0b3d91) used for portal accent theming.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Organisation Profile"
+
+    def __str__(self):
+        return self.name_en
