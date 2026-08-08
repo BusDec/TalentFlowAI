@@ -6,10 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from accounts.decorators import require_role
 from .importer import import_bio_csv, import_workbook
 
 
 @login_required
+@require_role("hr_manager")
 def import_csv(request):
     if request.method == "POST":
         dry_run = request.POST.get("dry_run") == "on"

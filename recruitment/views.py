@@ -8,8 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from accounts.decorators import check_role, require_role
 from agents import eligibility_verifier, interview_copilot, roster_compliance
 from agents.shortlist import build_shortlist
 from consent.models import Consent, ConsentEvent
@@ -30,6 +32,7 @@ from .models import (
 
 
 @login_required
+@require_role("viewer")
 def dashboard(request):
     total = Application.objects.count()
     by_status = {
@@ -62,6 +65,7 @@ def dashboard(request):
 
 
 @login_required
+@require_role("viewer")
 def advertisement_list(request):
     return render(
         request,
@@ -71,6 +75,7 @@ def advertisement_list(request):
 
 
 @login_required
+@require_role("hr_manager")
 def advertisement_create(request):
     from .forms import AdvertisementForm, PostFormSet
 
@@ -105,6 +110,7 @@ def advertisement_create(request):
 
 
 @login_required
+@require_role("hr_manager")
 def advertisement_generate(request, advt_id):
     """Render a NEEPCO/THDC-format advertisement text for copy/print."""
     advt = get_object_or_404(Advertisement, id=advt_id)
@@ -117,6 +123,7 @@ def advertisement_generate(request, advt_id):
 
 
 @login_required
+@require_role("hr_manager")
 def advertisement_pdf(request, advt_id):
     """Download a formatted PDF advertisement matching the NEEPCO layout."""
     from .advt_pdf import generate_advertisement_pdf
@@ -210,6 +217,7 @@ def generate_advt_text(advt):
 
 
 @login_required
+@require_role("viewer")
 def advertisement_detail(request, advt_id):
     advt = get_object_or_404(Advertisement, id=advt_id)
     return render(request, "recruitment/advertisement_detail.html", {"advt": advt})
@@ -247,6 +255,7 @@ def _qualification_verdict(post, application):
 
 
 @login_required
+@require_role("viewer")
 def advertisement_report(request, advt_id):
     advt = get_object_or_404(Advertisement, id=advt_id)
 
@@ -284,6 +293,7 @@ def advertisement_report(request, advt_id):
 
 
 @login_required
+@require_role("viewer")
 def application_list(request):
     applications = Application.objects.select_related("candidate", "post", "post__advertisement").all()
 
@@ -320,6 +330,7 @@ def application_list(request):
 
 
 @login_required
+@require_role("viewer")
 def applications_export(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="applications.csv"'
@@ -348,7 +359,10 @@ REJECTION_STAGE_CHOICES = [
 
 
 @login_required
+@require_role("recruiter", "hr_manager")
 def application_detail(request, application_id):
+    if request.method == "POST":
+        check_role(request, "hr_manager")
     application = get_object_or_404(Application, application_id=application_id)
     background_report = getattr(application, "background_report", None)
     category_allocations = application.category_allocations.all()
@@ -430,6 +444,7 @@ def application_detail(request, application_id):
 
 
 @login_required
+@require_role("recruiter")
 @require_POST
 def digilocker_fetch(request, application_id):
     """Fetch documents from DigiLocker / NAD — only with active candidate consent."""
@@ -479,6 +494,7 @@ def digilocker_fetch(request, application_id):
 
 
 @login_required
+@require_role("recruiter")
 def run_eligibility(request, application_id):
     application = get_object_or_404(Application, application_id=application_id)
     verdict = eligibility_verifier.verify_application(
@@ -490,7 +506,10 @@ def run_eligibility(request, application_id):
 
 
 @login_required
+@require_role("recruiter", "hr_manager")
 def roster_view(request, post_id):
+    if request.method == "POST":
+        check_role(request, "hr_manager")
     post = get_object_or_404(Post, id=post_id)
     if request.method == "POST":
         action = request.POST.get("action")
@@ -533,12 +552,14 @@ def roster_view(request, post_id):
 
 
 @login_required
+@require_role("recruiter")
 def panel_view(request, post_id):
     entries = PanelList.objects.filter(post_id=post_id, is_active=True)
     return render(request, "recruitment/panel.html", {"entries": entries, "post_id": post_id})
 
 
 @login_required
+@require_role("hr_manager")
 @require_POST
 def panel_promote(request, post_id, panel_id):
     entry = get_object_or_404(PanelList, id=panel_id, post_id=post_id)
@@ -547,8 +568,8 @@ def panel_promote(request, post_id, panel_id):
         messages.error(request, "Application no longer promotable.")
     else:
         application.status = "offered"
-        application.save()
-        entry.promoted_on = datetime.datetime.now()
+        application.save(audit_actor=request.user)
+        entry.promoted_on = timezone.now()
         entry.is_active = False
         entry.save()
         messages.success(request, f"Promoted {application} from panel.")
@@ -556,12 +577,14 @@ def panel_promote(request, post_id, panel_id):
 
 
 @login_required
+@require_role("viewer")
 def internal_posting_list(request):
     postings = InternalJobPosting.objects.all()
     return render(request, "recruitment/internal_posting_list.html", {"postings": postings})
 
 
 @login_required
+@require_role("recruiter")
 def duplicates_queue(request):
     flags = DuplicateFlag.objects.select_related(
         "candidate", "application_a", "application_b"
@@ -570,6 +593,7 @@ def duplicates_queue(request):
 
 
 @login_required
+@require_role("hr_manager")
 @require_POST
 def duplicates_resolve(request, flag_id):
     flag = get_object_or_404(DuplicateFlag, id=flag_id)
@@ -577,13 +601,14 @@ def duplicates_resolve(request, flag_id):
     if resolution in dict(DuplicateFlag.RESOLUTION_CHOICES):
         flag.resolution = resolution
         flag.resolved_by = request.user
-        flag.resolved_at = datetime.datetime.now()
+        flag.resolved_at = timezone.now()
         flag.save()
         messages.success(request, "Duplicate flag resolved.")
     return redirect("duplicates_queue")
 
 
 @login_required
+@require_role("recruiter")
 def shortlist_view(request, post_id):
     """Smart shortlist for a post — ranks candidates by composite score."""
     post = get_object_or_404(Post, id=post_id)
@@ -606,6 +631,7 @@ def shortlist_view(request, post_id):
 
 
 @login_required
+@require_role("viewer")
 def analytics_view(request):
     """Recruitment analytics: funnel conversion, category mix, score distribution."""
     import json
@@ -660,8 +686,11 @@ def analytics_view(request):
 
 
 @login_required
+@require_role("recruiter", "org_admin")
 def offer_letter(request, application_id):
     """Generate an offer letter for a candidate (text preview; PDF via print)."""
+    if request.method == "POST":
+        check_role(request, "org_admin")
     application = get_object_or_404(Application, application_id=application_id)
     if application.status not in ("offered", "joined"):
         messages.warning(request, "Set the application status to 'Offered' first.")
@@ -714,8 +743,11 @@ def generate_offer_text(app):
 
 
 @login_required
+@require_role("recruiter", "hr_manager")
 def communications(request, application_id):
     """Communication hub — send and view candidate messages."""
+    if request.method == "POST":
+        check_role(request, "hr_manager")
     from .models import CommunicationLog
 
     application = get_object_or_404(Application, application_id=application_id)
@@ -744,12 +776,14 @@ def communications(request, application_id):
 
 
 @login_required
+@require_role("hr_manager")
 def consent_ledger(request):
     consents = Consent.objects.select_related("candidate_portal_user").all()
     return render(request, "consent/ledger.html", {"consents": consents})
 
 
 @login_required
+@require_role("hr_manager")
 def consent_ledger_export(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="consent_ledger.csv"'
