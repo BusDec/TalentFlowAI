@@ -12,7 +12,7 @@
 {% block content %}
 <div class="report-doc">
     <div class="report-header">
-        <div class="report-title">{{ advt.company_name|default:"North Eastern Electric Power Corporation Limited" }}</div>
+        <div class="report-title">{{ org_profile.name_en|default:"Organisation" }}</div>
         <div class="report-sub">{{ advt.advt_number }} — {{ advt.title }}</div>
         <div class="report-meta">Published: {{ advt.published_date|date:"d-m-Y" }} · Closes: {{ advt.closing_date|date:"d-m-Y" }}</div>
     </div>

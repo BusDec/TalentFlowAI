@@ -43,22 +43,6 @@
                 {{ form.closing_date }}
                 {% for e in form.closing_date.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
             </div>
-            <div class="tf-field">
-                <label class="tf-label">Company Name</label>
-                {{ form.company_name }}
-            </div>
-            <div class="tf-field">
-                <label class="tf-label">Company Tagline</label>
-                {{ form.company_tagline }}
-            </div>
-            <div class="tf-field">
-                <label class="tf-label">Company Address</label>
-                {{ form.company_address }}
-            </div>
-            <div class="tf-field">
-                <label class="tf-label">Contact Email</label>
-                {{ form.contact_email }}
-            </div>
         </div>
         <div class="tf-field">
             <label class="tf-label">Company Profile / Description</label>
@@ -73,10 +57,6 @@
 
         <details class="tf-glass" style="padding:16px 20px;margin-top:18px">
             <summary style="cursor:pointer;font-weight:700;color:#fff">⚙ Boilerplate Sections (pre-filled — edit if needed)</summary>
-            <div class="tf-field mt-3">
-                <label class="tf-label">Registration Fees</label>
-                {{ form.registration_fee_text }}
-            </div>
             <div class="tf-field">
                 <label class="tf-label">Health Requirements</label>
                 {{ form.health_text }}

@@ -266,6 +266,8 @@ def _qualification_verdict(post, application):
 @login_required
 @require_role("viewer")
 def advertisement_report(request, advt_id):
+    from .org_profile import get_org_profile
+
     advt = get_object_or_404(Advertisement, id=advt_id)
 
     if request.method == "POST":
@@ -297,7 +299,7 @@ def advertisement_report(request, advt_id):
     return render(
         request,
         "recruitment/advertisement_report.html",
-        {"advt": advt, "posts": posts, "today": datetime.date.today()},
+        {"advt": advt, "posts": posts, "today": datetime.date.today(), "org_profile": get_org_profile()},
     )
 
 

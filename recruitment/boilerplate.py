@@ -4,20 +4,8 @@ These mirror the published NEEPCO advertisement text so recruiters can
 generate a fully-formatted advertisement by only filling the variable parts.
 """
 
-DEFAULT_COMPANY_NAME = "North Eastern Electric Power Corporation Limited"
-DEFAULT_COMPANY_TAGLINE = "(A Government of India Enterprise)"
-DEFAULT_COMPANY_ADDRESS = "Brookland Compound, Lower New Colony, Shillong – 793003, Meghalaya"
-DEFAULT_CONTACT_EMAIL = "recruitment@neepco.co.in"
 DEFAULT_LOCATION = "Shillong or any Offices/ Project sites of NEEPCO, anywhere in India"
 DEFAULT_PERIOD = "Initially for 3 (three) years and extendable by further 2 (two) years on yearly basis based on the performance and requirement"
-
-DEFAULT_FEE_TEXT = (
-    "Candidate belonging to General /EWS /OBC category is required to pay a non-refundable "
-    "Application fee of Rs 500/- (Rupees five hundred only). SC/ST/PwBD/ESM category and female "
-    "candidates are exempted from the Application fee. However, SC/ST candidates applying for UR "
-    "posts are required to pay the application fee. Payment of the application fee is accepted "
-    "through online mode only. Fee once paid will not be refunded under any circumstances."
-)
 
 DEFAULT_HEALTH_TEXT = """The candidate should have sound health. Before joining, candidates will have to undergo medical examination at the Hospital and obtain a Medical certificate from Govt. Chief Medical Officer/ Civil Surgeon of District Hospital authorized to issue such certificate stating that you are medically fit for taking up this assignment on the basis of your medical examination covering the following routine investigation (Reports to be enclosed at the time of joining):
 

@@ -8,8 +8,6 @@ the source document.
 from django.core.management.base import BaseCommand
 
 from recruitment.boilerplate import (
-    DEFAULT_CONTACT_EMAIL,
-    DEFAULT_FEE_TEXT,
     DEFAULT_GENERAL_CONDITIONS,
     DEFAULT_HEALTH_TEXT,
     DEFAULT_HOW_TO_APPLY,
@@ -168,12 +166,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("NEEPCO/02/2026 not found. Run simulate_neepco_advt first."))
             return
 
-        advt.company_name = "North Eastern Electric Power Corporation Limited"
-        advt.company_tagline = "(A Government of India Enterprise)"
-        advt.company_address = "Brookland Compound, Lower New Colony, Shillong – 793003, Meghalaya"
-        advt.contact_email = DEFAULT_CONTACT_EMAIL
         advt.description = REAL_PROFILE
-        advt.registration_fee_text = DEFAULT_FEE_TEXT
         advt.health_text = DEFAULT_HEALTH_TEXT
         advt.general_conditions = DEFAULT_GENERAL_CONDITIONS
         advt.how_to_apply = DEFAULT_HOW_TO_APPLY

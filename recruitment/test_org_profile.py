@@ -74,3 +74,24 @@ def test_generate_offer_text_uses_org_profile(tenant, application):
     assert "ACME Energy Ltd" in text
     assert "123 Test Street" in text
     assert "North Eastern Electric Power Corporation Limited" not in text
+
+
+def test_advt_form_has_no_company_fields():
+    from recruitment.forms import AdvertisementForm
+
+    legacy = ("company_name", "company_tagline", "company_address", "contact_email", "registration_fee_text")
+    for field in legacy:
+        assert field not in AdvertisementForm.Meta.fields
+
+
+def test_advertisement_report_uses_org_profile(api_client, tenant, advertisement, viewer_user):
+    from recruitment.org_profile import get_org_profile
+
+    org = get_org_profile()
+    org.name_en = "ACME Energy Ltd"
+    org.save()
+
+    api_client.force_login(viewer_user)  # report route is viewer-role
+    resp = api_client.get(f"/advertisements/{advertisement.id}/report/")
+    assert resp.status_code == 200
+    assert "ACME Energy Ltd" in resp.content.decode()

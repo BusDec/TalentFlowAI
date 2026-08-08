@@ -5,8 +5,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .boilerplate import (
-    DEFAULT_CONTACT_EMAIL,
-    DEFAULT_FEE_TEXT,
     DEFAULT_GENERAL_CONDITIONS,
     DEFAULT_HEALTH_TEXT,
     DEFAULT_HOW_TO_APPLY,
@@ -23,8 +21,7 @@ class AdvertisementForm(forms.ModelForm):
         model = Advertisement
         fields = [
             "advt_number", "title", "description", "published_date", "closing_date", "is_active",
-            "company_name", "company_tagline", "company_address", "contact_email",
-            "registration_fee_text", "health_text", "general_conditions", "how_to_apply",
+            "health_text", "general_conditions", "how_to_apply",
         ]
         widgets = {
             "advt_number": forms.TextInput(attrs={"class": "tf-input", "placeholder": "e.g. NEEPCO/03/2026"}),
@@ -33,11 +30,6 @@ class AdvertisementForm(forms.ModelForm):
             "published_date": forms.DateInput(attrs={"class": "tf-input", "type": "date"}),
             "closing_date": forms.DateInput(attrs={"class": "tf-input", "type": "date"}),
             "is_active": forms.CheckboxInput(attrs={"style": "width:18px;height:18px;accent-color:var(--tf-accent);cursor:pointer"}),
-            "company_name": forms.TextInput(attrs={"class": "tf-input"}),
-            "company_tagline": forms.TextInput(attrs={"class": "tf-input"}),
-            "company_address": forms.TextInput(attrs={"class": "tf-input"}),
-            "contact_email": forms.TextInput(attrs={"class": "tf-input"}),
-            "registration_fee_text": forms.Textarea(attrs={"class": "tf-textarea", "rows": 3}),
             "health_text": forms.Textarea(attrs={"class": "tf-textarea", "rows": 4}),
             "general_conditions": forms.Textarea(attrs={"class": "tf-textarea", "rows": 6}),
             "how_to_apply": forms.Textarea(attrs={"class": "tf-textarea", "rows": 6}),
@@ -47,11 +39,6 @@ class AdvertisementForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Pre-fill boilerplate for a fresh (non-POST) form.
         if not kwargs.get("data"):
-            self.fields["company_name"].initial = "North Eastern Electric Power Corporation Limited"
-            self.fields["company_tagline"].initial = "(A Government of India Enterprise)"
-            self.fields["company_address"].initial = "Brookland Compound, Lower New Colony, Shillong – 793003, Meghalaya"
-            self.fields["contact_email"].initial = DEFAULT_CONTACT_EMAIL
-            self.fields["registration_fee_text"].initial = DEFAULT_FEE_TEXT
             self.fields["health_text"].initial = DEFAULT_HEALTH_TEXT
             self.fields["general_conditions"].initial = DEFAULT_GENERAL_CONDITIONS
             self.fields["how_to_apply"].initial = DEFAULT_HOW_TO_APPLY
