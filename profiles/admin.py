@@ -11,10 +11,15 @@ from .models import (
 
 @admin.register(CandidateProfile)
 class CandidateProfileAdmin(admin.ModelAdmin):
-    # Aadhaar is encrypted at rest and must never be shown unmasked in list
-    # views; ciphertext also cannot be searched, so search by candidate only.
+    # Aadhaar is encrypted at rest and must never be shown unmasked — not in
+    # the list, and not in the change form. The change form shows a masked
+    # read-only value; raw values are corrected only through the candidate
+    # portal (self-service). Ciphertext also cannot be searched, so search by
+    # candidate only.
     list_display = ["candidate", "category", "gender", "display_aadhaar", "updated_at"]
     search_fields = ["candidate__first_name", "candidate__last_name"]
+    exclude = ("aadhar_no",)
+    readonly_fields = ("display_aadhaar",)
 
 
 @admin.register(AcademicRecord)
