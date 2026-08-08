@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ advt.advt_number }}{% endblock %}
+{% block page_title %}{{ advt.advt_number }} — {{ advt.title }}{% endblock %}
+{% block subtitle %}Published {{ advt.published_date|date:"d-m-Y" }} · Closes {{ advt.closing_date|date:"d-m-Y" }}{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">Description</div>
+    <p style="margin:0;color:rgba(233,234,244,0.85)">{{ advt.description|default:"No description provided." }}</p>
+</div>
+
+<div class="tf-glass tf-card">
+    <div class="tf-flex" style="justify-content:space-between">
+        <div class="tf-section-title">Posts ({{ advt.posts.count }})</div>
+        <div class="tf-flex">
+            <a href="{% url 'advertisement_generate' advt.id %}" class="tf-btn small ghost">Preview Text</a>
+            <a href="{% url 'advertisement_report' advt.id %}" class="tf-btn small ghost">Report</a>
+            <a href="{% url 'advertisement_pdf' advt.id %}" class="tf-btn small">Download PDF</a>
+        </div>
+    </div>
+    <table class="tf-table">
+        <thead><tr><th>Post</th><th>Code</th><th>Vacancies</th><th>Category</th><th>Max Age</th><th>Pay Scale</th><th>Actions</th></tr></thead>
+        <tbody>
+            {% for post in advt.posts.all %}
+            <tr>
+                <td>{{ post.name }}</td>
+                <td>{{ post.post_code }}</td>
+                <td>{{ post.vacancies }}</td>
+                <td>{{ post.category_breakup_display|default:"—" }}</td>
+                <td>{{ post.max_age|default:"—" }}</td>
+                <td>{{ post.pay_scale }}</td>
+                <td><div class="tf-flex">
+                    <a href="{% url 'roster_view' post.id %}" class="tf-link">Roster</a>
+                    <a href="{% url 'panel_view' post.id %}" class="tf-link">Panel</a>
+                    <a href="{% url 'shortlist_view' post.id %}" class="tf-link">AI Shortlist</a>
+                </div></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="tf-empty">No posts in this advertisement.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

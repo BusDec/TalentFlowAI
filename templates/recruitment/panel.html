@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Panel List{% endblock %}
+{% block page_title %}Panel List{% endblock %}
+{% block subtitle %}Ranked waitlist for this post{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="panelTable">
+        <thead><tr><th>Rank</th><th>Application</th><th>Candidate</th><th>Valid Until</th><th>Promoted</th><th></th></tr></thead>
+        <tbody>
+            {% for entry in entries %}
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' entry.application.application_id %}">
+                <td><span class="tf-score mid">{{ entry.panel_rank }}</span></td>
+                <td>{{ entry.application.application_id }}</td>
+                <td>{{ entry.application.candidate }}</td>
+                <td>{{ entry.valid_until|default:"—" }}</td>
+                <td>{{ entry.promoted_on|default:"—" }}</td>
+                <td>
+                    <form method="post" action="{% url 'panel_promote' post_id entry.id %}">
+                        {% csrf_token %}
+                        <button class="tf-btn small success">Promote to Offer</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="tf-empty">No active panel entries.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

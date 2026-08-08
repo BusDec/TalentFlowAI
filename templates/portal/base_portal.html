@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentFlow AI Portal - {% block title %}{% endblock %}</title>
+    {% load static %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/talentflow.css' %}">
+</head>
+<body>
+<div class="tf-app">
+    <aside class="tf-sidebar">
+        <a class="tf-brand" href="{% url 'portal_dashboard' %}">
+            <span class="logo">TF</span>
+            <span>TalentFlow</span>
+        </a>
+        <nav class="tf-nav">
+            {% if user.is_authenticated %}
+            <a href="{% url 'portal_dashboard' %}"><span class="icon">◈</span> Dashboard</a>
+            <a href="{% url 'portal_profile' %}"><span class="icon">◉</span> My Profile</a>
+            <a href="{% url 'portal_my_applications' %}"><span class="icon">≣</span> My Applications</a>
+            <a href="{% url 'portal_consents' %}"><span class="icon">✎</span> My Consents</a>
+            {% endif %}
+        </nav>
+        <div class="tf-sidebar-footer">
+            {% if user.is_authenticated %}
+            <div class="tf-tenant-chip">
+                <span>◈</span>
+                <div>
+                    <div style="font-weight:700">{{ user.full_name|default:user.email }}</div>
+                    <div style="font-size:0.75rem;opacity:0.7">{{ request.tenant.name }}</div>
+                </div>
+            </div>
+            <form method="post" action="{% url 'portal_logout' %}" class="mt-3">
+                {% csrf_token %}
+                <button type="submit" class="tf-btn ghost w-100">Logout</button>
+            </form>
+            {% else %}
+            <a href="{% url 'portal_login' %}" class="tf-btn w-100">Login</a>
+            <a href="{% url 'portal_register' %}" class="tf-btn ghost w-100 mt-3">Register</a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <main class="tf-main">
+        {% with n=request.resolver_match.url_name %}
+        {% if n != 'portal_dashboard' and n != 'portal_login' and n != 'portal_register' %}
+        <a href="#" onclick="history.back();return false;" class="tf-btn small ghost" style="margin-bottom:16px" title="Go back">&larr; Back</a>
+        {% endif %}
+        {% endwith %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="tf-alert {{ message.tags|default:'info' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

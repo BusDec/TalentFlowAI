@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Offer Letter{% endblock %}
+{% block page_title %}Offer Letter — {{ application.application_id }}{% endblock %}
+{% block subtitle %}{{ application.candidate }} · {{ application.post.name }}{% endblock %}
+
+{% block content %}
+<div class="tf-flex mb-4">
+    <a href="{% url 'application_detail' application.application_id %}" class="tf-btn small ghost">Back</a>
+    <button class="tf-btn small" onclick="navigator.clipboard.writeText(document.getElementById('offerText').textContent)">Copy</button>
+    <button class="tf-btn small ghost" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+<div class="tf-glass tf-card">
+    <pre id="offerText" style="white-space:pre-wrap;font-family:inherit;color:#e9eaf4;font-size:0.9rem;line-height:1.7;margin:0">{{ offer_text }}</pre>
+</div>
+{% endblock %}

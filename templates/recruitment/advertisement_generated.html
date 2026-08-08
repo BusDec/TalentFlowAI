@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Generated Advertisement{% endblock %}
+{% block page_title %}{{ advt.advt_number }} — Generated Advertisement{% endblock %}
+{% block subtitle %}Ready to copy into your notice{% endblock %}
+
+{% block content %}
+<div class="tf-flex mb-4">
+    <a href="{% url 'advertisement_detail' advt.id %}" class="tf-btn small ghost">Back to Details</a>
+    <button class="tf-btn small" onclick="navigator.clipboard.writeText(document.getElementById('advtText').textContent)">Copy to Clipboard</button>
+    <button class="tf-btn small ghost" onclick="window.print()">Print / Save PDF</button>
+</div>
+
+<div class="tf-glass tf-card" style="line-height:1.7">
+    <div id="advtText" style="font-size:0.95rem;color:#e9eaf4;white-space:pre-wrap;word-wrap:break-word">{{ advt_text }}</div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "Register" %}{% endblock %}
+
+{% block content %}
+<div class="tf-auth-card">
+    <h2>{% trans "Candidate Registration" %}</h2>
+    <div class="sub">{% trans "Create your account to apply for positions" %}</div>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="tf-field">
+            <label class="tf-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="tf-alert danger" style="margin-top:8px;padding:8px 12px">{{ field.errors }}</div>{% endif %}
+        </div>
+        {% endfor %}
+        <button class="tf-btn w-100" type="submit">{% trans "Register" %}</button>
+    </form>
+    <p class="tf-muted mt-4" style="font-size:0.88rem">
+        {% trans "Already have an account?" %} <a href="{% url 'portal_login' %}" class="tf-link">{% trans "Login" %}</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,213 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the TalentFlow AI package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: TalentFlow AI 3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-04 10:00+0530\n"
+"PO-Revision-Date: 2026-08-04 10:00+0530\n"
+"Last-Translator: \n"
+"Language-Team: Hindi <hi@talentflow.local>\n"
+"Language: hi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Register"
+msgstr "पंजीकरण"
+
+msgid "Login"
+msgstr "लॉगिन"
+
+msgid "Candidate Registration"
+msgstr "उम्मीदवार पंजीकरण"
+
+msgid "Candidate Login"
+msgstr "उम्मीदवार लॉगिन"
+
+msgid "Already have an account?"
+msgstr "क्या आपके पास पहले से खाता है?"
+
+msgid "New here?"
+msgstr "नए हैं?"
+
+msgid "Send OTP"
+msgstr "OTP भेजें"
+
+msgid "Verify OTP"
+msgstr "OTP सत्यापित करें"
+
+msgid "Verify"
+msgstr "सत्यापित करें"
+
+msgid "Dashboard"
+msgstr "डैशबोर्ड"
+
+msgid "Candidate Dashboard"
+msgstr "उम्मीदवार डैशबोर्ड"
+
+msgid "Active advertisements"
+msgstr "सक्रिय विज्ञापन"
+
+msgid "Closes"
+msgstr "अंतिम तिथि"
+
+msgid "Apply Now"
+msgstr "अभी आवेदन करें"
+
+msgid "No active advertisements."
+msgstr "कोई सक्रिय विज्ञापन नहीं।"
+
+msgid "My Applications"
+msgstr "मेरे आवेदन"
+
+msgid "Application ID"
+msgstr "आवेदन आईडी"
+
+msgid "Post"
+msgstr "पद"
+
+msgid "Status"
+msgstr "स्थिति"
+
+msgid "View"
+msgstr "देखें"
+
+msgid "No applications yet."
+msgstr "अभी कोई आवेदन नहीं।"
+
+msgid "No applications."
+msgstr "कोई आवेदन नहीं।"
+
+msgid "Applied On"
+msgstr "आवेदन दिनांक"
+
+msgid "Apply"
+msgstr "आवेदन करें"
+
+msgid "Select Post"
+msgstr "पद चुनें"
+
+msgid "vacancies"
+msgstr "रिक्तियां"
+
+msgid "Max Age"
+msgstr "अधिकतम आयु"
+
+msgid "Submit Application"
+msgstr "आवेदन जमा करें"
+
+msgid "By applying you consent to processing of your application and documents as required for recruitment."
+msgstr "आवेदन करके आप भर्ती हेतु अपने आवेदन और दस्तावेज़ों के प्रसंस्करण हेतु सहमति देते हैं।"
+
+msgid "Application Detail"
+msgstr "आवेदन विवरण"
+
+msgid "Application"
+msgstr "आवेदन"
+
+msgid "Back"
+msgstr "वापस"
+
+msgid "Employee Number"
+msgstr "कर्मचारी संख्या"
+
+msgid "Background Verification — Facts for Your Explanation"
+msgstr "पृष्ठभूमि सत्यापन — आपके स्पष्टीकरण हेतु तथ्य"
+
+msgid "Category"
+msgstr "श्रेणी"
+
+msgid "Fact"
+msgstr "तथ्य"
+
+msgid "Source"
+msgstr "स्रोत"
+
+msgid "Your Explanation (optional)"
+msgstr "आपका स्पष्टीकरण (वैकल्पिक)"
+
+msgid "Submit Explanation"
+msgstr "स्पष्टीकरण जमा करें"
+
+msgid "Documents"
+msgstr "दस्तावेज़"
+
+msgid "Upload Resume"
+msgstr "बायोडाटा अपलोड करें"
+
+msgid "Upload"
+msgstr "अपलोड करें"
+
+msgid "No resumes uploaded."
+msgstr "कोई बायोडाटा अपलोड नहीं किया गया।"
+
+msgid "My Consents"
+msgstr "मेरी सहमति"
+
+msgid "Consent Management"
+msgstr "सहमति प्रबंधन"
+
+msgid "View and manage your data consent. You may revoke consent at any time."
+msgstr "अपनी डेटा सहमति देखें और प्रबंधित करें। आप किसी भी समय सहमति रद्द कर सकते हैं।"
+
+msgid "Purpose"
+msgstr "उद्देश्य"
+
+msgid "Scope"
+msgstr "दायरा"
+
+msgid "Granted"
+msgstr "दी गई"
+
+msgid "Expires"
+msgstr "समाप्ति"
+
+msgid "Active"
+msgstr "सक्रिय"
+
+msgid "Revoked"
+msgstr "रद्द की गई"
+
+msgid "Revoke"
+msgstr "रद्द करें"
+
+msgid "No consents recorded."
+msgstr "कोई सहमति दर्ज नहीं।"
+
+msgid "An account with this email already exists."
+msgstr "इस ईमेल के साथ खाता पहले से मौजूद है।"
+
+msgid "Simulated OTP sent to email (console): %(otp)s"
+msgstr "ईमेल पर सिम्युलेटेड OTP भेजा गया (कंसोल): %(otp)s"
+
+msgid "OTP verified. Welcome!"
+msgstr "OTP सत्यापित। स्वागत है!"
+
+msgid "Verification session expired."
+msgstr "सत्यापन सत्र समाप्त हो गया।"
+
+msgid "Invalid OTP."
+msgstr "अमान्य OTP।"
+
+msgid "No account found with this email."
+msgstr "इस ईमेल के साथ कोई खाता नहीं मिला।"
+
+msgid "Application submitted successfully."
+msgstr "आवेदन सफलतापूर्वक जमा किया गया।"
+
+msgid "Post not found or already applied."
+msgstr "पद नहीं मिला या पहले ही आवेदन किया जा चुका है।"
+
+msgid "Resume uploaded. Parsing will run shortly."
+msgstr "बायोडाटा अपलोड हो गया। पार्सिंग शीघ्र चलेगी।"
+
+msgid "Explanation submitted."
+msgstr "स्पष्टीकरण जमा किया गया।"
+
+msgid "Consent revoked."
+msgstr "सहमति रद्द कर दी गई।"

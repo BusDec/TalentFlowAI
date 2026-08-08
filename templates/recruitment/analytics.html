@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load tf_filters %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Recruitment Analytics{% endblock %}
+{% block subtitle %}Funnel conversion, category mix & score distribution{% endblock %}
+
+{% block content %}
+<div class="tf-stats mb-4">
+    <div class="tf-stat"><div class="label">Total Applications</div><div class="value">{{ total }}</div></div>
+    {% for value, label in stage_cards %}
+    <div class="tf-stat"><div class="label">{{ label }}</div><div class="value">{{ status_counts|get_item:value|default:0 }}</div></div>
+    {% endfor %}
+    <div class="tf-stat"><div class="label">Interview→Offer</div><div class="value">{{ conversion.interview|default:"—" }}%</div></div>
+</div>
+
+<div class="tf-grid-3 mb-4">
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">📊 Status Funnel</div>
+        <div id="funnelChart"></div>
+    </div>
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">🏷 Resume Score Distribution</div>
+        <canvas id="scoreChart" height="200"></canvas>
+    </div>
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">🗂 Applications per Post</div>
+        <div class="tf-kv" id="postChart">
+            {% for key, value in post_chart_data.items %}
+            <span class="k">{{ key }}</span><span class="v"><span class="tf-badge primary">{{ value }}</span></span>
+            {% empty %}
+            <span class="tf-muted">No applications yet.</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">🎯 Category Mix (Allocations)</div>
+    <div class="tf-flex" style="flex-wrap:wrap;gap:10px">
+        {% for row in category_counts %}
+        <span class="tf-badge primary">{{ row.category|upper }} — {{ row.c }}</span>
+        {% empty %}
+        <span class="tf-muted">No category allocations yet.</span>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">📈 Conversion Rates</div>
+    <table class="tf-table">
+        <thead><tr><th>Stage</th><th>Count</th><th>% of Received</th></tr></thead>
+        <tbody>
+            {% for s, c in status_counts.items %}
+            <tr>
+                <td>{{ s|title }}</td>
+                <td>{{ c }}</td>
+                <td>{{ conversion|get_item:s|default:"—" }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script src="{% static 'js/funnel.js' %}"></script>
+<script>
+const statusData = {{ status_chart_data|safe }};
+const bucketData = {{ bucket_chart_data|safe }};
+
+drawFunnel('funnelChart', statusData);
+new Chart(document.getElementById('scoreChart'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(bucketData), datasets: [{ data: Object.values(bucketData), backgroundColor: ['rgba(239,71,111,0.65)','rgba(255,209,102,0.65)','rgba(6,214,160,0.65)'] }] },
+    options: { plugins: { legend: { labels: { color: 'rgba(233,234,244,0.8)' } } } }
+});
+</script>
+{% endblock %}

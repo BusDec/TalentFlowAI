@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Import Profiles{% endblock %}
+{% block page_title %}Import Candidate Profiles{% endblock %}
+{% block subtitle %}Upload a TalentBridge template (.xlsx) or CSV to create/update candidate profiles{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">What gets imported</div>
+    <table class="tf-table">
+        <thead><tr><th>Sheet</th><th>Fields</th></tr></thead>
+        <tbody>
+            <tr><td><strong>CANDIDATE_BIO</strong></td><td>Name, DOB, Gender, Category, Is_PwBD, Email, Mobile, Aadhar_No, Permanent_Address, Current_Address</td></tr>
+            <tr><td><strong>ACADEMIC_RECORD</strong></td><td>Level, Discipline, University_Board, Year_Passed, Marking_Type, Score, Is_UGC_Recognized</td></tr>
+            <tr><td><strong>WORK_EXP</strong></td><td>Org_Name, Org_Type, Designation, Start_Date, End_Date, Annual_CTC_Lakhs, Turnover_Cr</td></tr>
+            <tr><td><strong>EXAM_DISCLOSURE_PORTAL</strong></td><td>Exam_Type, GATE_Year, Paper_Code, Marks_Out_100, GATE_Score, AIR, ESE_Total_Score, Public_Disclosure_Consent</td></tr>
+        </tbody>
+    </table>
+    <p class="tf-muted" style="margin:12px 0 0;font-size:0.85rem">
+        <strong>.xlsx</strong> imports all four sheets (the candidate is identified by the Email in CANDIDATE_BIO).
+        <strong>.csv</strong> imports CANDIDATE_BIO only.
+    </p>
+</div>
+
+<div class="tf-glass tf-card">
+    <form method="post" enctype="multipart/form-data" class="tf-grid-2">
+        {% csrf_token %}
+        <div class="tf-field">
+            <label class="tf-label">Template File (.xlsx / .csv)</label>
+            <input type="file" name="csv_file" class="tf-input" accept=".xlsx,.csv,.txt" required>
+        </div>
+        <label class="tf-flex" style="gap:10px;cursor:pointer;align-items:center;margin-top:24px">
+            <input type="checkbox" name="dry_run" value="on" class="tf-input" style="width:18px;height:18px">
+            <span>Dry run (validate only, don't save)</span>
+        </label>
+        <div class="tf-flex">
+            <button class="tf-btn" type="submit">Import</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

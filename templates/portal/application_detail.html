@@ -1,0 +1,125 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "Application Detail" %}{% endblock %}
+
+{% block content %}
+<div class="tf-flex" style="justify-content:space-between;margin-bottom:22px">
+    <h2 style="color:#fff;font-weight:800;margin:0">{% trans "Application" %} {{ application.application_id }}</h2>
+</div>
+
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">{% trans "Application Progress" %}</div>
+    <div class="tf-stepper">
+        {% if is_terminal %}
+        {% for stage, label in stage_labels %}
+        <div class="tf-step {% if forloop.counter0 == terminal_index %}rejected{% elif forloop.counter0 < terminal_index %}done{% else %}pending{% endif %}">
+            <span class="tf-step-dot">
+                {% if forloop.counter0 < terminal_index %}✓{% elif forloop.counter0 == terminal_index %}✗{% else %}{{ forloop.counter }}{% endif %}
+            </span>
+            <span class="tf-step-label">{{ label }}</span>
+        </div>
+        {% endfor %}
+        {% else %}
+        {% for stage, label in stage_labels %}
+        <div class="tf-step {% if stage == application.status %}current{% elif stage_index > forloop.counter0 %}done{% else %}pending{% endif %}">
+            <span class="tf-step-dot">
+                {% if stage_index > forloop.counter0 %}✓{% else %}{{ forloop.counter }}{% endif %}
+            </span>
+            <span class="tf-step-label">{{ label }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <div class="tf-flex" style="margin-top:16px">
+        <span class="tf-badge {% if application.status == 'rejected' %}danger{% elif application.status == 'withdrawn' %}muted{% else %}primary{% endif %}">
+            {{ application.get_status_display }}
+        </span>
+        {% if application.resume_score %}
+        <span class="tf-score {% if application.resume_score >= 80 %}high{% elif application.resume_score >= 60 %}mid{% else %}low{% endif %}">{{ application.resume_score }}/100</span>
+        {% endif %}
+    </div>
+    {% if is_terminal %}
+    <div class="tf-alert {% if application.status == 'rejected' %}danger{% else %}warning{% endif %}" style="margin:18px 0 0;font-size:0.85rem">
+        {% if application.status == 'rejected' %}
+        {% trans "This application was not accepted." %}
+        {% else %}
+        {% trans "You have withdrawn this application." %}
+        {% endif %}
+    </div>
+    {% endif %}
+    {% if application.employee_number %}
+    <p class="mt-3" style="margin-bottom:0"><strong class="tf-muted">{% trans "Employee Number" %}:</strong> <span class="tf-badge success">{{ application.employee_number }}</span></p>
+    {% endif %}
+    {% if can_withdraw %}
+    <div class="mt-4" style="display:flex;align-items:center;gap:12px;justify-content:space-between">
+        <p class="tf-muted" style="margin:0;font-size:0.82rem">{% trans "If you no longer wish to be considered, you can withdraw your application. This cannot be undone." %}</p>
+        <form method="post" action="{% url 'portal_application_withdraw' application.application_id %}" data-confirm="{% trans 'Are you sure you want to withdraw this application? This action cannot be undone.' %}">
+            {% csrf_token %}
+            <button class="tf-btn small danger" type="submit">{% trans "Withdraw Application" %}</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+{% if background_report and background_report.facts.rows %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">{% trans "Background Verification — Facts for Your Explanation" %}</div>
+    <p class="tf-muted" style="font-size:0.82rem">{{ background_report.facts.disclaimer|default:"" }}</p>
+    <table class="tf-table">
+        <thead><tr><th>{% trans "Category" %}</th><th>{% trans "Fact" %}</th><th>{% trans "Source" %}</th><th>{% trans "Status" %}</th></tr></thead>
+        <tbody>
+            {% for row in background_report.facts.rows %}
+            <tr>
+                <td>{{ row.category }}</td>
+                <td>{{ row.fact }}</td>
+                <td>{{ row.source }}</td>
+                <td><span class="tf-badge muted">{{ row.status }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        <div class="tf-field">
+            <label class="tf-label">{% trans "Your Explanation (optional)" %}</label>
+            <textarea name="candidate_explanation" class="tf-textarea" rows="3">{{ background_report.candidate_explanation }}</textarea>
+        </div>
+        <button class="tf-btn small" type="submit">{% trans "Submit Explanation" %}</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">{% trans "Resume" %}</div>
+    {% if resumes %}
+    <p class="tf-muted" style="font-size:0.85rem;margin-top:0">{% trans "Your resume was uploaded at the time of application. No further upload is required." %}</p>
+    <ul style="padding-left:18px;color:rgba(233,234,244,0.85);font-size:0.9rem;margin-bottom:0">
+        {% for r in resumes %}
+        <li style="margin-bottom:8px">
+            {{ r.file.name }}
+            <span class="tf-badge success">{% trans "Uploaded" %} ✓</span>
+            {% if r.parse_status == 'parsed' %}
+            <span class="tf-badge success">{% trans "Parsed" %}</span>
+            {% elif r.parse_status == 'failed' %}
+            <span class="tf-badge danger">{% trans "Parsing failed" %}</span>
+            {% else %}
+            <span class="tf-badge muted">{% trans "Parsing pending" %}</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="tf-muted" style="font-size:0.85rem">{% trans "No resume uploaded yet." %}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $('form[data-confirm]').on('submit', function(e){
+        if (!window.confirm($(this).data('confirm'))) { e.preventDefault(); }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Advertisements{% endblock %}
+{% block page_title %}Advertisements{% endblock %}
+{% block subtitle %}Manage recruitment notifications{% endblock %}
+
+{% block content %}
+<div class="tf-flex mb-4">
+    <a href="{% url 'advertisement_create' %}" class="tf-btn">+ Create Advertisement</a>
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="advtTable">
+        <thead><tr><th>Advt No.</th><th>Title</th><th>Published</th><th>Closes</th><th>Status</th><th>Report</th></tr></thead>
+        <tbody>
+            {% for advt in advertisements %}
+            <tr class="tf-rowlink" data-href="{% url 'advertisement_detail' advt.id %}">
+                <td>{{ advt.advt_number }}</td>
+                <td>{{ advt.title }}</td>
+                <td>{{ advt.published_date|date:"d-m-Y" }}</td>
+                <td>{{ advt.closing_date|date:"d-m-Y" }}</td>
+                <td>
+                    {% if advt.is_active %}<span class="tf-badge success">Active</span>
+                    {% else %}<span class="tf-badge muted">Closed</span>{% endif %}
+                </td>
+                <td><a href="{% url 'advertisement_report' advt.id %}" class="tf-link">Report →</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="tf-empty">No advertisements yet. Create your first one!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>$(document).ready(function(){ $('#advtTable').DataTable({pageLength:10}); });</script>
+{% endblock %}

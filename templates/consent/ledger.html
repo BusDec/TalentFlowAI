@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Consent Ledger{% endblock %}
+{% block page_title %}Consent Ledger{% endblock %}
+{% block subtitle %}DPDP compliance — audit trail of candidate consents{% endblock %}
+
+{% block content %}
+<div class="tf-flex mb-4">
+    <a href="{% url 'consent_ledger_export' %}" class="tf-btn small ghost">Export CSV</a>
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="consentTable">
+        <thead><tr><th>ID</th><th>Candidate</th><th>Purpose</th><th>Post</th><th>Granted</th><th>Expires</th><th>Revoked</th><th>Status</th></tr></thead>
+        <tbody>
+            {% for consent in consents %}
+            <tr>
+                <td>{{ consent.id }}</td>
+                <td>{{ consent.candidate_portal_user }}</td>
+                <td>{{ consent.get_purpose_display }}</td>
+                <td>
+                    {% if consent.application %}{{ consent.application.post.name }}
+                    <span class="tf-muted" style="font-size:0.78rem">({{ consent.application.post.advertisement.advt_number }})</span>
+                    {% else %}—{% endif %}
+                </td>
+                <td>{{ consent.granted_at|date:"d M Y H:i" }}</td>
+                <td>{{ consent.expires_at|date:"d M Y H:i"|default:"—" }}</td>
+                <td>{{ consent.revoked_at|date:"d M Y H:i"|default:"—" }}</td>
+                <td>
+                    {% if consent.is_active %}<span class="tf-badge success">Active</span>
+                    {% else %}<span class="tf-badge muted">Inactive</span>{% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="tf-empty">No consents recorded.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>$(document).ready(function(){ $('#consentTable').DataTable({pageLength:15}); });</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load tf_filters %}
+{% block title %}Applications{% endblock %}
+{% block page_title %}Applications{% endblock %}
+{% block subtitle %}Filter, search and rank candidates{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card mb-4">
+    <form method="get" class="tf-grid-3">
+        <div class="tf-field" style="margin:0">
+            <label class="tf-label">Status</label>
+            <select name="status" class="tf-select">
+                <option value="">All statuses</option>
+                {% for value, label in all_statuses %}
+                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="tf-field" style="margin:0">
+            <label class="tf-label">Advertisement</label>
+            <select name="advt" class="tf-select">
+                <option value="">All advertisements</option>
+                {% for a in advertisements %}
+                <option value="{{ a.id }}" {% if request.GET.advt == a.id|stringformat:'s' %}selected{% endif %}>{{ a.advt_number }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="tf-field" style="margin:0">
+            <label class="tf-label">Minimum Score</label>
+            <select name="min_score" class="tf-select">
+                <option value="">Any score</option>
+                <option value="90" {% if request.GET.min_score == '90' %}selected{% endif %}>≥ 90</option>
+                <option value="80" {% if request.GET.min_score == '80' %}selected{% endif %}>≥ 80</option>
+                <option value="70" {% if request.GET.min_score == '70' %}selected{% endif %}>≥ 70</option>
+                <option value="60" {% if request.GET.min_score == '60' %}selected{% endif %}>≥ 60</option>
+                <option value="50" {% if request.GET.min_score == '50' %}selected{% endif %}>≥ 50</option>
+            </select>
+        </div>
+        <div class="tf-field" style="margin:0">
+            <label class="tf-label">Search</label>
+            <input type="text" name="q" value="{{ request.GET.q }}" class="tf-input" placeholder="Name, email, or ID">
+        </div>
+        <div class="tf-field" style="margin:0;display:flex;align-items:flex-end">
+            <button class="tf-btn small">Apply Filters</button>
+            <a href="{% url 'application_list' %}" class="tf-btn small ghost" style="margin-left:8px">Clear</a>
+            <a href="{% url 'applications_export' %}?{{ request.GET.urlencode }}" class="tf-btn small ghost" style="margin-left:8px">Export CSV</a>
+        </div>
+    </form>
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="appsTable">
+        <thead>
+            <tr><th>Application</th><th>Candidate</th><th>Post</th><th>Score</th><th>Status</th><th>Applied</th><th>Emp No</th></tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}">
+                <td>{{ app.application_id }}</td>
+                <td>{{ app.candidate }}</td>
+                <td>{{ app.post.name }}</td>
+                <td data-search="{{ app.resume_score }}">
+                    <span class="tf-score {{ app.resume_score|score_class }}">{{ app.resume_score }}</span>
+                </td>
+                <td><span class="tf-badge {% if app.status == 'rejected' %}danger{% elif app.status == 'withdrawn' %}muted{% elif app.status == 'joined' %}success{% else %}primary{% endif %}">{{ app.get_status_display }}</span></td>
+                <td>{{ app.applied_at|date:"d M Y" }}</td>
+                <td>{{ app.employee_number|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function () {
+    $('#appsTable').DataTable({
+        order: [[3, 'desc']],
+        pageLength: 15,
+        lengthMenu: [[10, 15, 25, 50, -1], [10, 15, 25, 50, 'All']],
+        language: {
+            emptyTable: 'No applications match your filters.'
+        }
+    });
+});
+</script>
+{% endblock %}

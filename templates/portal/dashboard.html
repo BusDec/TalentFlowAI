@@ -1,0 +1,57 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+
+{% block content %}
+<div class="tf-portal-banner">
+    <h1>{% trans "Welcome back," %} {{ user.full_name|default:user.email }}</h1>
+    <p>{% trans "Browse active advertisements and apply for positions that match your profile." %}</p>
+</div>
+
+{% if not has_profile %}
+<div class="tf-alert warning" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+    <span>{% trans "Complete your profile (education, work, exam scores, proof documents) before applying." %}</span>
+    <a href="{% url 'portal_profile' %}" class="tf-btn small">{% trans "Create Profile" %}</a>
+</div>
+{% endif %}
+
+<div class="tf-section-title">{% trans "Active Advertisements" %}</div>
+<div class="tf-hscroll mb-4">
+    {% for advt in advertisements %}
+    <div class="tf-glass tf-card tf-hscroll-card">
+        <div class="tf-badge success" style="margin-bottom:10px">{{ advt.advt_number }}</div>
+        <h3 style="margin:0 0 8px;color:#fff;font-size:1.05rem">{{ advt.title }}</h3>
+        <p class="tf-muted" style="font-size:0.85rem;margin:0 0 14px">{% trans "Closes" %}: {{ advt.closing_date }}</p>
+        {% if advt.id in applied_advt_ids %}
+        <span class="tf-badge primary">{% trans "Applied" %} ✓</span>
+        {% elif advt.closing_date <= today %}
+        <button class="tf-btn small ghost" disabled style="opacity:0.55;cursor:not-allowed">{% trans "Closed" %}</button>
+        {% else %}
+        <a href="{% url 'portal_apply' advt.id %}" class="tf-btn small">{% trans "Apply Now" %}</a>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="tf-glass tf-card tf-empty">{% trans "No active advertisements." %}</div>
+    {% endfor %}
+</div>
+
+<div class="tf-section-title">{% trans "My Applications" %}</div>
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="myApps">
+        <thead><tr><th>{% trans "Application ID" %}</th><th>{% trans "Post" %}</th><th>{% trans "Status" %}</th><th>{% trans "Applied On" %}</th><th></th></tr></thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.application_id }}</td>
+                <td>{{ app.post.name }}</td>
+                <td><span class="tf-badge {% if app.status == 'rejected' %}danger{% elif app.status == 'withdrawn' %}muted{% elif app.status == 'joined' %}success{% else %}primary{% endif %}">{{ app.get_status_display }}</span></td>
+                <td>{{ app.applied_at|date:"d M Y" }}</td>
+                <td><a href="{% url 'portal_application_detail' app.application_id %}" class="tf-link">{% trans "View" %} →</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="tf-empty">{% trans "No applications yet." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

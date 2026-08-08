@@ -1,0 +1,25 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "My Applications" %}{% endblock %}
+
+{% block content %}
+<div class="tf-section-title">{% trans "My Applications" %}</div>
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="appsTable">
+        <thead><tr><th>{% trans "Application ID" %}</th><th>{% trans "Post" %}</th><th>{% trans "Status" %}</th><th>{% trans "Applied On" %}</th><th></th></tr></thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.application_id }}</td>
+                <td>{{ app.post.name }}</td>
+                <td><span class="tf-badge {% if app.status == 'rejected' %}danger{% elif app.status == 'withdrawn' %}muted{% elif app.status == 'joined' %}success{% else %}primary{% endif %}">{{ app.get_status_display }}</span></td>
+                <td>{{ app.applied_at|date:"d M Y" }}</td>
+                <td><a href="{% url 'portal_application_detail' app.application_id %}" class="tf-link">{% trans "View" %} →</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="tf-empty">{% trans "No applications." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

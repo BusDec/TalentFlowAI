@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Roster Matrix{% endblock %}
+{% block page_title %}Roster Matrix{% endblock %}
+{% block subtitle %}Category-wise vacancy allocation · {{ post.name }} ({{ post.post_code }}){% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-flex" style="justify-content:space-between">
+        <div class="tf-section-title">Manage Category Rows</div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="generate">
+            <button class="tf-btn small ghost" type="submit">Sync from Category Breakup</button>
+        </form>
+    </div>
+    <form method="post" class="tf-grid-3" style="align-items:end">
+        {% csrf_token %}
+        <div class="tf-field">
+            <label class="tf-label">Category</label>
+            <select name="category" class="tf-select" required>
+                <option value="">— Select —</option>
+                {% for value, label in category_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="tf-field">
+            <label class="tf-label">Vertical Vacancies</label>
+            <input type="number" name="vertical_vacancies" class="tf-input" min="0" value="0">
+        </div>
+        <div class="tf-field">
+            <label class="tf-label">PwBD (Horizontal)</label>
+            <input type="number" name="pwbd_horizontal_vacancies" class="tf-input" min="0" value="0">
+        </div>
+        <label class="tf-flex" style="gap:8px;cursor:pointer;margin-bottom:18px">
+            <input type="checkbox" name="carry_forward" value="on" class="tf-input" style="width:18px;height:18px">
+            <span>Carry forward (backlog)</span>
+        </label>
+        <div>
+            <button class="tf-btn small" type="submit">Save / Update Row</button>
+        </div>
+    </form>
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="rosterTable">
+        <thead><tr><th>Post</th><th>Category</th><th>Vertical</th><th>PwBD</th><th>Total</th><th>Filled</th><th>Full?</th><th>Carry Fwd</th><th>Warning</th></tr></thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.post.name }}</td>
+                <td>{{ row.get_category_display }}</td>
+                <td>{{ row.vertical_vacancies }}</td>
+                <td>{{ row.pwbd_horizontal_vacancies }}</td>
+                <td>{{ row.total_vacancies }}</td>
+                <td>{{ row.filled_count }}</td>
+                <td>{% if row.is_full %}<span class="tf-badge success">Full</span>{% else %}<span class="tf-badge muted">Open</span>{% endif %}</td>
+                <td>{{ row.carry_forward|yesno:"Yes,No" }}</td>
+                <td>{% if row.breach_warning %}<span style="color:#ff9bb0;font-size:0.82rem">{{ row.breach_warning }}</span>{% else %}—{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="tf-empty">No roster matrix rows for this post. Use "Sync from Category Breakup" or add rows above.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>$(document).ready(function(){ $('#rosterTable').DataTable({pageLength:25}); });</script>
+{% endblock %}

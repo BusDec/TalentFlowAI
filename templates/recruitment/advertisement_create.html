@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block title %}Create Advertisement{% endblock %}
+{% block page_title %}Create Advertisement{% endblock %}
+{% block subtitle %}Fill the form — the NEEPCO/THDC-format advertisement is generated automatically{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    {% if form.errors or formset.non_form_errors %}
+    <div class="tf-alert danger">
+        <strong>Please fix the errors below.</strong>
+        <ul style="margin:8px 0 0;padding-left:18px">
+            {% for field, errors in form.errors.items %}
+                {% for e in errors %}<li>{{ field|title }}: {{ e }}</li>{% endfor %}
+            {% endfor %}
+            {% for e in formset.non_form_errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <form method="post" id="advtForm">
+        {% csrf_token %}
+        {{ formset.management_form }}
+
+        <div class="tf-section-title">📋 Advertisement Details</div>
+        <div class="tf-grid-2">
+            <div class="tf-field">
+                <label class="tf-label">Advt Number *</label>
+                {{ form.advt_number }}
+                {% for e in form.advt_number.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Title *</label>
+                {{ form.title }}
+                {% for e in form.title.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Published Date *</label>
+                {{ form.published_date }}
+                {% for e in form.published_date.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Closing Date *</label>
+                {{ form.closing_date }}
+                {% for e in form.closing_date.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Company Name</label>
+                {{ form.company_name }}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Company Tagline</label>
+                {{ form.company_tagline }}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Company Address</label>
+                {{ form.company_address }}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Contact Email</label>
+                {{ form.contact_email }}
+            </div>
+        </div>
+        <div class="tf-field">
+            <label class="tf-label">Company Profile / Description</label>
+            {{ form.description }}
+            {% for e in form.description.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="tf-field">
+            <label class="tf-flex" style="gap:8px;cursor:pointer">
+                {{ form.is_active }} <span>Active advertisement</span>
+            </label>
+        </div>
+
+        <details class="tf-glass" style="padding:16px 20px;margin-top:18px">
+            <summary style="cursor:pointer;font-weight:700;color:#fff">⚙ Boilerplate Sections (pre-filled — edit if needed)</summary>
+            <div class="tf-field mt-3">
+                <label class="tf-label">Registration Fees</label>
+                {{ form.registration_fee_text }}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Health Requirements</label>
+                {{ form.health_text }}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">General Conditions</label>
+                {{ form.general_conditions }}
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">How to Apply</label>
+                {{ form.how_to_apply }}
+            </div>
+        </details>
+
+        <hr style="border-color:rgba(255,255,255,0.15);margin:26px 0">
+
+        <div class="tf-flex" style="justify-content:space-between">
+            <div class="tf-section-title">🗂 Posts / Vacancies <span class="tf-muted" style="font-size:0.8rem">(at least 1 required)</span></div>
+            <button type="button" class="tf-btn small ghost" id="addPost">+ Add Post</button>
+        </div>
+
+        <div id="postForms">
+            {% for post_form in formset %}
+            <div class="tf-glass post-form" style="padding:18px 20px;margin-bottom:16px;position:relative">
+                <div class="tf-flex" style="justify-content:space-between;margin-bottom:12px">
+                    <span class="tf-badge primary">Post {{ forloop.counter }}</span>
+                    <button type="button" class="tf-btn small danger remove-post">✕ Remove Post</button>
+                </div>
+                {% if post_form.instance.pk %}
+                <div style="display:none">{{ post_form.DELETE }}</div>
+                {% endif %}
+                <div class="tf-grid-2">
+                    <div class="tf-field">
+                        <label class="tf-label">Post Name *</label>
+                        {{ post_form.name }}
+                        {% for e in post_form.name.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="tf-field">
+                        <label class="tf-label">Post Code *</label>
+                        {{ post_form.post_code }}
+                        {% for e in post_form.post_code.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="tf-field">
+                        <label class="tf-label">Vacancies *</label>
+                        {{ post_form.vacancies }}
+                        {% for e in post_form.vacancies.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="tf-field">
+                        <label class="tf-label">Max Age</label>
+                        {{ post_form.max_age }}
+                        {% for e in post_form.max_age.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+                    </div>
+                </div>
+                <div class="tf-section-title" style="font-size:0.9rem;margin-top:6px">Category-wise Vacancies</div>
+                <div class="tf-grid-3" style="grid-template-columns:repeat(5,1fr);gap:10px">
+                    <div class="tf-field"><label class="tf-label">UR</label>{{ post_form.cat_ur }}</div>
+                    <div class="tf-field"><label class="tf-label">EWS</label>{{ post_form.cat_ews }}</div>
+                    <div class="tf-field"><label class="tf-label">OBC</label>{{ post_form.cat_obc }}</div>
+                    <div class="tf-field"><label class="tf-label">SC</label>{{ post_form.cat_sc }}</div>
+                    <div class="tf-field"><label class="tf-label">ST</label>{{ post_form.cat_st }}</div>
+                </div>
+                <div class="tf-field">
+                    <label class="tf-label">Qualification *</label>
+                    {{ post_form.qualification }}
+                    {% for e in post_form.qualification.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="tf-field">
+                    <label class="tf-label">Experience</label>
+                    {{ post_form.experience_required }}
+                    {% for e in post_form.experience_required.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="tf-field">
+                    <label class="tf-label">Pay Scale (Rs added automatically)</label>
+                    {{ post_form.pay_scale }}
+                    {% for e in post_form.pay_scale.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="tf-field">
+                    <label class="tf-label">Location</label>
+                    {{ post_form.location }}
+                </div>
+                <div class="tf-field">
+                    <label class="tf-label">Required Certificates (comma-separated)</label>
+                    {{ post_form.required_certificates }}
+                    <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">Leave blank to auto-detect certification keywords from the JD.</p>
+                </div>
+                <div class="tf-field">
+                    <label class="tf-label">Period of Engagement</label>
+                    {{ post_form.period_of_engagement }}
+                </div>
+                {{ post_form.id }}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="tf-flex mt-4">
+            <button class="tf-btn" type="submit">Create Advertisement</button>
+            <a href="{% url 'advertisement_list' %}" class="tf-btn small ghost">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function reindexForms() {
+    const forms = document.querySelectorAll('#postForms .post-form');
+    const total = document.getElementById('id_posts-TOTAL_FORMS');
+    total.value = forms.length;
+    forms.forEach((f, idx) => {
+        f.querySelectorAll('input, textarea, select').forEach(el => {
+            if (el.name) el.name = el.name.replace(/posts-\d+-/, 'posts-' + idx + '-');
+            if (el.id) el.id = el.id.replace(/posts-\d+-/, 'posts-' + idx + '-');
+        });
+        const badge = f.querySelector('.tf-badge');
+        if (badge) badge.textContent = 'Post ' + (idx + 1);
+    });
+}
+
+document.getElementById('addPost').addEventListener('click', function () {
+    const forms = document.querySelectorAll('#postForms .post-form');
+    const template = forms[0].cloneNode(true);
+    // Reset values, clear hidden DELETE state
+    template.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.type === 'checkbox') el.checked = false;
+        else if (el.tagName !== 'SELECT') el.value = '';
+    });
+    const deleteField = template.querySelector('input[name$="-DELETE"]');
+    if (deleteField) { deleteField.value = ''; deleteField.closest('div').style.display = 'none'; }
+    document.getElementById('postForms').appendChild(template);
+    reindexForms();
+});
+
+document.getElementById('postForms').addEventListener('click', function (e) {
+    if (!e.target.closest('.remove-post')) return;
+    const forms = document.querySelectorAll('#postForms .post-form');
+    if (forms.length <= 1) {
+        alert('At least one post is required.');
+        return;
+    }
+    const form = e.target.closest('.post-form');
+    const deleteField = form.querySelector('input[name$="-DELETE"]');
+    if (deleteField) { deleteField.value = 'on'; form.style.display = 'none'; }
+    else { form.remove(); }
+    reindexForms();
+});
+</script>
+{% endblock %}

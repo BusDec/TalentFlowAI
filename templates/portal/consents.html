@@ -1,0 +1,57 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "My Consents" %}{% endblock %}
+
+{% block content %}
+<div class="tf-section-title">{% trans "Consent Management" %}</div>
+<p class="tf-muted" style="max-width:760px">{% trans "View and manage your data consent. Consents are purpose-limited: we only use your data for the stated purpose. You may revoke consent at any time." %}</p>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="consentTable">
+        <thead><tr><th>{% trans "Purpose" %}</th><th>{% trans "Post" %}</th><th>{% trans "Scope" %}</th><th>{% trans "Granted" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
+        <tbody>
+            {% for consent in consents %}
+            <tr>
+                <td>{{ consent.get_purpose_display }}</td>
+                <td>
+                    {% if consent.application %}
+                    {{ consent.application.post.name }} <span class="tf-muted" style="font-size:0.78rem">({{ consent.application.post.advertisement.advt_number }})</span>
+                    {% else %}<span class="tf-muted">—</span>{% endif %}
+                </td>
+                <td>{{ consent.scope_text }}</td>
+                <td>{{ consent.granted_at|date:"d M Y" }}</td>
+                <td>
+                    {% if consent.is_active %}<span class="tf-badge success">{% trans "Active" %}</span>
+                    {% else %}<span class="tf-badge muted">{% trans "Revoked" %}</span>{% endif %}
+                </td>
+                <td>
+                    {% if consent.is_active %}
+                    <form method="post" action="{% url 'portal_consent_revoke' consent.id %}" data-confirm="{% trans 'Revoking consent means we will stop processing your data for this purpose. This may affect ongoing processing such as application review. This action is recorded in the audit ledger and cannot be undone. Continue?' %}">
+                        {% csrf_token %}
+                        <button class="tf-btn small danger">{% trans "Revoke" %}</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="tf-empty">{% trans "No consents recorded." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="tf-alert" style="margin-top:20px;font-size:0.85rem">
+    <strong>{% trans "What does revoking consent mean?" %}</strong>
+    {% trans "Revoking a consent instructs us to stop processing your data for that specific purpose and is recorded in the audit ledger. It cannot be undone — if you revoke a consent tied to an application, you will need to re-grant it for that processing to continue." %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $('form[data-confirm]').on('submit', function(e){
+        if (!window.confirm($(this).data('confirm'))) { e.preventDefault(); }
+    });
+});
+</script>
+{% endblock %}

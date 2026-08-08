@@ -1,0 +1,21 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "Login" %}{% endblock %}
+
+{% block content %}
+<div class="tf-auth-card">
+    <h2>{% trans "Candidate Login" %}</h2>
+    <div class="sub">{% trans "We'll send a one-time password to your email" %}</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="tf-field">
+            <label class="tf-label">{{ form.email.label }}</label>
+            {{ form.email }}
+        </div>
+        <button class="tf-btn w-100" type="submit">{% trans "Send OTP" %}</button>
+    </form>
+    <p class="tf-muted mt-4" style="font-size:0.88rem">
+        {% trans "New here?" %} <a href="{% url 'portal_register' %}" class="tf-link">{% trans "Register" %}</a>
+    </p>
+</div>
+{% endblock %}

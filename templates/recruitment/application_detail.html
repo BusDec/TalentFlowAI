@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load tf_filters %}
+{% block title %}Application {{ application.application_id }}{% endblock %}
+{% block page_title %}Application: {{ application.application_id }}{% endblock %}
+{% block subtitle %}{{ application.candidate }} · {{ application.post.name }}{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+<div class="tf-grid-2">
+    <!-- LEFT COLUMN -->
+    <div>
+        <!-- Candidate summary -->
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-flex" style="justify-content:space-between">
+                <div class="tf-section-title">Candidate &amp; Post</div>
+                {% if application.resume_score %}
+                <span class="tf-score {{ application.resume_score|score_class }}">{{ application.resume_score }}/100</span>
+                {% endif %}
+            </div>
+            <div class="tf-kv">
+                <span class="k">Candidate</span><span class="v">{{ application.candidate }}</span>
+                <span class="k">Email</span><span class="v">{{ application.candidate.email }}</span>
+                <span class="k">Mobile</span><span class="v">{{ application.candidate.mobile|default:"—" }}</span>
+                <span class="k">DOB</span><span class="v">{{ application.candidate.date_of_birth|default:"—" }}</span>
+                <span class="k">Post</span><span class="v">{{ application.post.name }}</span>
+                <span class="k">Pay Scale</span><span class="v">{{ application.post.pay_scale|default:"—" }}</span>
+                <span class="k">Status</span><span class="v"><span class="tf-badge {% if application.status == 'rejected' %}danger{% elif application.status == 'withdrawn' %}muted{% elif application.status == 'joined' %}success{% else %}primary{% endif %}">{{ application.get_status_display }}</span></span>
+                {% if application.employee_number %}
+                <span class="k">Emp No</span><span class="v"><span class="tf-badge success">{{ application.employee_number }}</span></span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Parsed resume info -->
+        {% if resume and resume.parsed_json %}
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-flex" style="justify-content:space-between">
+                <div class="tf-section-title">📄 Parsed Resume</div>
+                <span class="tf-badge {% if resume.parsed_json|get_item:'_method' == 'llm' %}success{% else %}warning{% endif %}">
+                    {{ resume.parsed_json|get_item:'_method'|default:"heuristic" }} extraction
+                </span>
+            </div>
+            {% with p=resume.parsed_json %}
+            <div class="tf-kv">
+                {% if p.full_name %}<span class="k">Name</span><span class="v">{{ p.full_name }}</span>{% endif %}
+                <span class="k">Email</span><span class="v">{{ p.email|default:"—" }}</span>
+                <span class="k">Phone</span><span class="v">{{ p.phone|default:"—" }}</span>
+                {% if p.date_of_birth %}<span class="k">DOB</span><span class="v">{{ p.date_of_birth }}</span>{% endif %}
+                <span class="k">Degree</span><span class="v">{{ p.degree|default:"—" }}</span>
+                {% if p.university %}<span class="k">University</span><span class="v">{{ p.university }}</span>{% endif %}
+                {% if p.year_of_passing %}<span class="k">Passing Year</span><span class="v">{{ p.year_of_passing }}</span>{% endif %}
+                {% if p.percentage %}<span class="k">Percentage</span><span class="v">{{ p.percentage }}</span>{% endif %}
+                {% if p.total_experience_years %}<span class="k">Experience</span><span class="v">{{ p.total_experience_years }} years</span>{% endif %}
+                {% if p.current_designation %}<span class="k">Designation</span><span class="v">{{ p.current_designation }}</span>{% endif %}
+                {% if p.current_organization %}<span class="k">Organization</span><span class="v">{{ p.current_organization }}</span>{% endif %}
+            </div>
+            {% if p.skills %}
+            <div class="tf-section-title mt-4" style="font-size:0.95rem">Skills</div>
+            <div class="tf-flex" style="flex-wrap:wrap;gap:8px">
+                {% for s in p.skills %}<span class="tf-badge primary">{{ s }}</span>{% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+        {% endif %}
+
+        <!-- Update status -->
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-section-title">⚡ Update Status</div>
+            <div class="tf-field" style="margin-bottom:10px">
+                <label class="tf-label">Status</label>
+                <select name="status" class="tf-select" style="max-width:320px">
+                    {% for value, label in application.STATUS_CHOICES %}
+                    <option value="{{ value }}" {% if application.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="tf-field" id="rejectedStageField" style="display:none;margin-bottom:10px">
+                <label class="tf-label">Rejected at stage</label>
+                <select name="rejected_at_stage" class="tf-select" style="max-width:320px">
+                    {% for value, label in rejection_stage_choices %}
+                    <option value="{{ value }}" {% if application.rejected_at_stage == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">The candidate's progress tracker will show a red cross at this stage.</p>
+            </div>
+            <div class="tf-flex" style="flex-wrap:wrap">
+                <a href="{% url 'run_eligibility' application.application_id %}" class="tf-btn small ghost">Run Eligibility</a>
+                {% if application.status == "offered" or application.status == "joined" %}
+                <a href="{% url 'offer_letter' application.application_id %}" class="tf-btn small ghost">Offer Letter</a>
+                {% endif %}
+                <a href="{% url 'communications' application.application_id %}" class="tf-btn small ghost">Communications</a>
+            </div>
+        </div>
+
+        <!-- Category allocation -->
+        <div class="tf-glass tf-card">
+            <div class="tf-section-title">🏷 Category Allocation / Roster</div>
+            {% for alloc in category_allocations %}
+            <div class="tf-flex" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+                <span>{{ alloc.get_category_display }}</span>
+                <span class="tf-badge {% if alloc.is_verified %}success{% else %}warning{% endif %}">
+                    {% if alloc.is_verified %}Verified{% else %}Unverified{% endif %}
+                </span>
+            </div>
+            {% empty %}
+            <div class="tf-muted" style="margin-bottom:10px">No allocation recorded.</div>
+            {% endfor %}
+            <div class="tf-field" style="margin-top:12px">
+                <label class="tf-label">Category</label>
+                <select name="category" class="tf-select">
+                    <option value="">— Add allocation —</option>
+                    {% for value, label in category_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">Category Certificate (PDF/scan of caste/disability certificate)</label>
+                <input type="file" name="certificate_file" class="tf-input">
+            </div>
+            <label class="tf-flex" style="gap:8px;cursor:pointer">
+                <input type="checkbox" name="is_verified" class="tf-input" style="width:auto">
+                <span>Mark verified</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <!-- Resume evaluation -->
+        {% if application.resume_evaluation %}
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-flex" style="justify-content:space-between">
+                <div class="tf-section-title">🧠 Resume Evaluation</div>
+                <span class="tf-score {{ application.resume_score|score_class }}">{{ application.resume_score }}/100</span>
+            </div>
+            <p style="margin:0 0 16px;color:rgba(233,234,244,0.85);font-size:0.95rem;line-height:1.6">{{ application.resume_evaluation.summary }}</p>
+            {% for comp in application.resume_evaluation.competencies %}
+            <div class="mb-3">
+                <div class="tf-flex" style="justify-content:space-between;margin-bottom:5px">
+                    <span style="font-size:0.9rem;font-weight:600">{{ comp.name }}</span>
+                    <span style="font-size:0.88rem;color:rgba(233,234,244,0.8)">{{ comp.score }}/100</span>
+                </div>
+                <div class="tf-bar"><span style="width:{{ comp.score }}%"></span></div>
+                {% if comp.notes %}<div class="tf-muted" style="font-size:0.82rem;margin-top:4px;line-height:1.5">{{ comp.notes }}</div>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="tf-grid-2 mt-4">
+                <div>
+                    <div class="tf-badge success" style="margin-bottom:8px">✓ Positives</div>
+                    <ul style="margin:0;padding-left:18px;color:rgba(233,234,244,0.9);font-size:0.9rem;line-height:1.7">
+                        {% for p in application.resume_evaluation.positives %}<li>{{ p }}</li>{% endfor %}
+                    </ul>
+                </div>
+                <div>
+                    <div class="tf-badge danger" style="margin-bottom:8px">⚠ Concerns</div>
+                    <ul style="margin:0;padding-left:18px;color:rgba(233,234,244,0.9);font-size:0.9rem;line-height:1.7">
+                        {% for c in application.resume_evaluation.concerns %}<li>{{ c }}</li>{% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Background facts -->
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-section-title">🛡 Background Facts Report</div>
+            {% if background_report %}
+                {% if background_report.facts.rows %}
+                <table class="tf-table">
+                    <thead><tr><th>Category</th><th>Fact</th><th>Source</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for row in background_report.facts.rows %}
+                        <tr>
+                            <td>{{ row.category }}</td>
+                            <td>{{ row.fact }}</td>
+                            <td>{{ row.source }}</td>
+                            <td><span class="tf-badge muted">{{ row.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="tf-muted">No facts compiled yet.</div>
+                {% endif %}
+                <div class="tf-field" style="margin-top:14px">
+                    <label class="tf-label">Candidate Explanation</label>
+                    <textarea name="candidate_explanation" class="tf-textarea" rows="2">{{ background_report.candidate_explanation }}</textarea>
+                </div>
+                <div class="tf-field">
+                    <label class="tf-label">Reviewer Notes</label>
+                    <textarea name="reviewer_notes" class="tf-textarea" rows="2">{{ background_report.reviewer_notes }}</textarea>
+                </div>
+            {% else %}
+            <div class="tf-muted">No background report.</div>
+            {% endif %}
+        </div>
+
+        <!-- DigiLocker / NAD -->
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-section-title">🪪 DigiLocker / NAD Document Fetch</div>
+            {% if digilocker_consent %}
+            <p class="tf-muted" style="font-size:0.85rem;margin-top:0">Active consent on file — documents may be fetched.</p>
+            <form method="post" action="{% url 'digilocker_fetch' application.application_id %}">
+                {% csrf_token %}
+                <button class="tf-btn small" type="submit">Fetch from DigiLocker / NAD</button>
+            </form>
+            {% else %}
+            <p class="tf-muted" style="font-size:0.85rem;margin:0">No active DigiLocker/NAD consent from the candidate — documents will not be fetched.</p>
+            {% endif %}
+            {% if fetched_documents %}
+            <table class="tf-table mt-4">
+                <thead><tr><th>Source</th><th>Doc Type</th><th>Issuer</th><th>Issued</th><th>Signature</th></tr></thead>
+                <tbody>
+                    {% for d in fetched_documents %}
+                    <tr>
+                        <td>{{ d.source|title }}</td>
+                        <td>{{ d.doc_type|title }}</td>
+                        <td>{{ d.issuer }}</td>
+                        <td>{{ d.issue_date }}</td>
+                        <td>{% if d.signature_valid %}<span class="tf-badge success">Valid</span>{% else %}<span class="tf-badge danger">Invalid</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+
+        <!-- Interview questions -->
+        <div class="tf-glass tf-card">
+            <div class="tf-section-title">💬 Interview Co-pilot Questions</div>
+            <ul style="margin:0;padding-left:18px;color:rgba(233,234,244,0.9);font-size:0.92rem;line-height:1.8">
+                {% for q in suggested_questions %}<li>{{ q }}</li>{% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="tf-glass tf-card mt-4" style="position:sticky;bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+    <div class="tf-muted" style="font-size:0.82rem">
+        Changes on this page are saved together. Review your inputs, then save your progress.
+    </div>
+    <div class="tf-flex">
+        <a href="#" onclick="history.back();return false;" class="tf-btn small ghost">Cancel</a>
+        <button class="tf-btn" type="submit">💾 Save Progress</button>
+    </div>
+</div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    var $status = $('select[name="status"]');
+    var $stageField = $('#rejectedStageField');
+    function toggleStage() {
+        $stageField.toggle($status.val() === 'rejected');
+    }
+    $status.on('change', toggleStage);
+    toggleStage();
+});
+</script>
+{% endblock %}

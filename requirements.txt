@@ -1,0 +1,13 @@
+# --- Django ---
+django>=5.0,<6.1
+django-tenants>=3.6
+psycopg2-binary>=2.9
+python-dotenv>=1.0
+djangorestframework>=3.15
+
+# --- OCR / document ---
+pytesseract>=0.3.13
+Pillow>=10.0
+
+# --- LLM client (OpenAI-compatible: DeepSeek, OpenAI, Azure, etc.) ---
+openai>=1.30

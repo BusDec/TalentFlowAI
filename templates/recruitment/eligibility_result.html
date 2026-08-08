@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Eligibility Result{% endblock %}
+{% block page_title %}Eligibility Result{% endblock %}
+{% block subtitle %}{{ verdict.application_id }} · {{ verdict.post }} · Cut-off {{ verdict.cutoff }}{% endblock %}
+
+{% block content %}
+<div class="tf-alert {% if verdict.eligible %}success{% else %}warning{% endif %}">
+    <strong>Verdict:</strong> {{ verdict.verdict }}
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table">
+        <thead><tr><th>Check</th><th>Result</th><th>Detail</th></tr></thead>
+        <tbody>
+            {% for key, val in verdict.flags.items %}
+            <tr>
+                <td>{{ key|title }}</td>
+                <td>
+                    {% if val.ok is True %}<span class="tf-badge success">OK</span>
+                    {% elif val.ok is False %}<span class="tf-badge danger">FAIL</span>
+                    {% else %}<span class="tf-badge muted">Pending</span>{% endif %}
+                </td>
+                <td>{{ val.detail|default:"" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

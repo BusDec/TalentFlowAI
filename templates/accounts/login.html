@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="tf-auth-card">
+    <h2>Staff Login</h2>
+    <div class="sub">Access the recruitment back-office</div>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="tf-field">
+            <label class="tf-label">{{ field.label }}</label>
+            {{ field }}
+        </div>
+        {% endfor %}
+        <button class="tf-btn w-100" type="submit">Login</button>
+    </form>
+</div>
+{% endblock %}

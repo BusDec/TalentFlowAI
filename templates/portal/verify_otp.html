@@ -1,0 +1,18 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "Verify OTP" %}{% endblock %}
+
+{% block content %}
+<div class="tf-auth-card">
+    <h2>{% trans "Verify OTP" %}</h2>
+    <div class="sub">{% trans "Enter the 6-digit code sent to your email" %}</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="tf-field">
+            <label class="tf-label">{{ form.otp.label }}</label>
+            {{ form.otp }}
+        </div>
+        <button class="tf-btn w-100" type="submit">{% trans "Verify" %}</button>
+    </form>
+</div>
+{% endblock %}

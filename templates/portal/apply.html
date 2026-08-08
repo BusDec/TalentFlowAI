@@ -1,0 +1,97 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "Apply" %}{% endblock %}
+
+{% block content %}
+<div class="tf-portal-banner" style="margin-bottom:22px">
+    <div class="tf-badge success" style="margin-bottom:10px">{{ advt.advt_number }}</div>
+    <h1 style="margin:0 0 6px;font-weight:800">{{ advt.title }}</h1>
+    <p style="margin:0">{% trans "Closes" %}: {{ advt.closing_date }} · {% trans "Published" %}: {{ advt.published_date }}</p>
+</div>
+
+<div class="tf-grid-2">
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">{% trans "Advertisement Details" %}</div>
+        <p class="tf-muted" style="font-size:0.92rem;margin:0 0 20px">{{ advt.description|default:"No description provided." }}</p>
+
+        <div class="tf-section-title" style="font-size:0.95rem;margin-top:22px">{% trans "Posts" %} ({{ advt.posts.count }})</div>
+        <table class="tf-table">
+            <thead><tr><th>{% trans "Post" %}</th><th>{% trans "Vacancies" %}</th><th>{% trans "Max Age" %}</th><th>{% trans "Pay Scale" %}</th></tr></thead>
+            <tbody>
+                {% for post in advt.posts.all %}
+                <tr>
+                    <td>{{ post.name }} <span class="tf-muted" style="font-size:0.8rem">({{ post.post_code }})</span></td>
+                    <td>{{ post.vacancies }}</td>
+                    <td>{{ post.max_age|default:"—" }}</td>
+                    <td>{{ post.pay_scale|default:"—" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="tf-empty">{% trans "No posts." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">{% trans "Submit Your Application" %}</div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Select Post" %} *</label>
+                <select name="post" class="tf-select" id="postSelect" required>
+                    <option value="">{% trans "— Choose a post —" %}</option>
+                    {% for post in advt.posts.all %}
+                    <option value="{{ post.id }}">{{ post.name }} — {{ post.vacancies }} {% trans "vacancies" %} · {% trans "Max Age" %} {{ post.max_age|default:"—" }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% for post in advt.posts.all %}
+            <div class="cert-group" data-post="{{ post.id }}" style="display:none">
+                <div class="tf-label" style="margin-bottom:8px">{% trans "Required Certificates" %}</div>
+                {% for cert in post.required_certificates %}
+                <div class="tf-field">
+                    <label class="tf-label">{{ cert }}</label>
+                    <input type="file" name="cert_{{ post.id }}_{{ forloop.counter0 }}" class="tf-input" accept=".pdf,.doc,.docx">
+                </div>
+                {% endfor %}
+                {% if not post.required_certificates %}
+                <p class="tf-muted" style="font-size:0.8rem;margin-top:0">{% trans "No certificates required for this post." %}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Upload Resume" %} *</label>
+                <input type="file" name="resume" class="tf-input" accept=".pdf,.doc,.docx" required>
+                <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">{% trans "PDF or Word. Your resume is stored once and reused across applications." %}</p>
+            </div>
+            <label class="tf-flex" style="gap:10px;align-items:flex-start;cursor:pointer;margin-bottom:18px">
+                <input type="checkbox" name="declare" value="on" class="tf-input" style="width:auto;margin-top:2px" required>
+                <span style="font-size:0.85rem;line-height:1.5;color:rgba(233,234,244,0.85)">
+                    {% trans "I declare that the information provided by me is true and correct to the best of my knowledge. In case any information is found false or incorrect, my application is liable to be rejected and I may be barred from applying to this organisation in future." %}
+                </span>
+            </label>
+            <button class="tf-btn" type="submit">{% trans "Submit Application" %}</button>
+        </form>
+
+        <div class="tf-alert" style="margin-top:26px;font-size:0.85rem">
+            {% trans "By applying you consent to processing of your application and documents as required for recruitment, including verification of the information you provide." %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    var $select = $('#postSelect');
+    function toggleCerts() {
+        var postId = $select.val();
+        $('.cert-group').each(function(){
+            $(this).toggle($(this).data('post') == postId);
+        });
+    }
+    $select.on('change', toggleCerts);
+    toggleCerts();
+});
+</script>
+{% endblock %}

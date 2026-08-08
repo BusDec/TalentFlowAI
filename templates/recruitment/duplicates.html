@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Duplicate Queue{% endblock %}
+{% block page_title %}Duplicate Detection Queue{% endblock %}
+{% block subtitle %}AI flags potential duplicates across advertisements — humans resolve{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="dupTable">
+        <thead><tr><th>Candidate</th><th>App A</th><th>App B</th><th>Confidence</th><th>Matched</th><th>Resolution</th><th></th></tr></thead>
+        <tbody>
+            {% for flag in flags %}
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' flag.application_a.application_id %}">
+                <td>{{ flag.candidate }}</td>
+                <td>{{ flag.application_a.application_id }} <span class="tf-muted">({{ flag.application_a.post.advertisement.advt_number }})</span></td>
+                <td>{{ flag.application_b.application_id }} <span class="tf-muted">({{ flag.application_b.post.advertisement.advt_number }})</span></td>
+                <td>
+                    <span class="tf-score {% if flag.confidence >= 80 %}high{% elif flag.confidence >= 60 %}mid{% else %}low{% endif %}">{{ flag.confidence }}%</span>
+                </td>
+                <td>{{ flag.match_fields|join:", " }}</td>
+                <td><span class="tf-badge primary">{{ flag.resolution|title }}</span></td>
+                <td>
+                    <form method="post" action="{% url 'duplicates_resolve' flag.id %}" class="tf-flex">
+                        {% csrf_token %}
+                        <select name="resolution" class="tf-select" style="width:auto;padding:6px 10px">
+                            <option value="genuine_duplicate">Genuine Duplicate</option>
+                            <option value="false_positive">False Positive</option>
+                            <option value="merged">Merged</option>
+                        </select>
+                        <button class="tf-btn small ghost">Resolve</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="tf-empty">No duplicate flags. Great — your data is clean!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

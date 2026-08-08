@@ -1,0 +1,9 @@
+from django.apps import AppConfig
+
+
+class ConsentConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "consent"
+
+    def ready(self):
+        import consent.signals  # noqa: F401

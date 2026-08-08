@@ -1,0 +1,29 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path("", views.dashboard, name="dashboard"),
+    path("advertisements/", views.advertisement_list, name="advertisement_list"),
+    path("advertisements/create/", views.advertisement_create, name="advertisement_create"),
+    path("advertisements/<int:advt_id>/", views.advertisement_detail, name="advertisement_detail"),
+    path("advertisements/<int:advt_id>/generate/", views.advertisement_generate, name="advertisement_generate"),
+    path("advertisements/<int:advt_id>/pdf/", views.advertisement_pdf, name="advertisement_pdf"),
+    path("advertisements/<int:advt_id>/report/", views.advertisement_report, name="advertisement_report"),
+    path("applications/", views.application_list, name="application_list"),
+    path("applications/export/", views.applications_export, name="applications_export"),
+    path("applications/<str:application_id>/", views.application_detail, name="application_detail"),
+    path("applications/<str:application_id>/eligibility/", views.run_eligibility, name="run_eligibility"),
+    path("applications/<str:application_id>/offer/", views.offer_letter, name="offer_letter"),
+    path("applications/<str:application_id>/communications/", views.communications, name="communications"),
+    path("applications/<str:application_id>/digilocker-fetch/", views.digilocker_fetch, name="digilocker_fetch"),
+    path("roster/<int:post_id>/", views.roster_view, name="roster_view"),
+    path("shortlist/<int:post_id>/", views.shortlist_view, name="shortlist_view"),
+    path("panel/<int:post_id>/", views.panel_view, name="panel_view"),
+    path("panel/<int:post_id>/promote/<int:panel_id>/", views.panel_promote, name="panel_promote"),
+    path("internal-postings/", views.internal_posting_list, name="internal_posting_list"),
+    path("duplicates/", views.duplicates_queue, name="duplicates_queue"),
+    path("duplicates/<int:flag_id>/resolve/", views.duplicates_resolve, name="duplicates_resolve"),
+    path("analytics/", views.analytics_view, name="analytics"),
+    path("audit/consents/", views.consent_ledger, name="consent_ledger"),
+    path("audit/consents/export/", views.consent_ledger_export, name="consent_ledger_export"),
+]

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Report — {{ advt.advt_number }}{% endblock %}
+{% block page_title %}Candidate Report{% endblock %}
+{% block subtitle %}{{ advt.advt_number }} — {{ advt.title }} · Generated {{ today|default:"" }}{% endblock %}
+
+{% block topbar %}
+<div class="tf-flex">
+    <a href="javascript:window.print()" class="tf-btn small">🖨 Print / Save PDF</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="report-doc">
+    <div class="report-header">
+        <div class="report-title">{{ advt.company_name|default:"North Eastern Electric Power Corporation Limited" }}</div>
+        <div class="report-sub">{{ advt.advt_number }} — {{ advt.title }}</div>
+        <div class="report-meta">Published: {{ advt.published_date|date:"d-m-Y" }} · Closes: {{ advt.closing_date|date:"d-m-Y" }}</div>
+    </div>
+
+    {% for p in posts %}
+    <div class="report-section">
+        <div class="report-post">{{ forloop.counter }}. {{ p.post.name }} <span class="report-meta">({{ p.post.post_code }} · {{ p.post.vacancies }} vacancies)</span></div>
+        {% if p.applications %}
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>#</th><th>Candidate</th><th>App ID</th><th>Qualification Met</th>
+                    <th>Resume Score</th><th>Resume Evaluation</th><th>Observation / Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in p.applications %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ a.application.candidate }}<br><span class="report-meta">{{ a.application.candidate.email }}</span></td>
+                    <td>{{ a.application.application_id }}</td>
+                    <td>
+                        {% if a.met is True %}<span class="report-ok">✓ Met</span>
+                        {% elif a.met is False %}<span class="report-no">✗ Not Met ({{ a.matched }}/{{ a.total }})</span>
+                        {% else %}<span class="report-na">Review ({{ a.matched }}/{{ a.total }})</span>{% endif %}
+                    </td>
+                    <td>{{ a.application.resume_score }}/100</td>
+                    <td class="report-eval">
+                        {% if a.evaluation.summary %}{{ a.evaluation.summary }}{% else %}<span class="report-meta">No evaluation</span>{% endif %}
+                        {% if a.resume and a.resume.parse_status == 'parsed' %}<span class="report-meta"><br>Resume: {{ a.resume.file.name }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'advertisement_report' advt.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="application_id" value="{{ a.application.application_id }}">
+                            <textarea name="remarks" class="report-remarks" rows="2">{{ a.application.evaluation_notes }}</textarea>
+                            <button class="tf-btn small" type="submit" style="margin-top:6px">Save Remarks</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="report-meta">No applications for this post.</p>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="tf-empty">No posts in this advertisement.</div>
+    {% endfor %}
+</div>
+
+<style>
+@media print {
+    .tf-sidebar, .tf-topbar a, .report-table .report-remarks, .report-table button, .tf-alert { display: none !important; }
+    .tf-main { padding: 0 !important; }
+    body { background: #fff !important; color: #111 !important; }
+}
+.report-doc { background: #fff; color: #111; border-radius: 14px; padding: 28px 32px; }
+.report-header { text-align: center; border-bottom: 2px solid #444; padding-bottom: 14px; margin-bottom: 20px; }
+.report-title { font-size: 1.3rem; font-weight: 800; }
+.report-sub { font-size: 1.05rem; font-weight: 700; margin-top: 4px; }
+.report-meta { color: #666; font-size: 0.8rem; }
+.report-section { margin-bottom: 26px; }
+.report-post { font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; color: #1a1b2e; }
+.report-table { width: 100%; border-collapse: collapse; }
+.report-table th, .report-table td { border: 1px solid #ccc; padding: 8px 10px; font-size: 0.82rem; vertical-align: top; }
+.report-table th { background: #f0f0f5; text-align: left; }
+.report-ok { color: #06764b; font-weight: 700; }
+.report-no { color: #c02; font-weight: 700; }
+.report-na { color: #a87000; font-weight: 700; }
+.report-eval { line-height: 1.4; }
+.report-remarks { width: 100%; border: 1px solid #ccc; border-radius: 6px; padding: 6px; font-size: 0.78rem; }
+</style>
+{% endblock %}

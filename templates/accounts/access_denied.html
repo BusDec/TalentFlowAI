@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Access Denied{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card" style="max-width:520px;margin:8vh auto;text-align:center">
+    <div style="font-size:3rem;margin-bottom:10px">⛔</div>
+    <h2 style="color:#fff;font-weight:800;margin:0 0 8px">Access Denied</h2>
+    <p class="tf-muted">You do not have permission to access this organisation's data.</p>
+    <a href="{% url 'login' %}" class="tf-btn small mt-4">Back to Login</a>
+</div>
+{% endblock %}

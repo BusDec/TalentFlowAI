@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load tf_filters %}
+{% block title %}Smart Shortlist{% endblock %}
+{% block page_title %}Smart Shortlist — {{ post.name }}{% endblock %}
+{% block subtitle %}AI-ranked candidates for human review{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card mb-4">
+    <form method="get" class="tf-flex">
+        <label class="tf-label" style="margin:0 10px 0 0">Keywords (comma-separated)</label>
+        <input type="text" name="keywords" value="{{ keywords|join:", " }}" class="tf-input" style="max-width:420px">
+        <button class="tf-btn small">Rank</button>
+    </form>
+    <p class="tf-muted mt-3" style="font-size:0.82rem;margin-bottom:0">
+        Composite = 70% AI resume score + 30% skill-keyword match. This is a recommendation — final shortlist decisions are human.
+    </p>
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="shortlistTable">
+        <thead><tr><th>Rank</th><th>Application</th><th>Candidate</th><th>Resume Score</th><th>Keyword Matches</th><th>Composite</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            {% for row in ranked %}
+            <tr>
+                <td><span class="tf-score mid">{{ row.rank }}</span></td>
+                <td>{{ row.application.application_id }}</td>
+                <td>{{ row.application.candidate }}</td>
+                <td>
+                    <span class="tf-score {{ row.resume_score|score_class }}">{{ row.resume_score }}</span>
+                </td>
+                <td>
+                    {% for kw in row.keyword_matches %}<span class="tf-badge primary" style="margin-right:4px">{{ kw }}</span>{% empty %}<span class="tf-muted">—</span>{% endfor %}
+                </td>
+                <td><span class="tf-badge success">{{ row.composite_score }}</span></td>
+                <td><span class="tf-badge muted">{{ row.application.get_status_display }}</span></td>
+                <td><a href="{% url 'application_detail' row.application.application_id %}" class="tf-link">View →</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="tf-empty">No applications to rank. Upload resumes first.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

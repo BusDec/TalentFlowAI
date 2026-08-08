@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load tf_filters %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Recruitment Dashboard{% endblock %}
+{% block subtitle %}{{ request.tenant.name }} — recruitment overview{% endblock %}
+
+{% block content %}
+{% if roster_alerts %}
+<div class="tf-alert danger">
+    <strong>Roster Breach Alerts:</strong>
+    <ul class="mb-0" style="margin-top:6px">
+        {% for a in roster_alerts %}<li>{{ a }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div class="tf-stats">
+    {% for status, count in by_status.items %}
+    <a href="{% url 'application_list' %}?status={{ status }}" class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">{{ status|title }}</div>
+        <div class="value">{{ count }}</div>
+        <div class="icon">◈</div>
+    </a>
+    {% endfor %}
+</div>
+
+<div class="tf-grid-3 mb-4">
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">📊 Funnel Overview</div>
+        <div id="funnelChart"></div>
+    </div>
+
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">⚑ Flags &amp; Actions</div>
+        <div class="tf-kv">
+            <span class="k">Pending duplicates</span><span class="v"><span class="tf-badge warning">{{ pending_duplicates }}</span></span>
+            <span class="k">Panel promotable</span><span class="v"><span class="tf-badge primary">{{ panel_promotable }}</span></span>
+            <span class="k">Active adverts</span><span class="v"><span class="tf-badge success">{{ advertisements|length }}</span></span>
+            <span class="k">Avg resume score</span><span class="v"><span class="tf-badge muted">{{ avg_score|default:"—" }}</span></span>
+        </div>
+        <div class="mt-4">
+            <a href="{% url 'application_list' %}" class="tf-btn small">Review Applications</a>
+            <a href="{% url 'duplicates_queue' %}" class="tf-btn small ghost">Duplicates</a>
+        </div>
+    </div>
+
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">▤ Active Advertisements</div>
+        <div class="tf-hscroll">
+            {% for advt in advertisements %}
+            <a href="{% url 'advertisement_detail' advt.id %}" class="tf-hscroll-card tf-hscroll-link">
+                <span style="font-weight:700">{{ advt.advt_number }}</span>
+                <span class="tf-muted" style="font-size:0.8rem">Closes {{ advt.closing_date }}</span>
+            </a>
+            {% empty %}
+            <div class="tf-empty">No active advertisements.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">📈 Top Candidates by Resume Score</div>
+    <table class="tf-table">
+        <thead><tr><th>Application</th><th>Candidate</th><th>Post</th><th>Score</th><th>Status</th></tr></thead>
+        <tbody>
+            {% for app in top_applications %}
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}">
+                <td>{{ app.application_id }}</td>
+                <td>{{ app.candidate }}</td>
+                <td>{{ app.post.name }}</td>
+                <td>
+                    <span class="tf-score {{ app.resume_score|score_class }}">{{ app.resume_score }}</span>
+                </td>
+                <td><span class="tf-badge {% if app.status == 'rejected' %}danger{% elif app.status == 'withdrawn' %}muted{% elif app.status == 'joined' %}success{% else %}primary{% endif %}">{{ app.get_status_display }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="tf-empty">No applications yet. Run the simulator to seed data.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script src="{% static 'js/funnel.js' %}"></script>
+<script>
+const funnelData = {{ funnel_data|safe }};
+drawFunnel('funnelChart', funnelData);
+</script>
+{% endblock %}

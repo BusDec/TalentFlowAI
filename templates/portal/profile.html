@@ -1,0 +1,255 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "My Profile" %}{% endblock %}
+
+{% block content %}
+<div class="tf-section-title">{% trans "My Profile" %}</div>
+<p class="tf-muted" style="max-width:820px">
+    {% trans "Keep your profile complete — accurate details speed up verification. Upload proof documents (PDF) for fields that require them." %}
+</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <datalist id="ugc-universities">
+        {% for uni in ugc_universities %}<option value="{{ uni }}"></option>{% endfor %}
+    </datalist>
+
+    <div class="tf-glass tf-card mb-4">
+        <div class="tf-section-title">{% trans "Personal & Address" %}</div>
+        <div class="tf-grid-2">
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Name" %}</label>
+                <input type="text" class="tf-input" value="{{ candidate }}" disabled>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Date of Birth" %}</label>
+                <input type="text" class="tf-input" value="{{ candidate.date_of_birth|default:'—' }}" disabled>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Gender" %}</label>
+                <select name="gender" class="tf-select">
+                    <option value="">{% trans "Select" %}</option>
+                    <option value="M" {% if profile.gender == 'M' %}selected{% endif %}>{% trans "Male" %}</option>
+                    <option value="F" {% if profile.gender == 'F' %}selected{% endif %}>{% trans "Female" %}</option>
+                    <option value="O" {% if profile.gender == 'O' %}selected{% endif %}>{% trans "Other" %}</option>
+                </select>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Category" %}</label>
+                <select name="category" class="tf-select">
+                    <option value="">{% trans "Select" %}</option>
+                    {% for value, label in profile.CATEGORY_CHOICES %}
+                    <option value="{{ value }}" {% if profile.category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>            <div class="tf-field">
+                <label class="tf-label">{% trans "Aadhaar Number" %}</label>
+                <input type="text" name="aadhar_no" class="tf-input" value="{{ profile.aadhar_no }}" placeholder="XXXX XXXX XXXX">
+            </div>
+            <label class="tf-flex" style="gap:10px;cursor:pointer;align-self:end">
+                <input type="checkbox" name="is_pwbd" value="on" class="tf-input" style="width:18px;height:18px" {% if profile.is_pwbd %}checked{% endif %}>
+                <span>{% trans "Person with Benchmark Disability (PwBD)" %}</span>
+            </label>
+        </div>
+        <div class="tf-field">
+            <label class="tf-label">{% trans "Permanent Address" %}</label>
+            <textarea name="permanent_address" class="tf-textarea" rows="2">{{ profile.permanent_address }}</textarea>
+        </div>
+        <label class="tf-flex" style="gap:10px;cursor:pointer;margin-bottom:14px">
+            <input type="checkbox" name="current_same_as_permanent" value="on" class="tf-input" style="width:18px;height:18px" id="sameAddr" {% if current_same_as_permanent %}checked{% endif %}>
+            <span>{% trans "Current address is same as permanent address" %}</span>
+        </label>
+        <div class="tf-field" id="currentAddrField">
+            <label class="tf-label">{% trans "Current Address" %}</label>
+            <textarea name="current_address" class="tf-textarea" rows="2">{{ profile.current_address }}</textarea>
+        </div>
+    </div>
+
+    <div class="tf-glass tf-card mb-4">
+        <div class="tf-flex" style="justify-content:space-between">
+            <div class="tf-section-title">{% trans "Academic Record" %}</div>
+            <button type="button" class="tf-btn small ghost" id="addAcademic">+ {% trans "Add Row" %}</button>
+        </div>
+        <div id="academicRows">
+            {% for rec in academic_records %}
+            <div class="tf-grid-3 academic-row" style="align-items:end;margin-bottom:12px">
+                <div class="tf-field"><label class="tf-label">{% trans "Level" %}</label>
+                    <select name="academic_level_{{ forloop.counter0 }}" class="tf-select">
+                        {% for value, label in rec.LEVEL_CHOICES %}
+                        <option value="{{ value }}" {% if rec.level == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Discipline" %}</label>
+                    <input name="academic_discipline_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.discipline }}"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "University / Board" %}</label>
+                    <input name="academic_board_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.university_board }}" list="ugc-universities" autocomplete="off"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Year Passed" %}</label>
+                    <input name="academic_year_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.year_passed }}"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Marking" %}</label>
+                    <select name="academic_marking_{{ forloop.counter0 }}" class="tf-select">
+                        {% for value, label in rec.MARKING_CHOICES %}
+                        <option value="{{ value }}" {% if rec.marking_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Score" %}</label>
+                    <input name="academic_score_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.score }}"></div>
+                <div class="tf-field" style="display:flex;align-items:center;gap:8px">
+                    <input type="checkbox" name="academic_ugc_{{ forloop.counter0 }}" value="on" class="tf-input" style="width:18px;height:18px" {% if rec.is_ugc_recognized %}checked{% endif %}>
+                    <span class="tf-muted" style="font-size:0.8rem">{% trans "UGC recognized" %}</span>
+                </div>
+                <button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ {% trans "Remove record" %}</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% if not academic_records %}
+        <p class="tf-muted" id="noAcademic">{% trans "No academic records yet — add your SSC/12th/UG/PG details." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="tf-glass tf-card mb-4">
+        <div class="tf-flex" style="justify-content:space-between">
+            <div class="tf-section-title">{% trans "Work Experience" %}</div>
+            <button type="button" class="tf-btn small ghost" id="addWork">+ {% trans "Add Row" %}</button>
+        </div>
+        <div id="workRows">
+            {% for we in work_experiences %}
+            <div class="tf-grid-3 work-row" style="align-items:end;margin-bottom:12px">
+                <div class="tf-field"><label class="tf-label">{% trans "Organisation" %}</label>
+                    <input name="work_org_{{ forloop.counter0 }}" class="tf-input" value="{{ we.org_name }}"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Type" %}</label>
+                    <select name="work_orgtype_{{ forloop.counter0 }}" class="tf-select">
+                        <option value="">—</option>
+                        {% for value, label in we.ORG_TYPE_CHOICES %}
+                        <option value="{{ value }}" {% if we.org_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Designation" %}</label>
+                    <input name="work_designation_{{ forloop.counter0 }}" class="tf-input" value="{{ we.designation }}"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Start" %}</label>
+                    <input name="work_start_{{ forloop.counter0 }}" type="date" class="tf-input" value="{{ we.start_date|date:'Y-m-d' }}"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "End" %}</label>
+                    <input name="work_end_{{ forloop.counter0 }}" type="date" class="tf-input" value="{{ we.end_date|date:'Y-m-d' }}"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Annual CTC (Lakhs)" %}</label>
+                    <input name="work_ctc_{{ forloop.counter0 }}" class="tf-input" value="{{ we.annual_ctc_lakhs }}"></div>
+                <div class="tf-field"><label class="tf-label">{% trans "Org Turnover (Cr)" %}</label>
+                    <input name="work_turnover_{{ forloop.counter0 }}" class="tf-input" value="{{ we.turnover_cr }}"></div>
+                <button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ {% trans "Remove record" %}</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% if not work_experiences %}
+        <p class="tf-muted" id="noWork">{% trans "No work experience added yet." %}</p>
+        {% endif %}
+    </div>
+
+    <div class="tf-glass tf-card mb-4">
+        <div class="tf-section-title">{% trans "Public Exam Disclosure (GATE / ESE)" %}</div>
+        <div class="tf-grid-2">
+            <div class="tf-field"><label class="tf-label">{% trans "Exam" %}</label>
+                <select name="exam_type" class="tf-select">
+                    <option value="">—</option>
+                    {% for value, label in exam.EXAM_CHOICES %}
+                    <option value="{{ value }}" {% if exam.exam_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select></div>
+            <div class="tf-field"><label class="tf-label">{% trans "GATE Year" %}</label>
+                <input name="gate_year" class="tf-input" value="{{ exam.gate_year }}"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "Paper Code" %}</label>
+                <input name="paper_code" class="tf-input" value="{{ exam.paper_code }}"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "Marks (out of 100)" %}</label>
+                <input name="marks_out_100" class="tf-input" value="{{ exam.marks_out_100 }}"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "GATE Score" %}</label>
+                <input name="gate_score" class="tf-input" value="{{ exam.gate_score }}"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "All India Rank (AIR)" %}</label>
+                <input name="air" class="tf-input" value="{{ exam.air }}"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "ESE Total Score" %}</label>
+                <input name="ese_total_score" class="tf-input" value="{{ exam.ese_total_score }}"></div>
+            <label class="tf-flex" style="gap:10px;cursor:pointer;align-self:end;margin-bottom:18px">
+                <input type="checkbox" name="public_disclosure_consent" value="on" class="tf-input" style="width:18px;height:18px" {% if exam.public_disclosure_consent %}checked{% endif %}>
+                <span class="tf-muted" style="font-size:0.8rem">{% trans "Consent to disclose score publicly in merit list" %}</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="tf-glass tf-card mb-4">
+        <div class="tf-section-title">{% trans "Proof Documents" %}</div>
+        <p class="tf-muted" style="font-size:0.85rem;margin-top:0">{% trans "Upload a PDF proof for each field that requires verification." %}</p>
+        <div class="tf-grid-2">
+            <div class="tf-field"><label class="tf-label">{% trans "DOB Proof" %} (PDF)</label>
+                <input type="file" name="doc_dob" class="tf-input" accept=".pdf"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "Aadhaar" %} (PDF)</label>
+                <input type="file" name="doc_aadhar" class="tf-input" accept=".pdf"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "Academic Records" %} (PDF)</label>
+                <input type="file" name="doc_academic" class="tf-input" accept=".pdf"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "Work Experience" %} (PDF)</label>
+                <input type="file" name="doc_work_ex" class="tf-input" accept=".pdf"></div>
+            <div class="tf-field"><label class="tf-label">{% trans "Public Exam Score" %} (PDF)</label>
+                <input type="file" name="doc_public_exam" class="tf-input" accept=".pdf"></div>
+        </div>
+        {% if documents %}
+        <ul style="padding-left:18px;color:rgba(233,234,244,0.85);font-size:0.88rem;margin-top:8px">
+            {% for d in documents %}
+            <li>{{ d.get_doc_type_display }} — {{ d.file.name }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="tf-flex">
+        <button class="tf-btn" type="submit">{% trans "Save Profile" %}</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $('#sameAddr').on('change', function(){
+        $('#currentAddrField').toggle(!this.checked);
+    });
+    $('#sameAddr').trigger('change');
+
+    function reindex(container, prefix) {
+        $(container + ' .row-field').each(function(i){ $(this).attr('name', prefix + i); });
+    }
+
+    $('#addAcademic').on('click', function(){
+        $('#noAcademic').remove();
+        const n = $('#academicRows .academic-row').length;
+        const $row = $('<div class="tf-grid-3 academic-row" style="align-items:end;margin-bottom:12px">' +
+            '<div class="tf-field"><label class="tf-label">Level</label><select name="academic_level_'+n+'" class="tf-select">' +
+            '<option value="10th">SSC / 10th</option><option value="12th">HSC / 12th</option>' +
+            '<option value="diploma">Diploma</option><option value="ug">Graduate (UG)</option>' +
+            '<option value="pg">Post-graduate (PG)</option><option value="other">Other</option></select></div>' +
+            '<div class="tf-field"><label class="tf-label">Discipline</label><input name="academic_discipline_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label">University / Board</label><input name="academic_board_'+n+'" class="tf-input" list="ugc-universities" autocomplete="off"></div>' +
+            '<div class="tf-field"><label class="tf-label">Year Passed</label><input name="academic_year_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label">Marking</label><select name="academic_marking_'+n+'" class="tf-select">' +
+            '<option value="percentage">Percentage</option><option value="cgpa">CGPA</option><option value="grade">Grade</option></select></div>' +
+            '<div class="tf-field"><label class="tf-label">Score</label><input name="academic_score_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field" style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="academic_ugc_'+n+'" value="on" style="width:18px;height:18px"><span class="tf-muted" style="font-size:0.8rem">UGC recognized</span></div>' +
+            '<button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ Remove record</button></div>');
+        $('#academicRows').append($row);
+    });
+
+    $('#addWork').on('click', function(){
+        $('#noWork').remove();
+        const n = $('#workRows .work-row').length;
+        const $row = $('<div class="tf-grid-3 work-row" style="align-items:end;margin-bottom:12px">' +
+            '<div class="tf-field"><label class="tf-label">Organisation</label><input name="work_org_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label">Type</label><select name="work_orgtype_'+n+'" class="tf-select"><option value="">—</option>' +
+            '<option value="psu">PSU</option><option value="private">Private</option><option value="govt">Government</option><option value="other">Other</option></select></div>' +
+            '<div class="tf-field"><label class="tf-label">Designation</label><input name="work_designation_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label">Start</label><input name="work_start_'+n+'" type="date" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label">End</label><input name="work_end_'+n+'" type="date" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label">Annual CTC (Lakhs)</label><input name="work_ctc_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label">Org Turnover (Cr)</label><input name="work_turnover_'+n+'" class="tf-input"></div>' +
+            '<button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ Remove record</button></div>');
+        $('#workRows').append($row);
+    });
+
+    $(document).on('click', '.remove-row', function(){ $(this).closest('.academic-row, .work-row').remove(); });
+});
+</script>
+{% endblock %}
