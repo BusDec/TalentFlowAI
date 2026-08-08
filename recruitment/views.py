@@ -32,7 +32,7 @@ from .models import (
 
 
 @login_required
-@require_role("viewer")
+@require_role("viewer", "recruiter", "hr_manager", "org_admin", "reviewer", "auditor")
 def dashboard(request):
     total = Application.objects.count()
     by_status = {

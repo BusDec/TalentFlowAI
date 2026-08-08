@@ -31,5 +31,19 @@ def logout_view(request):
     return redirect("login")
 
 
-def access_denied(request):
-    return render(request, "accounts/access_denied.html", status=403)
+def access_denied(request, exception=None):
+    """Friendly 403 page — used for PermissionDenied (role gates) and the
+    access_denied route (TenantAccessMiddleware redirect)."""
+    current_roles = []
+    if request.user.is_authenticated and hasattr(request, "tenant"):
+        current_roles = list(
+            request.user.tenant_memberships.filter(
+                tenant=request.tenant, is_active=True
+            ).values_list("role", flat=True)
+        )
+    return render(
+        request,
+        "accounts/access_denied.html",
+        {"exception": exception, "current_roles": current_roles},
+        status=403,
+    )
