@@ -145,6 +145,12 @@ def main():
             category_breakup={"ur": 1},
         )
 
+        from profiles.models import CandidateProfile
+
+        s_profile = CandidateProfile.objects.create(
+            candidate=cand, aadhar_no="123456789012"
+        )
+
         ids = dict(
             advt=advt.id,
             post=post.id,
@@ -155,6 +161,7 @@ def main():
             s_post=s_post.id,
             s_panel=s_panel.id,
             s_flag=s_flag.id,
+            s_profile=s_profile.id,
         )
         with open("e2e_ids.json", "w") as fh:
             json.dump(ids, fh)
@@ -166,6 +173,7 @@ def main():
         SAPP = ids["s_app"]
         SPANEL = ids["s_panel"]
         SFLAG = ids["s_flag"]
+        SPROF = ids["s_profile"]
 
         def advt_form_data(number):
             return {
@@ -287,6 +295,13 @@ def main():
             for label, method, path, _ in ADMIN_GETS:
                 code, _ = sess.req(method, path)
                 check(label, role, method, path, code, (200,))
+            # Admin change form must show a masked Aadhaar, never plaintext.
+            code, body = sess.req("GET", f"/admin/profiles/candidateprofile/{SPROF}/change/")
+            check("admin_profile_change", role, "GET", f"/admin/profiles/candidateprofile/{SPROF}/change/", code, (200,))
+            if "XXXX-XXXX-9012" not in body or "123456789012" in body:
+                failures.append("effect aadhar mask: change form does not mask Aadhaar")
+            else:
+                passed += 1
         code, _ = sess.req("POST", "/logout/", {"csrfmiddlewaretoken": token})
         check("logout", role, "POST", "/logout/", code, (302,))
 
