@@ -520,6 +520,16 @@ class OrgProfile(models.Model):
 
     class Meta:
         verbose_name = "Organisation Profile"
+        constraints = [
+            # Enforce a single profile row per schema: a partial unique index
+            # on the constant 1 allows at most one real row (pk IS NOT NULL
+            # excludes the NULL-pk placeholder Django uses during checks).
+            models.UniqueConstraint(
+                models.Value(1),
+                condition=models.Q(pk__isnull=False),
+                name="orgprofile_singleton_row",
+            )
+        ]
 
     def __str__(self):
         return self.name_en

@@ -30,6 +30,13 @@ class Migration(migrations.Migration):
             ],
             options={
                 'verbose_name': 'Organisation Profile',
+                'constraints': [
+                    models.UniqueConstraint(
+                        models.Value(1),
+                        condition=models.Q(pk__isnull=False),
+                        name='orgprofile_singleton_row',
+                    ),
+                ],
             },
         ),
     ]

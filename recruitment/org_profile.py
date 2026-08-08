@@ -20,17 +20,22 @@ def get_org_profile():
     except Client.DoesNotExist:
         name = connection.schema_name
 
-    profile, _ = OrgProfile.objects.get_or_create(
-        defaults={
-            "name_en": name or connection.schema_name or "Organisation",
-            "name_hi": "",
-            "tagline_en": "",
-            "tagline_hi": "",
-            "address": "",
-            "footer_motto": "",
-            "contact_email": "",
-            "website": "",
-            "sbi_epay_text": "",
-        }
-    )
-    return profile
+    try:
+        profile, _ = OrgProfile.objects.get_or_create(
+            defaults={
+                "name_en": name or connection.schema_name or "Organisation",
+                "name_hi": "",
+                "tagline_en": "",
+                "tagline_hi": "",
+                "address": "",
+                "footer_motto": "",
+                "contact_email": "",
+                "website": "",
+                "sbi_epay_text": "",
+            }
+        )
+        return profile
+    except OrgProfile.MultipleObjectsReturned:
+        # Legacy multi-row state (pre-constraint schemas): never-raises
+        # contract means hand back the first row rather than exploding.
+        return OrgProfile.objects.first()

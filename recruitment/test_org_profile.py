@@ -13,8 +13,8 @@ def test_get_org_profile_creates_singleton(tenant):
     from recruitment.models import OrgProfile
     from recruitment.org_profile import get_org_profile
 
-    # Migration 0010 seeds a row per test schema; drop it so this test
-    # exercises the helper's own get_or_create defaults.
+    # Defensive: drop any pre-existing row so this test exercises the
+    # helper's own get_or_create defaults.
     OrgProfile.objects.all().delete()
     first = get_org_profile()
     second = get_org_profile()
@@ -33,6 +33,6 @@ def test_get_org_profile_no_client_fallback(tenant, monkeypatch):
     from recruitment.models import OrgProfile
     from recruitment.org_profile import get_org_profile
 
-    OrgProfile.objects.all().delete()  # drop the migration-seeded row
+    OrgProfile.objects.all().delete()  # Defensive: drop any pre-existing row
     profile = get_org_profile()
     assert profile.name_en  # falls back to schema name, non-empty
