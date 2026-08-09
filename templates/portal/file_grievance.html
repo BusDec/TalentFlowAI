@@ -1,0 +1,42 @@
+{% extends 'portal/base_portal.html' %}
+{% block title %}File Grievance{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">📝 File a Grievance / Appeal</div>
+    <p class="tf-muted" style="margin-bottom:16px">
+        Use this form to raise a concern or appeal regarding the recruitment process.
+        Our team will review and respond to your grievance.
+    </p>
+
+    <form method="post" aria-label="File a new grievance">
+        {% csrf_token %}
+
+        <div class="tf-field" style="margin-bottom:12px">
+            <label for="subject" class="tf-label">Subject <span class="tf-required">*</span></label>
+            <input type="text" id="subject" name="subject" class="tf-input" maxlength="300" required
+                   placeholder="Brief subject of your grievance" aria-required="true"
+                   value="{{ request.POST.subject|default:'' }}">
+        </div>
+
+        <div class="tf-field" style="margin-bottom:12px">
+            <label for="description" class="tf-label">Description <span class="tf-required">*</span></label>
+            <textarea id="description" name="description" class="tf-textarea" rows="5" required
+                      placeholder="Describe your grievance in detail…" aria-required="true">{{ request.POST.description|default:'' }}</textarea>
+        </div>
+
+        <div class="tf-field" style="margin-bottom:16px">
+            <label for="application_id" class="tf-label">Related Application (optional)</label>
+            <select id="application_id" name="application_id" class="tf-select">
+                <option value="">— None —</option>
+                {% for app in applications %}
+                <option value="{{ app.application_id }}">{{ app.application_id }} — {{ app.post.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="tf-btn">Submit Grievance</button>
+        <a href="{% url 'portal_my_grievances' %}" class="tf-btn ghost" style="margin-left:8px">View My Grievances</a>
+    </form>
+</div>
+{% endblock %}

@@ -257,6 +257,66 @@
                 {% for q in suggested_questions %}<li>{{ q }}</li>{% endfor %}
             </ul>
         </div>
+
+        <!-- Police Verification -->
+        <div class="tf-glass tf-card">
+            <div class="tf-section-title">🛡️ Police Verification</div>
+            {% if police_verifications %}
+            <table class="tf-table" style="margin-bottom:12px">
+                <thead>
+                    <tr><th>District</th><th>Status</th><th>Initiated By</th><th>Report</th><th>Created</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for pv in police_verifications %}
+                    <tr>
+                        <td>{{ pv.district }}</td>
+                        <td><span class="tf-badge {% if pv.status == 'cleared' %}success{% elif pv.status == 'not_cleared' %}danger{% elif pv.status == 'in_progress' %}warning{% else %}primary{% endif %}">{{ pv.get_status_display }}</span></td>
+                        <td>{{ pv.initiated_by|default:"—" }}</td>
+                        <td>{% if pv.report_file %}<a href="{{ pv.report_file.url }}" target="_blank" class="tf-btn small ghost">View Report</a>{% else %}—{% endif %}</td>
+                        <td>{{ pv.created_at|date:"d M Y" }}</td>
+                        <td>
+                            {% if pv.status != 'cleared' and pv.status != 'not_cleared' %}
+                            <details>
+                                <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">Update</summary>
+                                <form method="post" action="{% url 'police_verification_update_status' pv.pk %}" enctype="multipart/form-data" style="margin-top:8px" aria-label="Update police verification status for {{ pv.district }}">
+                                    {% csrf_token %}
+                                    <div class="tf-field" style="margin-bottom:6px">
+                                        <select name="status" class="tf-select" aria-label="New status">
+                                            <option value="initiated" {% if pv.status == 'initiated' %}selected{% endif %}>Initiated</option>
+                                            <option value="in_progress" {% if pv.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="cleared">Cleared</option>
+                                            <option value="not_cleared">Not Cleared</option>
+                                        </select>
+                                    </div>
+                                    <div class="tf-field" style="margin-bottom:6px">
+                                        <textarea name="notes" class="tf-textarea" rows="2" placeholder="Notes…" aria-label="Notes"></textarea>
+                                    </div>
+                                    <div class="tf-field" style="margin-bottom:6px">
+                                        <input type="file" name="report_file" class="tf-input" aria-label="Upload police report">
+                                    </div>
+                                    <button class="tf-btn small" type="submit">Save</button>
+                                </form>
+                            </details>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="tf-muted" style="font-size:0.85rem;margin:0">No police verification initiated yet.</p>
+            {% endif %}
+            <form method="post" action="{% url 'police_verification_initiate' application.application_id %}" style="margin-top:8px" aria-label="Initiate new police verification">
+                {% csrf_token %}
+                <div class="tf-field" style="margin-bottom:6px">
+                    <input type="text" name="district" class="tf-input" placeholder="District (e.g. East Khasi Hills)" required aria-label="Police district">
+                </div>
+                <div class="tf-field" style="margin-bottom:6px">
+                    <textarea name="notes" class="tf-textarea" rows="2" placeholder="Notes (optional)…" aria-label="Initiation notes"></textarea>
+                </div>
+                <button class="tf-btn small" type="submit">🛡️ Initiate Police Verification</button>
+            </form>
+        </div>
     </div>
 </div>
 

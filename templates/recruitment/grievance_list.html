@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Grievances{% endblock %}
+{% block page_title %}Grievances &amp; Appeals{% endblock %}
+{% block subtitle %}Candidate grievance management{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">📋 Grievance Queue</div>
+
+    <form method="get" style="margin-bottom:16px" aria-label="Filter grievances by status">
+        <label for="status-filter" class="tf-label">Filter by status:</label>
+        <select name="status" id="status-filter" class="tf-select" style="max-width:200px;display:inline-block" onchange="this.form.submit()">
+            <option value="">All</option>
+            {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <noscript><button class="tf-btn small" type="submit">Filter</button></noscript>
+    </form>
+
+    {% if grievances %}
+    <table class="tf-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Subject</th>
+                <th>Candidate</th>
+                <th>Application</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Filed On</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for g in grievances %}
+            <tr>
+                <td>{{ g.pk }}</td>
+                <td><strong>{{ g.subject }}</strong></td>
+                <td>{{ g.candidate }}</td>
+                <td>{% if g.application %}{{ g.application.application_id }}{% else %}—{% endif %}</td>
+                <td>
+                    <span class="tf-badge {% if g.status == 'resolved' %}success{% elif g.status == 'acknowledged' or g.status == 'investigating' %}warning{% else %}primary{% endif %}">
+                        {{ g.get_status_display }}
+                    </span>
+                </td>
+                <td>{% if g.assigned_to %}{{ g.assigned_to }}{% else %}<span class="tf-muted">Unassigned</span>{% endif %}</td>
+                <td>{{ g.created_at|date:"d M Y" }}</td>
+                <td>
+                    <details>
+                        <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">View &amp; Act</summary>
+                        <div style="margin-top:8px;max-width:400px">
+                            <p style="margin-bottom:8px"><strong>Description:</strong><br>{{ g.description|linebreaksbr }}</p>
+                            {% if g.resolution_notes %}
+                            <p style="margin-bottom:8px"><strong>Resolution Notes:</strong><br>{{ g.resolution_notes|linebreaksbr }}</p>
+                            {% endif %}
+
+                            {% if g.status != 'resolved' %}
+                            <form method="post" action="{% url 'grievance_assign' g.pk %}" style="display:inline;margin-right:8px" aria-label="Assign grievance {{ g.pk }}">
+                                {% csrf_token %}
+                                <button class="tf-btn small" type="submit" aria-label="Assign grievance {{ g.pk }} to yourself">Assign to Me</button>
+                            </form>
+
+                            <form method="post" action="{% url 'grievance_update_status' g.pk %}" style="margin-top:8px" aria-label="Update status for grievance {{ g.pk }}">
+                                {% csrf_token %}
+                                <div class="tf-field" style="margin-bottom:6px">
+                                    <select name="status" class="tf-select" style="max-width:200px" aria-label="New status">
+                                        {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if g.status == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="tf-field" style="margin-bottom:6px">
+                                    <textarea name="resolution_notes" class="tf-textarea" rows="2" placeholder="Resolution notes…" aria-label="Resolution notes">{{ g.resolution_notes }}</textarea>
+                                </div>
+                                <button class="tf-btn small" type="submit" aria-label="Update status for grievance {{ g.pk }}">Update Status</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </details>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="tf-muted">No grievances found.</div>
+    {% endif %}
+</div>
+{% endblock %}

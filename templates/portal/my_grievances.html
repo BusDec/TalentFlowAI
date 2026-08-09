@@ -1,0 +1,45 @@
+{% extends 'portal/base_portal.html' %}
+{% block title %}My Grievances{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">📋 My Grievances &amp; Appeals</div>
+
+    <div style="margin-bottom:16px">
+        <a href="{% url 'portal_file_grievance' %}" class="tf-btn">📝 File New Grievance</a>
+    </div>
+
+    {% if grievances %}
+    <table class="tf-table">
+        <thead>
+            <tr>
+                <th>Ref #</th>
+                <th>Subject</th>
+                <th>Application</th>
+                <th>Status</th>
+                <th>Filed On</th>
+                <th>Resolution</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for g in grievances %}
+            <tr>
+                <td>{{ g.pk }}</td>
+                <td><strong>{{ g.subject }}</strong></td>
+                <td>{% if g.application %}{{ g.application.application_id }}{% else %}—{% endif %}</td>
+                <td>
+                    <span class="tf-badge {% if g.status == 'resolved' %}success{% elif g.status == 'acknowledged' or g.status == 'investigating' %}warning{% else %}primary{% endif %}">
+                        {{ g.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ g.created_at|date:"d M Y" }}</td>
+                <td>{% if g.resolution_notes %}{{ g.resolution_notes|truncatewords:20 }}{% else %}—{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="tf-muted">You have not filed any grievances yet.</div>
+    {% endif %}
+</div>
+{% endblock %}
