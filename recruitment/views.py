@@ -1026,3 +1026,115 @@ def fee_reconciliation(request):
         "total_collected": total_collected,
     }
     return render(request, "recruitment/fee_reconciliation.html", context)
+
+
+# ── Document Verification ────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("recruiter", "hr_manager")
+def verify_documents(request):
+    """List pending documents and handle verify/reject actions."""
+    from .models import DocumentVerification
+
+    # Handle POST action (verify or reject)
+    if request.method == "POST":
+        dv_id = request.POST.get("verification_id")
+        action = request.POST.get("action")
+        comments = request.POST.get("comments", "").strip()
+
+        dv = get_object_or_404(DocumentVerification, id=dv_id)
+
+        if action in ("verified", "rejected"):
+            old_status = dv.status
+            dv.status = action
+            dv.verifier = request.user
+            dv.comments = comments
+            dv.verified_at = timezone.now()
+            dv.save()
+
+            # Also update the legacy is_verified flag on the Document.
+            doc = dv.document
+            doc.is_verified = action == "verified"
+            doc.verified_at = dv.verified_at if action == "verified" else None
+            doc.save(update_fields=["is_verified", "verified_at"])
+
+            # Write audit event.
+            log_audit(
+                request.user,
+                dv.document.application,
+                "document_verification",
+                old_status,
+                action,
+                reason=comments or f"Document {action} by {request.user.username}",
+            )
+
+            messages.success(request, f"Document {action} successfully.")
+            return redirect("verify_documents")
+
+    # Filter by status
+    status_filter = request.GET.get("status", "pending")
+    verifications = DocumentVerification.objects.select_related(
+        "document", "document__application", "document__application__candidate",
+        "document__application__post", "verifier",
+    ).all()
+
+    if status_filter and status_filter != "all":
+        verifications = verifications.filter(status=status_filter)
+
+    # Counts for the summary bar
+    from django.db.models import Count
+    counts = dict(
+        DocumentVerification.objects.values_list("status").annotate(c=Count("id")).values_list("status", "c")
+    )
+
+    context = {
+        "verifications": verifications[:200],
+        "status_filter": status_filter,
+        "pending_count": counts.get("pending", 0),
+        "verified_count": counts.get("verified", 0),
+        "rejected_count": counts.get("rejected", 0),
+        "total_count": sum(counts.values()),
+    }
+    return render(request, "recruitment/verify_documents.html", context)
+
+
+@login_required
+@require_role("viewer", "recruiter", "hr_manager")
+def document_verification_dashboard(request):
+    """Dashboard summary for document verification progress."""
+    from django.db.models import Count, Q
+    from .models import DocumentVerification
+
+    total = DocumentVerification.objects.count()
+    by_status = dict(
+        DocumentVerification.objects.values_list("status").annotate(c=Count("id")).values_list("status", "c")
+    )
+
+    # Per-post breakdown
+    per_post = (
+        DocumentVerification.objects
+        .values("document__application__post__name")
+        .annotate(
+            total=Count("id"),
+            pending=Count("id", filter=Q(status="pending")),
+            verified=Count("id", filter=Q(status="verified")),
+            rejected=Count("id", filter=Q(status="rejected")),
+        )
+        .order_by("-total")
+    )
+
+    # Recent activity
+    recent = DocumentVerification.objects.select_related(
+        "document__application__candidate", "verifier",
+    ).exclude(status="pending")[:20]
+
+    context = {
+        "total": total,
+        "pending_count": by_status.get("pending", 0),
+        "verified_count": by_status.get("verified", 0),
+        "rejected_count": by_status.get("rejected", 0),
+        "per_post": per_post,
+        "recent": recent,
+    }
+    return render(request, "recruitment/document_verification_dashboard.html", context)

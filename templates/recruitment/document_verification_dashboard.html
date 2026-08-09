@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Document Verification Dashboard{% endblock %}
+{% block page_title %}Document Verification Dashboard{% endblock %}
+{% block subtitle %}Overview of document verification progress{% endblock %}
+
+{% block content %}
+<div class="tf-stats" style="margin-bottom:24px">
+    <a class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Total</div>
+        <div class="value">{{ total }}</div>
+        <div class="icon">📄</div>
+    </a>
+    <a class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Pending</div>
+        <div class="value">{{ pending_count }}</div>
+        <div class="icon">⏳</div>
+    </a>
+    <a class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Verified</div>
+        <div class="value">{{ verified_count }}</div>
+        <div class="icon">✓</div>
+    </a>
+    <a class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Rejected</div>
+        <div class="value">{{ rejected_count }}</div>
+        <div class="icon">✗</div>
+    </a>
+</div>
+
+<div class="tf-grid-3 mb-4">
+    <div class="tf-glass tf-card" style="grid-column:span 2">
+        <div class="tf-section-title">📊 Verification by Post</div>
+        <table class="tf-table" id="perPostTable">
+            <thead><tr><th>Post</th><th>Total</th><th>Pending</th><th>Verified</th><th>Rejected</th></tr></thead>
+            <tbody>
+                {% for row in per_post %}
+                <tr>
+                    <td>{{ row.document__application__post__name|default:"—" }}</td>
+                    <td>{{ row.total }}</td>
+                    <td><span class="tf-badge warning">{{ row.pending }}</span></td>
+                    <td><span class="tf-badge success">{{ row.verified }}</span></td>
+                    <td><span class="tf-badge danger">{{ row.rejected }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="tf-empty">No verification data yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">🕐 Recent Activity</div>
+        {% for dv in recent %}
+        <div class="tf-kv" style="margin-bottom:8px">
+            <span class="k">{{ dv.document.application.candidate }}</span>
+            <span class="v">
+                <span class="tf-badge {% if dv.status == 'verified' %}success{% else %}danger{% endif %}">
+                    {{ dv.get_status_display }}
+                </span>
+            </span>
+        </div>
+        {% empty %}
+        <p class="tf-empty">No completed verifications yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="tf-flex" style="gap:12px;margin-top:16px">
+    <a href="{% url 'verify_documents' %}" class="tf-btn">Go to Verification Queue →</a>
+</div>
+{% endblock %}

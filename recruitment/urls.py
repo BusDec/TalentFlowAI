@@ -28,4 +28,6 @@ urlpatterns = [
     path("fee-reconciliation/", views.fee_reconciliation, name="fee_reconciliation"),
     path("audit/consents/", views.consent_ledger, name="consent_ledger"),
     path("audit/consents/export/", views.consent_ledger_export, name="consent_ledger_export"),
+    path("verify-documents/", views.verify_documents, name="verify_documents"),
+    path("document-verification/dashboard/", views.document_verification_dashboard, name="document_verification_dashboard"),
 ]

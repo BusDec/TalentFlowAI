@@ -849,3 +849,60 @@ class Corrigendum(models.Model):
 
     def __str__(self):
         return f"Corrigendum v{self.version} — {self.advertisement.advt_number}"
+
+
+# ── Phase 3: Document Verification ──────────────────────────────────────────
+
+
+class DocumentVerification(models.Model):
+    """Structured verification workflow for a candidate-submitted document.
+
+    Auto-created (pending) whenever a new Document is uploaded.  A recruiter
+    can then mark it verified or rejected with an optional comment; every
+    transition writes an AuditEvent.
+    """
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("verified", "Verified"),
+        ("rejected", "Rejected"),
+    ]
+
+    document = models.OneToOneField(
+        Document,
+        on_delete=models.CASCADE,
+        related_name="verification",
+        help_text="The document under review.",
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default="pending",
+        help_text="Current verification status.",
+    )
+    verifier = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="document_verifications",
+        help_text="Staff user who verified or rejected the document.",
+    )
+    comments = models.TextField(
+        blank=True,
+        help_text="Verifier's notes or rejection reason.",
+    )
+    verified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp of the verify/reject action.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Document Verification"
+        verbose_name_plural = "Document Verifications"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Verification({self.document.doc_type}) — {self.get_status_display()}"

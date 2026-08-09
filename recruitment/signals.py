@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
-from .models import Application, BackgroundReport, Resume
+from .models import Application, BackgroundReport, Document, DocumentVerification, Resume
 from .tasks import flag_duplicates_task, parse_resume_task
 
 
@@ -79,3 +79,10 @@ def resume_post_save(sender, instance, created, **kwargs):
         return
 
     parse_resume_task.delay(instance.id)
+
+
+@receiver(post_save, sender=Document)
+def document_post_save(sender, instance, created, **kwargs):
+    """Auto-create a pending DocumentVerification for every new document."""
+    if created:
+        DocumentVerification.objects.get_or_create(document=instance)

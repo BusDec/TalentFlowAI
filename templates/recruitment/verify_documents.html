@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Verify Documents{% endblock %}
+{% block page_title %}Document Verification{% endblock %}
+{% block subtitle %}Review and verify candidate-submitted documents{% endblock %}
+
+{% block content %}
+<div class="tf-stats" style="margin-bottom:24px">
+    <a href="?status=pending" class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Pending</div>
+        <div class="value">{{ pending_count }}</div>
+        <div class="icon">⏳</div>
+    </a>
+    <a href="?status=verified" class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Verified</div>
+        <div class="value">{{ verified_count }}</div>
+        <div class="icon">✓</div>
+    </a>
+    <a href="?status=rejected" class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Rejected</div>
+        <div class="value">{{ rejected_count }}</div>
+        <div class="icon">✗</div>
+    </a>
+    <a href="?status=all" class="tf-stat" style="text-decoration:none;display:block">
+        <div class="label">Total</div>
+        <div class="value">{{ total_count }}</div>
+        <div class="icon">📄</div>
+    </a>
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table" id="verifyTable">
+        <thead>
+            <tr>
+                <th>Candidate</th>
+                <th>Application</th>
+                <th>Doc Type</th>
+                <th>Status</th>
+                <th>Verifier</th>
+                <th>Comments</th>
+                <th>Verified At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dv in verifications %}
+            <tr>
+                <td>{{ dv.document.application.candidate }}</td>
+                <td>{{ dv.document.application.application_id }}</td>
+                <td><span class="tf-badge primary">{{ dv.document.doc_type }}</span></td>
+                <td>
+                    <span class="tf-badge {% if dv.status == 'verified' %}success{% elif dv.status == 'rejected' %}danger{% else %}warning{% endif %}">
+                        {{ dv.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ dv.verifier|default:"—" }}</td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ dv.comments }}">{{ dv.comments|default:"—" }}</td>
+                <td>{{ dv.verified_at|default:"—" }}</td>
+                <td>
+                    {% if dv.status == "pending" %}
+                    <form method="post" class="tf-flex" style="gap:4px">
+                        {% csrf_token %}
+                        <input type="hidden" name="verification_id" value="{{ dv.id }}">
+                        <input type="text" name="comments" placeholder="Comments..." class="tf-input" style="width:120px;padding:4px 8px;font-size:12px">
+                        <button name="action" value="verified" class="tf-btn small" style="background:#22c55e;color:#fff">✓ Verify</button>
+                        <button name="action" value="rejected" class="tf-btn small" style="background:#ef4444;color:#fff">✗ Reject</button>
+                    </form>
+                    {% else %}
+                    <span class="tf-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="tf-empty">No documents match the current filter.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
