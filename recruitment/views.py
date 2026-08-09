@@ -29,8 +29,10 @@ from .models import (
     InternalJobPosting,
     PanelList,
     Post,
+    PostBasedRoster,
     RosterMatrix,
 )
+from .roster import build_roster
 
 
 @login_required
@@ -588,6 +590,19 @@ def roster_view(request, post_id):
                 created += 1 if was_created else 0
             messages.success(request, f"Roster rows synced from category breakup ({created} added).")
 
+        elif action == "dopt_generate":
+            dopt, created = PostBasedRoster.objects.get_or_create(
+                post=post,
+                defaults={
+                    "cycle_start_year": timezone.now().year,
+                    "roster_points": build_roster(post, timezone.now().year),
+                },
+            )
+            if created:
+                messages.success(request, "DoPT 100-point roster generated.")
+            else:
+                messages.info(request, "DoPT roster already exists for this post.")
+
         else:
             category = request.POST.get("category")
             if category in dict(RosterMatrix.CATEGORY_CHOICES):
@@ -604,10 +619,28 @@ def roster_view(request, post_id):
         return redirect("roster_view", post_id=post_id)
 
     rows = RosterMatrix.objects.filter(post=post).select_related("post")
+    try:
+        dopt = post.roster
+    except PostBasedRoster.DoesNotExist:
+        dopt = None
+
+    # Build 10×10 grid for template rendering.
+    dopt_grid = []
+    if dopt and dopt.roster_points:
+        for row_idx in range(10):
+            start = row_idx * 10
+            dopt_grid.append(dopt.roster_points[start : start + 10])
+
     return render(
         request,
         "recruitment/roster.html",
-        {"rows": rows, "post": post, "category_choices": RosterMatrix.CATEGORY_CHOICES},
+        {
+            "rows": rows,
+            "post": post,
+            "category_choices": RosterMatrix.CATEGORY_CHOICES,
+            "dopt": dopt,
+            "dopt_grid": dopt_grid,
+        },
     )
 
 

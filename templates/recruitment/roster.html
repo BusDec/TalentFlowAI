@@ -7,11 +7,18 @@
 <div class="tf-glass tf-card mb-4">
     <div class="tf-flex" style="justify-content:space-between">
         <div class="tf-section-title">Manage Category Rows</div>
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="generate">
-            <button class="tf-btn small ghost" type="submit">Sync from Category Breakup</button>
-        </form>
+        <div class="tf-flex" style="gap:8px">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="generate">
+                <button class="tf-btn small ghost" type="submit">Sync from Category Breakup</button>
+            </form>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="dopt_generate">
+                <button class="tf-btn small" type="submit">Generate DoPT Roster</button>
+            </form>
+        </div>
     </div>
     <form method="post" class="tf-grid-3" style="align-items:end">
         {% csrf_token %}
@@ -42,7 +49,7 @@
     </form>
 </div>
 
-<div class="tf-glass tf-card">
+<div class="tf-glass tf-card mb-4">
     <table class="tf-table" id="rosterTable">
         <thead><tr><th>Post</th><th>Category</th><th>Vertical</th><th>PwBD</th><th>Total</th><th>Filled</th><th>Full?</th><th>Carry Fwd</th><th>Warning</th></tr></thead>
         <tbody>
@@ -64,6 +71,74 @@
         </tbody>
     </table>
 </div>
+
+{% if dopt %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title" style="margin-bottom:12px">DoPT 100-Point Roster</div>
+
+    <div class="tf-grid-3" style="margin-bottom:16px;gap:16px">
+        <div>
+            <span class="tf-label">Cycle Start Year</span>
+            <div style="font-size:1.1rem;font-weight:600">{{ dopt.cycle_start_year }}</div>
+        </div>
+        <div>
+            <span class="tf-label">Current Position</span>
+            <div style="font-size:1.1rem;font-weight:600">{{ dopt.current_position }}</div>
+        </div>
+        <div>
+            <span class="tf-label">Liaison Officer</span>
+            <div style="font-size:1.1rem;font-weight:600">{{ dopt.liaison_officer|default:"—" }}</div>
+        </div>
+    </div>
+
+    {% if dopt.certified_on %}
+    <div class="tf-grid-2" style="margin-bottom:16px;gap:16px">
+        <div>
+            <span class="tf-label">Certified On</span>
+            <div style="font-size:0.95rem">{{ dopt.certified_on|date:"d M Y H:i" }}</div>
+        </div>
+        <div>
+            <span class="tf-label">Certified By</span>
+            <div style="font-size:0.95rem">{{ dopt.certified_by|default:"—" }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div style="overflow-x:auto">
+        <table class="tf-table" id="doptGrid" style="text-align:center">
+            <thead>
+                <tr>
+                    {% for col_num in "12345678910" %}
+                    <th>Col {{ forloop.counter }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row_entries in dopt_grid %}
+                <tr>
+                    {% for entry in row_entries %}
+                    <td class="{% if entry.serial == dopt.current_position %}roster-current{% endif %}{% if entry.category != 'UR' %} roster-reserved{% endif %}"
+                        style="padding:6px 4px;font-size:0.82rem;{% if entry.serial == dopt.current_position %}background:rgba(59,130,246,0.2);border:2px solid #3b82f6;font-weight:700{% endif %}{% if entry.category == 'SC' %};background:rgba(234,179,8,0.12){% elif entry.category == 'ST' %};background:rgba(168,85,247,0.12){% elif entry.category == 'OBC' %};background:rgba(34,197,94,0.12){% elif entry.category == 'EWS' %};background:rgba(249,115,22,0.12){% endif %}">
+                        <div style="font-weight:600">{{ entry.serial }}</div>
+                        <div style="font-size:0.72rem;color:#94a3b8">{{ entry.category }}</div>
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;font-size:0.78rem">
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(59,130,246,0.2);border:1px solid #3b82f6;vertical-align:middle"></span> Current Position</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);vertical-align:middle"></span> SC</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);vertical-align:middle"></span> ST</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);vertical-align:middle"></span> OBC</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);vertical-align:middle"></span> EWS</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:transparent;border:1px solid rgba(148,163,184,0.3);vertical-align:middle"></span> UR</span>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
