@@ -6,6 +6,7 @@ Real OTP (SMS/email gateway) drops in later behind the same views.
 
 import json
 import secrets
+from decimal import Decimal
 from pathlib import Path
 
 from django.contrib import messages
@@ -73,6 +74,10 @@ def register(request):
             otp = f"{secrets.randbelow(900000) + 100000}"
             request.session["pending_otp"] = otp
             request.session["pending_user_id"] = user.id
+            # Send OTP via notification provider (console in dev).
+            from notifications import notify
+
+            notify("sms", user.phone, "OTP", f"Your OTP is {otp}")
             messages.info(
                 request,
                 _("Simulated OTP sent to email (console): %(otp)s") % {"otp": otp},
@@ -588,6 +593,95 @@ def application_slip(request, application_id):
     response = HttpResponse(payload, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="slip-{application.application_id}.pdf"'
     return response
+
+
+@require_portal_user
+@require_POST
+def pay_fee(request, application_id):
+    """Candidate pays the application fee.
+
+    Creates a Payment record if one does not exist, determines exemption via
+    ``fee_exempt``, and processes payment through the configured gateway.
+    Mock gateway always succeeds; Razorpay stub shows a friendly error.
+    Audits the transaction via ``log_audit`` with field_name="payment".
+    """
+    from django.contrib import messages as msg
+
+    from recruitment.audit import log_audit
+    from recruitment.fees import fee_amount, fee_exempt
+    from recruitment.models import Payment
+    from recruitment.payments import NotConfigured, get_gateway
+
+    application = get_object_or_404(
+        Application,
+        application_id=application_id,
+        candidate__portal_user=request.user,
+    )
+
+    # Get or create Payment record.
+    is_exempt, reason = fee_exempt(application.candidate, application.post)
+    amount = Decimal("0.00") if is_exempt else fee_amount(application.post)
+
+    payment, created = Payment.objects.get_or_create(
+        application=application,
+        defaults={
+            "amount": amount,
+            "gateway": "mock",
+            "gateway_ref": "",
+            "status": "pending",
+            "exempt": is_exempt,
+            "exempt_reason": reason,
+        },
+    )
+
+    # Exempt candidates are marked paid immediately.
+    if is_exempt and payment.status == "pending":
+        payment.status = "completed"
+        payment.paid_at = timezone.now()
+        payment.save()
+        log_audit(
+            None, application, "payment", "pending", "completed",
+            reason=f"fee exempt: {reason}",
+        )
+        msg.success(request, _("Fee exempted — no payment required."))
+        return redirect("portal_application_detail", application_id=application_id)
+
+    # Already paid.
+    if payment.status == "completed":
+        msg.info(request, _("Fee already paid."))
+        return redirect("portal_application_detail", application_id=application_id)
+
+    # Process through gateway.
+    try:
+        gateway = get_gateway()
+        result = gateway.create_payment(amount, application.application_id)
+        payment.gateway_ref = result.get("id", "")
+
+        if gateway.verify(result):
+            payment.status = "completed"
+            payment.paid_at = timezone.now()
+            payment.save()
+            log_audit(
+                None, application, "payment", "pending", "completed",
+                reason=f"gateway: {payment.gateway}, ref: {payment.gateway_ref}",
+            )
+            msg.success(request, _("Payment successful!"))
+        else:
+            payment.status = "failed"
+            payment.save()
+            msg.error(request, _("Payment verification failed. Please try again."))
+    except NotConfigured:
+        msg.error(
+            request,
+            _("Payment gateway not configured. Please contact support."),
+        )
+    except Exception:
+        msg.error(
+            request,
+            _("Payment could not be processed. Please try again later."),
+        )
+
+    return redirect("portal_application_detail", application_id=application_id)
 
 
 @require_portal_user

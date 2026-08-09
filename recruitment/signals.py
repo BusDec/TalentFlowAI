@@ -30,6 +30,27 @@ def application_post_save(sender, instance, created, **kwargs):
         # Fire duplicate detection asynchronously across all advertisements.
         flag_duplicates_task.delay(instance.id)
 
+        # Send acknowledgement notification via outbox.
+        try:
+            from notifications import notify
+
+            candidate = instance.candidate
+            to = candidate.email or candidate.mobile or ""
+            if to:
+                notify(
+                    channel="email" if "@" in to else "sms",
+                    to=to,
+                    subject="Application Received",
+                    body=(
+                        f"Dear {candidate.first_name}, your application for "
+                        f"{instance.post.name} ({instance.post.advertisement.advt_number}) "
+                        f"has been received. Application ID: {instance.application_id}."
+                    ),
+                )
+        except Exception:
+            # Notification failure must never block application creation.
+            pass
+
     # Advance the post's DoPT roster position when a candidate joins.
     if not created and instance.status == "joined":
         old_status = getattr(instance, "_pre_save_status", None)

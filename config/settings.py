@@ -44,6 +44,7 @@ TENANT_APPS = (
     "profiles",
     "workforce",
     "talent",
+    "notifications",
 )
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
@@ -185,3 +186,8 @@ CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", str(DEBUG)).low
 CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_TASK_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
+
+# ---------------------------------------------------------------------------
+# Notifications (console provider by default; swap via NOTIFY_PROVIDER env)
+# ---------------------------------------------------------------------------
+NOTIFY_PROVIDER = os.getenv("NOTIFY_PROVIDER", "console")
