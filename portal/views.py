@@ -36,6 +36,7 @@ from recruitment.models import (
     Document,
     Resume,
 )
+from recruitment.tasks import parse_document_task
 from .forms import (
     CandidateLoginForm,
     CandidateRegistrationForm,
@@ -266,11 +267,12 @@ def apply(request, advt_id):
                     for idx, cert in enumerate(post.required_certificates or []):
                         cert_file = request.FILES.get(f"cert_{post.id}_{idx}")
                         if cert_file:
-                            Document.objects.create(
+                            document = Document.objects.create(
                                 application=application,
                                 doc_type=f"certificate:{cert}",
                                 file=cert_file,
                             )
+                            parse_document_task.delay(document.id)
                     messages.success(request, _("Application submitted successfully."))
                     return redirect("portal_application_detail", application_id=application.application_id)
         messages.error(request, _("Post not found or already applied."))

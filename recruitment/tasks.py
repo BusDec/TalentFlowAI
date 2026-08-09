@@ -8,10 +8,11 @@ asynchronously from Django signals / views. In development
 from celery import shared_task
 from django.utils import timezone
 
+from agents.doc_intel import extract_document
 from agents.duplicate_detection import flag_duplicates
 from agents.resume_evaluator import evaluate_resume
 from agents.resume_parser import parse_resume
-from .models import Application, Resume
+from .models import Application, Document, Resume
 
 
 @shared_task
@@ -66,3 +67,26 @@ def flag_duplicates_task(application_id):
     application = Application.objects.get(id=application_id)
     created = flag_duplicates(application)
     return len(created)
+
+
+@shared_task
+def parse_document_task(document_id):
+    """Extract structured data from a candidate certificate/document.
+
+    Runs the doc-intel pipeline (text -> classify -> per-type extractor) and
+    stores the result on the Document. A recognised non-resume class updates
+    the stored doc_type. Never re-raises: failures are recorded in
+    extracted_data so the broker (and eager-mode callers) stay healthy.
+    """
+    document = Document.objects.filter(id=document_id).first()
+    if document is None:
+        return
+    try:
+        result = extract_document(document.file.path)
+        if result["doc_type"] not in ("unknown", "resume"):
+            document.doc_type = result["doc_type"]
+        document.extracted_data = result
+        document.save()
+    except Exception as exc:  # noqa: BLE001 - record failure instead of re-raising
+        document.extracted_data = {"error": str(exc)[:500]}
+        document.save(update_fields=["extracted_data"])

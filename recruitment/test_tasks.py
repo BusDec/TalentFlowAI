@@ -87,3 +87,17 @@ def test_signal_dispatches_task(application):
     # post_save dispatched parse_resume_task eagerly; status must have moved off "pending".
     resume.refresh_from_db()
     assert resume.parse_status != "pending"
+
+
+def test_parse_document_task_populates_extracted_data(tenant, application):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from recruitment.models import Document
+    from recruitment.tasks import parse_document_task
+    doc = Document.objects.create(
+        application=application, doc_type="certificate:GATE scorecard",
+        file=SimpleUploadedFile("gate.txt", b"GATE scorecard\nABCDE1234F\nName: R K", content_type="text/plain"),
+    )
+    parse_document_task.delay(doc.id)
+    doc.refresh_from_db()
+    assert isinstance(doc.extracted_data, dict)
+    assert "doc_type" in doc.extracted_data
