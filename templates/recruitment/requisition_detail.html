@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Requisition {{ req.post_name }}{% endblock %}
+{% block page_title %}Requisition: {{ req.post_name }}{% endblock %}
+{% block subtitle %}{{ req.count }} position{{ req.count|pluralize }} · {{ req.get_status_display }}{% endblock %}
+
+{% block content %}
+<div class="tf-grid-2">
+    <!-- LEFT COLUMN: Details -->
+    <div>
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-section-title">📋 Requisition Details</div>
+            <div class="tf-kv">
+                <span class="k">Post Name</span><span class="v">{{ req.post_name }}</span>
+                <span class="k">Positions</span><span class="v">{{ req.count }}</span>
+                <span class="k">Grade</span><span class="v">{{ req.grade }}</span>
+                <span class="k">Status</span>
+                <span class="v">
+                    <span class="tf-badge {% if req.status == 'draft' %}muted{% elif req.status == 'rejected' %}danger{% elif req.status == 'ca_approved' %}success{% else %}primary{% endif %}">
+                        {{ req.get_status_display }}
+                    </span>
+                </span>
+                <span class="k">Created By</span><span class="v">{{ req.created_by|default:"—" }}</span>
+                <span class="k">Created</span><span class="v">{{ req.created_at|date:"d M Y, H:i" }}</span>
+            </div>
+        </div>
+
+        <div class="tf-glass tf-card mb-4">
+            <div class="tf-section-title">📝 Justification</div>
+            <p style="color:rgba(233,234,244,0.85);font-size:0.95rem;line-height:1.7;margin:0">{{ req.justification }}</p>
+        </div>
+
+        <!-- Submit action (draft only) -->
+        {% if req.status == 'draft' %}
+        <div class="tf-glass tf-card">
+            <div class="tf-section-title">⚡ Actions</div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="submit">
+                <button type="submit" class="tf-btn">Submit for Approval</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- Approve/Reject action (pending stages) -->
+        {% if req.status != 'draft' and req.status != 'rejected' and req.status != 'ca_approved' %}
+            {% for a in approvals %}
+                {% if a.decision == 'pending' %}
+                <div class="tf-glass tf-card">
+                    <div class="tf-section-title">⚡ {{ a.get_stage_display }} — Decision Required</div>
+                    <form method="post" action="{% url 'requisition_approve' req.pk %}">
+                        {% csrf_token %}
+                        <div class="tf-field" style="margin-bottom:14px">
+                            <label class="tf-label">Comments</label>
+                            <textarea name="comments" class="tf-textarea" rows="3" placeholder="Required for rejection"></textarea>
+                        </div>
+                        <div class="tf-flex">
+                            <button type="submit" name="action" value="reject" class="tf-btn" style="background:var(--tf-danger,#e74c3c)">Reject</button>
+                            <button type="submit" name="action" value="approve" class="tf-btn">Approve</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- RIGHT COLUMN: Approval History -->
+    <div>
+        <div class="tf-glass tf-card">
+            <div class="tf-section-title">📊 Approval Timeline</div>
+            <table class="tf-table">
+                <thead><tr><th>Stage</th><th>Decision</th><th>Approver</th><th>Comments</th><th>Date</th></tr></thead>
+                <tbody>
+                    {% for a in approvals %}
+                    <tr>
+                        <td>{{ a.get_stage_display }}</td>
+                        <td>
+                            <span class="tf-badge {% if a.decision == 'approved' %}success{% elif a.decision == 'rejected' %}danger{% else %}warning{% endif %}">
+                                {{ a.get_decision_display }}
+                            </span>
+                        </td>
+                        <td>{{ a.approver|default:"—" }}</td>
+                        <td>{{ a.comments|default:"—" }}</td>
+                        <td>{{ a.timestamp|date:"d M Y, H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="tf-empty">No approval steps yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

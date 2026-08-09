@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Requisitions{% endblock %}
+{% block page_title %}Vacancy Requisitions{% endblock %}
+{% block subtitle %}Manage vacancy requests and approval workflow{% endblock %}
+
+{% block content %}
+<div class="tf-flex mb-4">
+    <a href="{% url 'requisition_create' %}" class="tf-btn">+ Create Requisition</a>
+</div>
+
+<div class="tf-glass tf-card">
+    <table class="tf-table">
+        <thead><tr><th>Post</th><th>Count</th><th>Grade</th><th>Status</th><th>Created By</th><th>Created</th></tr></thead>
+        <tbody>
+            {% for r in requisitions %}
+            <tr class="tf-rowlink" data-href="{% url 'requisition_detail' r.pk %}">
+                <td>{{ r.post_name }}</td>
+                <td>{{ r.count }}</td>
+                <td>{{ r.grade }}</td>
+                <td>
+                    <span class="tf-badge {% if r.status == 'draft' %}muted{% elif r.status == 'rejected' %}danger{% elif r.status == 'ca_approved' %}success{% else %}primary{% endif %}">
+                        {{ r.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ r.created_by|default:"—" }}</td>
+                <td>{{ r.created_at|date:"d-m-Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="tf-empty">No requisitions yet. Create your first one!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

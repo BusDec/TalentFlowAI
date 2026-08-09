@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Create Requisition{% endblock %}
+{% block page_title %}Create Vacancy Requisition{% endblock %}
+{% block subtitle %}Submit a new vacancy request for approval{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="tf-field" style="margin-bottom:14px">
+            <label class="tf-label">Post Name</label>
+            <input type="text" name="post_name" class="tf-input" value="{{ post_name|default:'' }}" required>
+        </div>
+        <div class="tf-field" style="margin-bottom:14px">
+            <label class="tf-label">Number of Positions</label>
+            <input type="number" name="count" class="tf-input" value="{{ count|default:'' }}" min="1" required>
+        </div>
+        <div class="tf-field" style="margin-bottom:14px">
+            <label class="tf-label">Pay Grade</label>
+            <input type="text" name="grade" class="tf-input" value="{{ grade|default:'' }}" placeholder="e.g. E-5" required>
+        </div>
+        <div class="tf-field" style="margin-bottom:14px">
+            <label class="tf-label">Business Justification</label>
+            <textarea name="justification" class="tf-textarea" rows="4" required>{{ justification|default:'' }}</textarea>
+        </div>
+        <div class="tf-flex">
+            <a href="{% url 'requisition_list' %}" class="tf-btn ghost">Cancel</a>
+            <button type="submit" class="tf-btn">Create Requisition</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

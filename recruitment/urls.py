@@ -30,4 +30,9 @@ urlpatterns = [
     path("audit/consents/export/", views.consent_ledger_export, name="consent_ledger_export"),
     path("verify-documents/", views.verify_documents, name="verify_documents"),
     path("document-verification/dashboard/", views.document_verification_dashboard, name="document_verification_dashboard"),
+    # Vacancy Requisition & Approval Workflow
+    path("requisitions/", views.requisition_list, name="requisition_list"),
+    path("requisitions/create/", views.requisition_create, name="requisition_create"),
+    path("requisitions/<int:req_id>/", views.requisition_detail, name="requisition_detail"),
+    path("requisitions/<int:req_id>/approve/", views.requisition_approve, name="requisition_approve"),
 ]

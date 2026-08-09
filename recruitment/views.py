@@ -5,6 +5,7 @@ import datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -34,7 +35,9 @@ from .models import (
     Payment,
     Post,
     PostBasedRoster,
+    RequisitionApproval,
     RosterMatrix,
+    VacancyRequisition,
 )
 from .roster import build_roster
 
@@ -1138,3 +1141,178 @@ def document_verification_dashboard(request):
         "recent": recent,
     }
     return render(request, "recruitment/document_verification_dashboard.html", context)
+
+
+# ── Vacancy Requisition & Approval Workflow ─────────────────────────────────
+
+# Role map: which role is required to act at each requisition approval stage.
+_REQ_ROLE_MAP = {
+    "finance": "recruiter",
+    "hr": "hr_manager",
+    "final": "org_admin",
+}
+
+# Status transition when a stage is approved.
+_STAGE_STATUS_MAP = {
+    "finance": "finance_approved",
+    "hr": "reservation_certified",
+    "final": "ca_approved",
+}
+
+# Next stage after each approval (None = workflow complete).
+_NEXT_STAGE_MAP = {
+    "finance": "hr",
+    "hr": "final",
+    "final": None,
+}
+
+
+def _log_requisition_audit(actor, requisition, old_status, new_status, reason=""):
+    """Audit a requisition status change using the existing AuditEvent model."""
+    log_audit(
+        actor=actor,
+        application=None,
+        field_name="requisition_status",
+        old_value=old_status,
+        new_value=new_status,
+        reason=reason,
+    )
+
+
+@login_required
+@require_role("hr_manager")
+def requisition_list(request):
+    """List all vacancy requisitions."""
+    requisitions = VacancyRequisition.objects.select_related("created_by").all()
+    return render(request, "recruitment/requisition_list.html", {"requisitions": requisitions})
+
+
+@login_required
+@require_role("hr_manager")
+def requisition_create(request):
+    """Create a new vacancy requisition (initial status: draft)."""
+    if request.method == "POST":
+        post_name = request.POST.get("post_name", "").strip()
+        count = request.POST.get("count", "0").strip()
+        grade = request.POST.get("grade", "").strip()
+        justification = request.POST.get("justification", "").strip()
+
+        if not post_name or not count or not grade or not justification:
+            messages.error(request, "All fields are required.")
+            return render(request, "recruitment/requisition_create.html", {
+                "post_name": post_name,
+                "count": count,
+                "grade": grade,
+                "justification": justification,
+            })
+
+        req = VacancyRequisition.objects.create(
+            post_name=post_name,
+            count=int(count),
+            grade=grade,
+            justification=justification,
+            status="draft",
+            created_by=request.user,
+        )
+        messages.success(request, f"Requisition for {req.post_name} created as draft.")
+        return redirect("requisition_detail", req_id=req.pk)
+
+    return render(request, "recruitment/requisition_create.html")
+
+
+@login_required
+@require_role("hr_manager")
+def requisition_detail(request, req_id):
+    """View requisition details and approval history. POST submits from draft."""
+    req = get_object_or_404(VacancyRequisition.objects.select_related("created_by"), pk=req_id)
+    approvals = req.approvals.select_related("approver").all()
+
+    if request.method == "POST":
+        action = request.POST.get("action", "")
+
+        if action == "submit" and req.status == "draft":
+            old_status = req.status
+            req.status = "submitted"
+            req.save(update_fields=["status"])
+            # Create the first approval step (finance stage).
+            RequisitionApproval.objects.create(
+                requisition=req,
+                stage="finance",
+                decision="pending",
+            )
+            _log_requisition_audit(request.user, req, old_status, "submitted", "Requisition submitted for approval")
+            messages.success(request, "Requisition submitted for finance approval.")
+            return redirect("requisition_detail", req_id=req.pk)
+
+    return render(request, "recruitment/requisition_detail.html", {
+        "req": req,
+        "approvals": approvals,
+    })
+
+
+@login_required
+@require_role("recruiter", "hr_manager", "org_admin")
+def requisition_approve(request, req_id):
+    """Approve or reject a requisition at the current stage. POST only."""
+    if request.method != "POST":
+        return redirect("requisition_detail", req_id=req_id)
+
+    req = get_object_or_404(VacancyRequisition, pk=req_id)
+    action = request.POST.get("action", "")
+    comments = request.POST.get("comments", "").strip()
+
+    # Find the current pending approval step.
+    approval = req.approvals.filter(decision="pending").order_by("timestamp").first()
+    if not approval:
+        messages.error(request, "No pending approval step for this requisition.")
+        return redirect("requisition_detail", req_id=req.pk)
+
+    stage = approval.stage
+
+    # Role gate: verify the user has permission for this stage.
+    required_role = _REQ_ROLE_MAP.get(stage)
+    if required_role:
+        try:
+            check_role(request, required_role)
+        except PermissionDenied:
+            messages.error(request, f"Only users with the '{required_role}' role can approve at the {stage} stage.")
+            return redirect("requisition_detail", req_id=req.pk)
+
+    if action == "reject":
+        if not comments:
+            messages.error(request, "Comments are required when rejecting a requisition.")
+            return redirect("requisition_detail", req_id=req.pk)
+        old_status = req.status
+        approval.decision = "rejected"
+        approval.approver = request.user
+        approval.comments = comments
+        approval.save(update_fields=["decision", "approver", "comments"])
+        req.status = "rejected"
+        req.save(update_fields=["status"])
+        _log_requisition_audit(request.user, req, old_status, "rejected", f"Rejected at {stage}: {comments}")
+        messages.success(request, f"Requisition rejected at {approval.get_stage_display()}.")
+
+    elif action == "approve":
+        approval.decision = "approved"
+        approval.approver = request.user
+        approval.comments = comments
+        approval.save(update_fields=["decision", "approver", "comments"])
+
+        new_status = _STAGE_STATUS_MAP.get(stage, req.status)
+        old_status = req.status
+        req.status = new_status
+        req.save(update_fields=["status"])
+        _log_requisition_audit(request.user, req, old_status, new_status, f"Approved at {stage}: {comments}")
+
+        # Create next stage if workflow continues.
+        next_stage = _NEXT_STAGE_MAP.get(stage)
+        if next_stage:
+            RequisitionApproval.objects.create(
+                requisition=req,
+                stage=next_stage,
+                decision="pending",
+            )
+
+        messages.success(request, f"Requisition approved at {approval.get_stage_display()}.")
+
+    return redirect("requisition_detail", req_id=req.pk)

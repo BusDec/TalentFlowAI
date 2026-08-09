@@ -717,8 +717,10 @@ class VacancyRequisition(models.Model):
 
     STATUS_CHOICES = [
         ("draft", "Draft"),
-        ("pending", "Pending Approval"),
-        ("approved", "Approved"),
+        ("submitted", "Submitted"),
+        ("finance_approved", "Finance Approved"),
+        ("reservation_certified", "Reservation Certified"),
+        ("ca_approved", "CA Approved"),
         ("rejected", "Rejected"),
     ]
 
