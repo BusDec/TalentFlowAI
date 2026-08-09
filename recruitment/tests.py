@@ -8,6 +8,7 @@ from recruitment.models import (
     AuditEvent,
     Candidate,
     CategoryAllocation,
+    Document,
     PanelList,
     RosterMatrix,
 )
@@ -141,3 +142,31 @@ def test_application_audit_written(application):
     assert event.old_value == "received"
     assert event.new_value == "shortlisted"
     assert event.tenant_schema  # schema name recorded as the tenant identity
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 — DocConsistency
+# ---------------------------------------------------------------------------
+
+def test_consistency_warning_on_staff_detail(api_client, staff_user, application):
+    """Name mismatch across documents surfaces a consistency warning on staff detail."""
+    api_client.force_login(staff_user)
+
+    Document.objects.create(
+        application=application,
+        doc_type="pan",
+        extracted_data={"doc_type": "pan", "fields": {"name": "Ram Kumar"}},
+    )
+    Document.objects.create(
+        application=application,
+        doc_type="aadhaar",
+        extracted_data={"doc_type": "aadhaar", "fields": {"name": "Shyam Kumar"}},
+    )
+
+    r = api_client.get(
+        reverse("application_detail", args=[application.application_id])
+    )
+    assert r.status_code == 200
+    content = r.content.decode()
+    assert "Document Consistency Warning" in content
+    assert "does not match" in content

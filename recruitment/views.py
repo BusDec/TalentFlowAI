@@ -531,6 +531,23 @@ def application_detail(request, application_id):
 
         return redirect("application_detail", application_id=application_id)
 
+    # Cross-document consistency warnings from stored extracted_data.
+    from agents import doc_intel as _doc_intel
+
+    docs_qs = application.documents.filter(extracted_data__isnull=False)
+    normalized = []
+    for d in docs_qs:
+        data = d.extracted_data or {}
+        fields = dict(data.get("fields") or {})
+        if d.doc_type == "resume" and fields.get("full_name"):
+            fields["name"] = fields.pop("full_name")
+        normalized.append({"doc_type": d.doc_type, "fields": fields})
+    consistency_warnings = [
+        issue["detail"]
+        for issue in _doc_intel.check_consistency(normalized)
+        if issue.get("detail")
+    ]
+
     context = {
         "application": application,
         "background_report": background_report,
@@ -544,6 +561,7 @@ def application_detail(request, application_id):
         "active_stay_cases": [
             c for c in application.litigation_cases.all() if c.has_active_stay
         ],
+        "consistency_warnings": consistency_warnings,
     }
     portal_user = application.candidate.portal_user
     if portal_user:

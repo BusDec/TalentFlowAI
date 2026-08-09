@@ -3,6 +3,14 @@
 {% block title %}{% trans "Application Detail" %}{% endblock %}
 
 {% block content %}
+{% if consistency_warnings %}
+<div class="tf-alert warning" style="border-color:rgba(255,170,0,0.55);background:rgba(255,170,0,0.08);margin-bottom:18px">
+    <strong>⚠️ {% trans "Document Consistency Warning" %}</strong>
+    <ul style="margin:6px 0 0;padding-left:18px;font-size:0.88rem;line-height:1.6">
+        {% for w in consistency_warnings %}<li>{{ w }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
 <div class="tf-flex" style="justify-content:space-between;margin-bottom:22px">
     <h2 style="color:#fff;font-weight:800;margin:0">{% trans "Application" %} {{ application.application_id }}</h2>
 </div>
@@ -53,9 +61,9 @@
     {% if can_withdraw %}
     <div class="mt-4" style="display:flex;align-items:center;gap:12px;justify-content:space-between">
         <p class="tf-muted" style="margin:0;font-size:0.82rem">{% trans "If you no longer wish to be considered, you can withdraw your application. This cannot be undone." %}</p>
-        <form method="post" action="{% url 'portal_application_withdraw' application.application_id %}" data-confirm="{% trans 'Are you sure you want to withdraw this application? This action cannot be undone.' %}">
+        <form method="post" action="{% url 'portal_application_withdraw' application.application_id %}" data-confirm="{% trans 'Are you sure you want to withdraw this application? This action cannot be undone.' %}" aria-label="{% trans 'Withdraw application form' %}">
             {% csrf_token %}
-            <button class="tf-btn small danger" type="submit">{% trans "Withdraw Application" %}</button>
+            <button class="tf-btn small danger" type="submit" aria-label="{% trans 'Withdraw application' %} {{ application.application_id }}">{% trans "Withdraw Application" %}</button>
         </form>
     </div>
     {% endif %}
@@ -96,7 +104,7 @@
     <pre style="white-space:pre-wrap;background:rgba(255,255,255,0.04);border:1px solid rgba(233,234,244,0.12);border-radius:10px;padding:16px;color:rgba(233,234,244,0.9);font-family:inherit;font-size:0.85rem;line-height:1.6;margin:0">{{ offer_text }}</pre>
     {% endif %}
     <p class="tf-muted" style="font-size:0.82rem;margin-top:14px">{% trans "Accepting this offer means you agree to join the organisation on the terms stated above. This cannot be undone." %}</p>
-    <form method="post" action="{% url 'portal_accept_offer' application.application_id %}" class="mt-3" style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap">
+    <form method="post" action="{% url 'portal_accept_offer' application.application_id %}" class="mt-3" style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap" aria-label="{% trans 'Accept offer of appointment' %}">
         {% csrf_token %}
         <label class="tf-flex" style="gap:10px;align-items:flex-start;cursor:pointer;flex:1;min-width:240px">
             <input type="checkbox" name="consent" value="on" class="tf-input" style="width:auto;margin-top:2px" required>

@@ -5,6 +5,14 @@
 {% block subtitle %}{{ application.candidate }} · {{ application.post.name }}{% endblock %}
 
 {% block content %}
+{% if consistency_warnings %}
+<div class="tf-alert warning" style="border-color:rgba(255,170,0,0.55);background:rgba(255,170,0,0.08);">
+    <strong>⚠️ Document Consistency Warning</strong>
+    <ul style="margin:6px 0 0;padding-left:18px;font-size:0.88rem;line-height:1.6">
+        {% for w in consistency_warnings %}<li>{{ w }}</li>{% endfor %}
+    </ul>
+</div>
+{% endif %}
 {% if active_stay_cases %}
 <div class="tf-alert warning" style="border-color:rgba(255,170,0,0.55);background:rgba(255,170,0,0.08);">
     <strong>⚠️ Active Stay Order</strong> — This application is affected by an active court stay.
@@ -83,16 +91,16 @@
         <div class="tf-glass tf-card mb-4">
             <div class="tf-section-title">⚡ Update Status</div>
             <div class="tf-field" style="margin-bottom:10px">
-                <label class="tf-label">Status</label>
-                <select name="status" class="tf-select" style="max-width:320px">
+                <label class="tf-label" for="status-select">Status</label>
+                <select name="status" class="tf-select" style="max-width:320px" id="status-select">
                     {% for value, label in application.STATUS_CHOICES %}
                     <option value="{{ value }}" {% if application.status == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="tf-field" id="rejectedStageField" style="display:none;margin-bottom:10px">
-                <label class="tf-label">Rejected at stage</label>
-                <select name="rejected_at_stage" class="tf-select" style="max-width:320px">
+                <label class="tf-label" for="rejected-stage-select">Rejected at stage</label>
+                <select name="rejected_at_stage" class="tf-select" style="max-width:320px" id="rejected-stage-select">
                     {% for value, label in rejection_stage_choices %}
                     <option value="{{ value }}" {% if application.rejected_at_stage == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -121,9 +129,9 @@
             {% empty %}
             <div class="tf-muted" style="margin-bottom:10px">No allocation recorded.</div>
             {% endfor %}
-            <div class="tf-field" style="margin-top:12px">
-                <label class="tf-label">Category</label>
-                <select name="category" class="tf-select">
+            <div class="tf-field">
+                <label class="tf-label" for="category-select">Category</label>
+                <select name="category" class="tf-select" id="category-select">
                     <option value="">— Add allocation —</option>
                     {% for value, label in category_choices %}
                     <option value="{{ value }}">{{ label }}</option>
@@ -131,11 +139,11 @@
                 </select>
             </div>
             <div class="tf-field">
-                <label class="tf-label">Category Certificate (PDF/scan of caste/disability certificate)</label>
-                <input type="file" name="certificate_file" class="tf-input">
+                <label class="tf-label" for="certificate-file">Category Certificate (PDF/scan of caste/disability certificate)</label>
+                <input type="file" name="certificate_file" class="tf-input" id="certificate-file">
             </div>
             <label class="tf-flex" style="gap:8px;cursor:pointer">
-                <input type="checkbox" name="is_verified" class="tf-input" style="width:auto">
+                <input type="checkbox" name="is_verified" class="tf-input" style="width:auto" aria-label="Mark category allocation as verified">
                 <span>Mark verified</span>
             </label>
         </div>
@@ -200,12 +208,12 @@
                 <div class="tf-muted">No facts compiled yet.</div>
                 {% endif %}
                 <div class="tf-field" style="margin-top:14px">
-                    <label class="tf-label">Candidate Explanation</label>
-                    <textarea name="candidate_explanation" class="tf-textarea" rows="2">{{ background_report.candidate_explanation }}</textarea>
+                    <label class="tf-label" for="candidate-explanation">Candidate Explanation</label>
+                    <textarea name="candidate_explanation" class="tf-textarea" rows="2" id="candidate-explanation">{{ background_report.candidate_explanation }}</textarea>
                 </div>
                 <div class="tf-field">
-                    <label class="tf-label">Reviewer Notes</label>
-                    <textarea name="reviewer_notes" class="tf-textarea" rows="2">{{ background_report.reviewer_notes }}</textarea>
+                    <label class="tf-label" for="reviewer-notes">Reviewer Notes</label>
+                    <textarea name="reviewer_notes" class="tf-textarea" rows="2" id="reviewer-notes">{{ background_report.reviewer_notes }}</textarea>
                 </div>
             {% else %}
             <div class="tf-muted">No background report.</div>
@@ -258,7 +266,7 @@
     </div>
     <div class="tf-flex">
         <a href="#" onclick="history.back();return false;" class="tf-btn small ghost">Cancel</a>
-        <button class="tf-btn" type="submit">💾 Save Progress</button>
+        <button class="tf-btn" type="submit" aria-label="Save application changes">💾 Save Progress</button>
     </div>
 </div>
 </form>
