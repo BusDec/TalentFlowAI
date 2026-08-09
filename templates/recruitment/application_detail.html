@@ -5,6 +5,20 @@
 {% block subtitle %}{{ application.candidate }} · {{ application.post.name }}{% endblock %}
 
 {% block content %}
+{% if active_stay_cases %}
+<div class="tf-alert warning" style="border-color:rgba(255,170,0,0.55);background:rgba(255,170,0,0.08);">
+    <strong>⚠️ Active Stay Order</strong> — This application is affected by an active court stay.
+    {% for sc in active_stay_cases %}
+    <div style="margin-top:6px;font-size:0.88rem;">
+        <span class="tf-badge warning">{{ sc.case_number }}</span>
+        {{ sc.court }} &middot; Petitioner: {{ sc.petitioner }}
+        {% for order in sc.interim_orders %}{% if order.type == "stay_order" %}
+        — <em>{{ order.text }}</em>
+        {% endif %}{% endfor %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
 <div class="tf-grid-2">

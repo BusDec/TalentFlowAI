@@ -2,6 +2,7 @@
 
 import csv
 import datetime
+from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -32,6 +33,10 @@ from .models import (
     FetchedDocument,
     InternalApplication,
     InternalJobPosting,
+    InterviewPanel,
+    InterviewScore,
+    InterviewSlot,
+    LitigationCase,
     PanelList,
     Payment,
     Post,
@@ -521,6 +526,9 @@ def application_detail(request, application_id):
         "rejection_stage_choices": REJECTION_STAGE_CHOICES,
         "digilocker_consent": None,
         "fetched_documents": application.fetched_documents.all(),
+        "active_stay_cases": [
+            c for c in application.litigation_cases.all() if c.has_active_stay
+        ],
     }
     portal_user = application.candidate.portal_user
     if portal_user:
@@ -1374,3 +1382,222 @@ def fairness_dashboard(request):
         "has_data": bool(selection_rates),
     }
     return render(request, "recruitment/fairness_dashboard.html", context)
+
+
+# ── Litigation ──────────────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("hr_manager")
+def litigation_list(request):
+    """List all litigation cases."""
+    cases = LitigationCase.objects.select_related(
+        "application", "post", "advertisement",
+    ).all()
+    return render(request, "recruitment/litigation_list.html", {"cases": cases})
+
+
+@login_required
+@require_role("hr_manager")
+@require_POST
+def litigation_add_order(request, case_id):
+    """Add an interim order to a litigation case."""
+    case = get_object_or_404(LitigationCase, pk=case_id)
+    order_type = request.POST.get("order_type", "").strip()
+    order_text = request.POST.get("order_text", "").strip()
+    if order_type and order_text:
+        case.add_interim_order(order_type, order_text)
+        messages.success(request, f"Interim order ({order_type}) added to {case.case_number}.")
+    else:
+        messages.error(request, "Order type and text are required.")
+    return redirect("litigation_list")
+
+
+@login_required
+@require_role("hr_manager")
+@require_POST
+def litigation_update_status(request, case_id):
+    """Update a litigation case status and optional resolution details."""
+    case = get_object_or_404(LitigationCase, pk=case_id)
+    old_status = case.status
+    new_status = request.POST.get("status", "").strip()
+    valid_statuses = dict(LitigationCase._meta.get_field("status").choices)
+    if new_status not in valid_statuses:
+        messages.error(request, "Invalid status.")
+        return redirect("litigation_list")
+
+    case.status = new_status
+    resolved_on = request.POST.get("resolved_on")
+    if resolved_on:
+        case.resolved_on = resolved_on
+    final_order = request.POST.get("final_order_text", "").strip()
+    if final_order:
+        case.final_order_text = final_order
+    case.save()
+
+    # Audit trail — log status change against the linked application (if any).
+    if case.application and old_status != new_status:
+        from .audit import log_audit
+
+        log_audit(
+            actor=request.user,
+            application=case.application,
+            field_name="litigation_status",
+            old_value=old_status,
+            new_value=new_status,
+            reason=f"Case {case.case_number} status updated.",
+        )
+
+    messages.success(request, f"Case {case.case_number} updated to {case.get_status_display()}.")
+    return redirect("litigation_list")
+
+
+# ── Interview Workflow ────────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("hr_manager")
+def interview_panel_create(request, post_id):
+    """Constitute an interview panel for a post. GET shows form, POST creates."""
+    post = get_object_or_404(Post, pk=post_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name", "").strip()
+        sitting_fee = request.POST.get("sitting_fee", "").strip()
+        member_ids = request.POST.getlist("member_ids")
+
+        if not name:
+            messages.error(request, "Panel name is required.")
+            return render(request, "recruitment/interview_panel_create.html", {
+                "post": post,
+                "name": name,
+                "sitting_fee": sitting_fee,
+            })
+
+        panel = InterviewPanel.objects.create(
+            post=post,
+            name=name,
+            sitting_fee=Decimal(sitting_fee) if sitting_fee else None,
+        )
+        if member_ids:
+            from accounts.models import User
+            panel.members.set(User.objects.filter(pk__in=member_ids))
+
+        messages.success(request, f"Panel '{panel.name}' created for {post.name}.")
+        return redirect("interview_results", post_id=post.pk)
+
+    from accounts.models import User
+    staff_users = User.objects.filter(
+        memberships__tenant=request.tenant,
+        memberships__is_active=True,
+    ).distinct()
+
+    return render(request, "recruitment/interview_panel_create.html", {
+        "post": post,
+        "staff_users": staff_users,
+    })
+
+
+@login_required
+@require_role("recruiter", "hr_manager")
+def interview_schedule(request, panel_id):
+    """Schedule an interview slot for a candidate on a panel."""
+    panel = get_object_or_404(InterviewPanel, pk=panel_id)
+
+    if request.method == "POST":
+        application_id = request.POST.get("application_id", "").strip()
+        dt_str = request.POST.get("datetime", "").strip()
+        duration = request.POST.get("duration_minutes", "30").strip()
+        notes = request.POST.get("notes", "").strip()
+
+        application = Application.objects.filter(application_id=application_id).first()
+        if not application:
+            messages.error(request, f"Application '{application_id}' not found.")
+            return render(request, "recruitment/interview_schedule.html", {
+                "panel": panel,
+                "application_id": application_id,
+                "datetime": dt_str,
+                "duration_minutes": duration,
+                "notes": notes,
+            })
+
+        slot = InterviewSlot.objects.create(
+            panel=panel,
+            application=application,
+            datetime=dt_str,
+            duration_minutes=int(duration) if duration else 30,
+            notes=notes,
+        )
+        messages.success(request, f"Slot scheduled for {application.application_id} on {slot.datetime}.")
+        return redirect("interview_results", post_id=panel.post.pk)
+
+    return render(request, "recruitment/interview_schedule.html", {
+        "panel": panel,
+    })
+
+
+@login_required
+def interview_score(request, slot_id):
+    """Enter or add a score for an interview slot."""
+    slot = get_object_or_404(InterviewSlot, pk=slot_id)
+
+    if request.method == "POST":
+        score_val = request.POST.get("score", "").strip()
+        comments = request.POST.get("comments", "").strip()
+
+        if not score_val:
+            messages.error(request, "Score is required.")
+            return render(request, "recruitment/interview_score.html", {
+                "slot": slot,
+                "score": score_val,
+                "comments": comments,
+            })
+
+        InterviewScore.objects.create(
+            slot=slot,
+            panel_member=request.user,
+            score=Decimal(score_val),
+            comments=comments,
+        )
+        messages.success(request, f"Score {score_val} recorded for {slot.application.application_id}.")
+        return redirect("interview_results", post_id=slot.panel.post.pk)
+
+    return render(request, "recruitment/interview_score.html", {
+        "slot": slot,
+    })
+
+
+@login_required
+@require_role("viewer", "recruiter", "hr_manager", "org_admin")
+def interview_results(request, post_id):
+    """View aggregate interview results for a post — panels, slots, scores."""
+    post = get_object_or_404(Post, pk=post_id)
+    panels = InterviewPanel.objects.filter(post=post).prefetch_related(
+        "members", "slots", "slots__application", "slots__application__candidate",
+        "slots__scores",
+    )
+
+    # Build per-slot aggregate data
+    slot_results = []
+    for panel in panels:
+        for slot in panel.slots.select_related("application__candidate"):
+            scores = slot.scores.all()
+            if scores:
+                avg = sum(s.score for s in scores) / len(scores)
+                scores_list = list(scores)
+            else:
+                avg = None
+                scores_list = []
+            slot_results.append({
+                "panel": panel,
+                "slot": slot,
+                "scores": scores_list,
+                "avg": avg,
+                "count": len(scores_list),
+            })
+
+    return render(request, "recruitment/interview_results.html", {
+        "post": post,
+        "panels": panels,
+        "slot_results": slot_results,
+    })

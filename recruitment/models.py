@@ -1040,3 +1040,107 @@ class InterviewScore(models.Model):
     def __str__(self):
         member = self.panel_member or "External"
         return f"Score {self.score} by {member} ({self.slot.application.application_id})"
+
+
+# ── Phase 3: Litigation ─────────────────────────────────────────────────────
+
+LITIGATION_STATUS_CHOICES = [
+    ("filed", "Filed"),
+    ("hearing", "Hearing"),
+    ("stay", "Stay Granted"),
+    ("resolved", "Resolved"),
+    ("dismissed", "Dismissed"),
+]
+
+
+class LitigationCase(models.Model):
+    """Court case tracker — links a litigation matter to an application, post, or advertisement."""
+
+    case_number = models.CharField(
+        max_length=100,
+        help_text="Court case number (e.g. WP/1234/2026).",
+    )
+    court = models.CharField(
+        max_length=200,
+        help_text="Court name (e.g. Gauhati High Court).",
+    )
+    petitioner = models.CharField(
+        max_length=200,
+        help_text="Name of the petitioner.",
+    )
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="litigation_cases",
+        help_text="Linked application (if any).",
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="litigation_cases",
+        help_text="Linked post (if any).",
+    )
+    advertisement = models.ForeignKey(
+        Advertisement,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="litigation_cases",
+        help_text="Linked advertisement (if any).",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=LITIGATION_STATUS_CHOICES,
+        default="filed",
+        help_text="Current status of the case.",
+    )
+    interim_orders = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of interim orders (type, date, text).",
+    )
+    final_order_text = models.TextField(
+        blank=True,
+        help_text="Text of the final court order.",
+    )
+    filed_on = models.DateField(
+        help_text="Date the case was filed.",
+    )
+    resolved_on = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date the case was resolved (null if still active).",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Litigation Case"
+        verbose_name_plural = "Litigation Cases"
+        ordering = ["-filed_on"]
+
+    def __str__(self):
+        return f"{self.case_number} — {self.court}"
+
+    @property
+    def has_active_stay(self):
+        """True if case is active and has a stay_order in interim_orders."""
+        if self.status in ("resolved", "dismissed"):
+            return False
+        return any(o.get("type") == "stay_order" for o in self.interim_orders)
+
+    def add_interim_order(self, order_type, text, order_date=None):
+        """Append an interim order to the JSONField."""
+        from datetime import date as _date
+
+        self.interim_orders = list(self.interim_orders) + [
+            {
+                "type": order_type,
+                "date": str(order_date or _date.today()),
+                "text": text,
+            }
+        ]
+        self.save(update_fields=["interim_orders"])

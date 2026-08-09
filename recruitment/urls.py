@@ -37,4 +37,13 @@ urlpatterns = [
     path("requisitions/<int:req_id>/approve/", views.requisition_approve, name="requisition_approve"),
     # Fairness dashboard
     path("fairness/", views.fairness_dashboard, name="fairness_dashboard"),
+    # Litigation
+    path("litigation/", views.litigation_list, name="litigation_list"),
+    path("litigation/<int:case_id>/add-order/", views.litigation_add_order, name="litigation_add_order"),
+    path("litigation/<int:case_id>/update-status/", views.litigation_update_status, name="litigation_update_status"),
+    # Interview workflow
+    path("posts/<int:post_id>/interview/panel/create/", views.interview_panel_create, name="interview_panel_create"),
+    path("interview/panel/<int:panel_id>/schedule/", views.interview_schedule, name="interview_schedule"),
+    path("interview/slot/<int:slot_id>/score/", views.interview_score, name="interview_score"),
+    path("posts/<int:post_id>/interview/results/", views.interview_results, name="interview_results"),
 ]
