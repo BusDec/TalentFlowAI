@@ -243,6 +243,21 @@ def generate_advt_text(advt):
 
 
 @login_required
+@require_role("hr_manager")
+def newspaper_preview(request, advt_id):
+    """Render Employment News formatted advertisement text for preview / submission."""
+    from .newspaper import generate_newspaper_text
+
+    advt = get_object_or_404(Advertisement, id=advt_id)
+    text = generate_newspaper_text(advt)
+    return render(
+        request,
+        "recruitment/advertisement_generated.html",
+        {"advt": advt, "advt_text": text},
+    )
+
+
+@login_required
 @require_role("viewer")
 def advertisement_detail(request, advt_id):
     advt = get_object_or_404(Advertisement, id=advt_id)

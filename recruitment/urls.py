@@ -9,6 +9,7 @@ urlpatterns = [
     path("advertisements/<int:advt_id>/generate/", views.advertisement_generate, name="advertisement_generate"),
     path("advertisements/<int:advt_id>/pdf/", views.advertisement_pdf, name="advertisement_pdf"),
     path("advertisements/<int:advt_id>/report/", views.advertisement_report, name="advertisement_report"),
+    path("advertisements/<int:advt_id>/newspaper/", views.newspaper_preview, name="newspaper_preview"),
     path("advertisements/<int:advt_id>/corrigendum/", views.corrigendum_create, name="corrigendum_create"),
     path("applications/", views.application_list, name="application_list"),
     path("applications/export/", views.applications_export, name="applications_export"),
