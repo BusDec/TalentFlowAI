@@ -642,3 +642,68 @@ class PostBasedRoster(models.Model):
 
     def __str__(self):
         return f"{self.post} roster ({self.cycle_start_year})"
+
+
+class Payment(models.Model):
+    """Payment record for an application fee.
+
+    Links one-to-one with an ``Application``.  ``exempt`` and ``exempt_reason``
+    record whether the candidate was excused from the fee (e.g. SC/ST/OBC/EWS,
+    female, PwBD).  ``status`` tracks the payment lifecycle:
+    ``pending`` → ``completed`` / ``failed``.
+    """
+
+    STATUS_CHOICES = (
+        ("pending", "Pending"),
+        ("completed", "Completed"),
+        ("failed", "Failed"),
+        ("refunded", "Refunded"),
+    )
+
+    application = models.OneToOneField(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="payment",
+        help_text="Application this payment is for.",
+    )
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Fee amount in INR.",
+    )
+    gateway = models.CharField(
+        max_length=50,
+        help_text="Payment gateway used (e.g. mock, razorpay).",
+    )
+    gateway_ref = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Gateway-side payment/order ID for reconciliation.",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+    exempt = models.BooleanField(
+        default=False,
+        help_text="True when the candidate is exempt from the fee.",
+    )
+    exempt_reason = models.TextField(
+        blank=True,
+        help_text="Human-readable reason for exemption.",
+    )
+    paid_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp when payment was confirmed.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Payment"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        status = "EXEMPT" if self.exempt else self.status
+        return f"Payment {self.application.application_id}: ₹{self.amount} ({status})"
