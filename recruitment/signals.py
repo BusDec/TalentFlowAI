@@ -1,11 +1,24 @@
 """Signals for recruitment app — automated orchestration of Phase I agents."""
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from .models import Application, BackgroundReport, Resume
 from .tasks import flag_duplicates_task, parse_resume_task
+
+
+@receiver(pre_save, sender=Application)
+def application_pre_save(sender, instance, **kwargs):
+    """Stash the previous status so post_save can detect transitions."""
+    if instance.pk:
+        try:
+            old = Application.objects.only("status").get(pk=instance.pk)
+            instance._pre_save_status = old.status
+        except Application.DoesNotExist:
+            instance._pre_save_status = None
+    else:
+        instance._pre_save_status = None
 
 
 @receiver(post_save, sender=Application)
@@ -16,6 +29,18 @@ def application_post_save(sender, instance, created, **kwargs):
 
         # Fire duplicate detection asynchronously across all advertisements.
         flag_duplicates_task.delay(instance.id)
+
+    # Advance the post's DoPT roster position when a candidate joins.
+    if not created and instance.status == "joined":
+        old_status = getattr(instance, "_pre_save_status", None)
+        if old_status != "joined":
+            try:
+                roster = instance.post.roster
+            except Exception:
+                roster = None
+            if roster is not None:
+                roster.current_position += 1
+                roster.save(update_fields=["current_position"])
 
 
 @receiver(post_save, sender=BackgroundReport)
