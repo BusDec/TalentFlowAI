@@ -137,8 +137,8 @@
     <form method="post" class="mt-4">
         {% csrf_token %}
         <div class="tf-field">
-            <label class="tf-label">{% trans "Your Explanation (optional)" %}</label>
-            <textarea name="candidate_explanation" class="tf-textarea" rows="3">{{ background_report.candidate_explanation }}</textarea>
+            <label class="tf-label" for="candidate-explanation">{% trans "Your Explanation (optional)" %}</label>
+            <textarea name="candidate_explanation" class="tf-textarea" rows="3" id="candidate-explanation">{{ background_report.candidate_explanation }}</textarea>
         </div>
         <button class="tf-btn small" type="submit">{% trans "Submit Explanation" %}</button>
     </form>

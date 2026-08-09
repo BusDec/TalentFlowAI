@@ -28,7 +28,7 @@
                     {% if consent.is_active %}
                     <form method="post" action="{% url 'portal_consent_revoke' consent.id %}" data-confirm="{% trans 'Revoking consent means we will stop processing your data for this purpose. This may affect ongoing processing such as application review. This action is recorded in the audit ledger and cannot be undone. Continue?' %}">
                         {% csrf_token %}
-                        <button class="tf-btn small danger">{% trans "Revoke" %}</button>
+                        <button class="tf-btn small danger" aria-label="{% trans 'Revoke consent for' %} {{ consent.get_purpose_display }}">{% trans "Revoke" %}</button>
                     </form>
                     {% endif %}
                 </td>

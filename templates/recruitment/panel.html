@@ -9,7 +9,7 @@
         <thead><tr><th>Rank</th><th>Application</th><th>Candidate</th><th>Valid Until</th><th>Promoted</th><th></th></tr></thead>
         <tbody>
             {% for entry in entries %}
-            <tr class="tf-rowlink" data-href="{% url 'application_detail' entry.application.application_id %}">
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' entry.application.application_id %}" role="link" tabindex="0" aria-label="Panel entry {{ entry.panel_rank }} — {{ entry.application.candidate }}">
                 <td><span class="tf-score mid">{{ entry.panel_rank }}</span></td>
                 <td>{{ entry.application.application_id }}</td>
                 <td>{{ entry.application.candidate }}</td>

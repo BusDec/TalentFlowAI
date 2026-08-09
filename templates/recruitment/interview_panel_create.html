@@ -9,12 +9,12 @@
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Panel Name</label>
-            <input type="text" name="name" class="tf-input" value="{{ name|default:'' }}" placeholder="e.g. Panel A" required>
+            <label class="tf-label" for="panel-name">Panel Name</label>
+            <input type="text" name="name" class="tf-input" value="{{ name|default:'' }}" placeholder="e.g. Panel A" required id="panel-name">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Sitting Fee (₹ per member, optional)</label>
-            <input type="number" name="sitting_fee" class="tf-input" value="{{ sitting_fee|default:'' }}" step="0.01" min="0" placeholder="2000.00">
+            <label class="tf-label" for="sitting-fee">Sitting Fee (₹ per member, optional)</label>
+            <input type="number" name="sitting_fee" class="tf-input" value="{{ sitting_fee|default:'' }}" step="0.01" min="0" placeholder="2000.00" id="sitting-fee">
         </div>
         {% if staff_users %}
         <div class="tf-field" style="margin-bottom:12px">

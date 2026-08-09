@@ -7,8 +7,8 @@
 {% block content %}
 <div class="tf-glass tf-card mb-4">
     <form method="get" class="tf-flex">
-        <label class="tf-label" style="margin:0 10px 0 0">Keywords (comma-separated)</label>
-        <input type="text" name="keywords" value="{{ keywords|join:", " }}" class="tf-input" style="max-width:420px">
+        <label class="tf-label" for="keywords-input" style="margin:0 10px 0 0">Keywords (comma-separated)</label>
+        <input type="text" id="keywords-input" name="keywords" value="{{ keywords|join:", " }}" class="tf-input" style="max-width:420px" aria-label="Enter keywords for AI ranking">
         <button class="tf-btn small">Rank</button>
     </form>
     <p class="tf-muted mt-3" style="font-size:0.82rem;margin-bottom:0">

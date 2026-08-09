@@ -9,7 +9,7 @@
         <thead><tr><th>Candidate</th><th>App A</th><th>App B</th><th>Confidence</th><th>Matched</th><th>Resolution</th><th></th></tr></thead>
         <tbody>
             {% for flag in flags %}
-            <tr class="tf-rowlink" data-href="{% url 'application_detail' flag.application_a.application_id %}">
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' flag.application_a.application_id %}" role="link" tabindex="0" aria-label="Duplicate flag: {{ flag.candidate }} — {{ flag.application_a.application_id }} vs {{ flag.application_b.application_id }}">
                 <td>{{ flag.candidate }}</td>
                 <td>{{ flag.application_a.application_id }} <span class="tf-muted">({{ flag.application_a.post.advertisement.advt_number }})</span></td>
                 <td>{{ flag.application_b.application_id }} <span class="tf-muted">({{ flag.application_b.post.advertisement.advt_number }})</span></td>

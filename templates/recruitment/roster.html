@@ -23,8 +23,8 @@
     <form method="post" class="tf-grid-3" style="align-items:end">
         {% csrf_token %}
         <div class="tf-field">
-            <label class="tf-label">Category</label>
-            <select name="category" class="tf-select" required>
+            <label class="tf-label" for="roster-category">Category</label>
+            <select name="category" class="tf-select" required id="roster-category">
                 <option value="">— Select —</option>
                 {% for value, label in category_choices %}
                 <option value="{{ value }}">{{ label }}</option>
@@ -32,15 +32,15 @@
             </select>
         </div>
         <div class="tf-field">
-            <label class="tf-label">Vertical Vacancies</label>
-            <input type="number" name="vertical_vacancies" class="tf-input" min="0" value="0">
+            <label class="tf-label" for="vertical-vacancies">Vertical Vacancies</label>
+            <input type="number" name="vertical_vacancies" class="tf-input" min="0" value="0" id="vertical-vacancies">
         </div>
         <div class="tf-field">
-            <label class="tf-label">PwBD (Horizontal)</label>
-            <input type="number" name="pwbd_horizontal_vacancies" class="tf-input" min="0" value="0">
+            <label class="tf-label" for="pwbd-vacancies">PwBD (Horizontal)</label>
+            <input type="number" name="pwbd_horizontal_vacancies" class="tf-input" min="0" value="0" id="pwbd-vacancies">
         </div>
         <label class="tf-flex" style="gap:8px;cursor:pointer;margin-bottom:18px">
-            <input type="checkbox" name="carry_forward" value="on" class="tf-input" style="width:18px;height:18px">
+            <input type="checkbox" name="carry_forward" value="on" class="tf-input" style="width:18px;height:18px" aria-label="Carry forward backlog vacancies">
             <span>Carry forward (backlog)</span>
         </label>
         <div>

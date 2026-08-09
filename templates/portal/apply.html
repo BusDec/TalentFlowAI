@@ -48,7 +48,7 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="tf-field">
-                <label class="tf-label">{% trans "Select Post" %} *</label>
+                <label class="tf-label" for="postSelect">{% trans "Select Post" %} *</label>
                 <select name="post" class="tf-select" id="postSelect" required>
                     <option value="">{% trans "— Choose a post —" %}</option>
                     {% for post in advt.posts.all %}
@@ -71,8 +71,8 @@
             </div>
             {% endfor %}
             <div class="tf-field">
-                <label class="tf-label">{% trans "Upload Resume" %} *</label>
-                <input type="file" name="resume" class="tf-input" accept=".pdf,.doc,.docx" required>
+                <label class="tf-label" for="resume-upload">{% trans "Upload Resume" %} *</label>
+                <input type="file" name="resume" class="tf-input" accept=".pdf,.doc,.docx" required id="resume-upload">
                 <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">{% trans "PDF or Word. Your resume is stored once and reused across applications." %}</p>
             </div>
             {% if prefill %}

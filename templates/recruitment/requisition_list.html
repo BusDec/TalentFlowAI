@@ -13,7 +13,7 @@
         <thead><tr><th>Post</th><th>Count</th><th>Grade</th><th>Status</th><th>Created By</th><th>Created</th></tr></thead>
         <tbody>
             {% for r in requisitions %}
-            <tr class="tf-rowlink" data-href="{% url 'requisition_detail' r.pk %}">
+            <tr class="tf-rowlink" data-href="{% url 'requisition_detail' r.pk %}" role="link" tabindex="0" aria-label="Requisition: {{ r.post_name }} — {{ r.get_status_display }}">
                 <td>{{ r.post_name }}</td>
                 <td>{{ r.count }}</td>
                 <td>{{ r.grade }}</td>

@@ -57,8 +57,8 @@
             <span style="font-size:0.85rem;line-height:1.5;color:rgba(233,234,244,0.85)">Mark candidate <strong>Eligible</strong> (uncheck to mark <strong>Not Eligible</strong>)</span>
         </label>
         <div class="tf-field">
-            <label class="tf-label">Reason</label>
-            <textarea name="override_reason" class="tf-textarea" rows="3" required placeholder="Justification for overriding the automated verdict">{{ override.reason|default:"" }}</textarea>
+            <label class="tf-label" for="override-reason">Reason</label>
+            <textarea name="override_reason" class="tf-textarea" rows="3" required placeholder="Justification for overriding the automated verdict" id="override-reason">{{ override.reason|default:"" }}</textarea>
         </div>
         <button class="tf-btn" type="submit">Save Override</button>
     </form>

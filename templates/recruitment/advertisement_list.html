@@ -13,7 +13,7 @@
         <thead><tr><th>Advt No.</th><th>Title</th><th>Published</th><th>Closes</th><th>Status</th><th>Report</th></tr></thead>
         <tbody>
             {% for advt in advertisements %}
-            <tr class="tf-rowlink" data-href="{% url 'advertisement_detail' advt.id %}">
+            <tr class="tf-rowlink" data-href="{% url 'advertisement_detail' advt.id %}" role="link" tabindex="0" aria-label="Advertisement {{ advt.advt_number }} — {{ advt.title }}">
                 <td>{{ advt.advt_number }}</td>
                 <td>{{ advt.title }}</td>
                 <td>{{ advt.published_date|date:"d-m-Y" }}</td>

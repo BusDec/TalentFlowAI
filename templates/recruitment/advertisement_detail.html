@@ -29,7 +29,7 @@
     <div class="tf-section-title">Add Corrigendum</div>
     <form method="post" action="{% url 'corrigendum_create' advt.id %}">
         {% csrf_token %}
-        <textarea name="changes_text" rows="3" placeholder="Describe the changes…" required
+        <textarea name="changes_text" rows="3" placeholder="Describe the changes…" required aria-label="Corrigendum changes text"
             style="width:100%;padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
             background:rgba(0,0,0,0.25);color:rgba(233,234,244,0.9);resize:vertical;margin-bottom:0.5rem;"></textarea>
         <button type="submit" class="tf-btn small">Publish Corrigendum</button>

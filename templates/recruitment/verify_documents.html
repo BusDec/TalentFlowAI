@@ -5,25 +5,25 @@
 
 {% block content %}
 <div class="tf-stats" style="margin-bottom:24px">
-    <a href="?status=pending" class="tf-stat" style="text-decoration:none;display:block">
+    <a href="?status=pending" class="tf-stat" style="text-decoration:none;display:block" aria-label="Pending verifications: {{ pending_count }}">
         <div class="label">Pending</div>
         <div class="value">{{ pending_count }}</div>
-        <div class="icon">⏳</div>
+        <div class="icon" aria-hidden="true">⏳</div>
     </a>
-    <a href="?status=verified" class="tf-stat" style="text-decoration:none;display:block">
+    <a href="?status=verified" class="tf-stat" style="text-decoration:none;display:block" aria-label="Verified documents: {{ verified_count }}">
         <div class="label">Verified</div>
         <div class="value">{{ verified_count }}</div>
-        <div class="icon">✓</div>
+        <div class="icon" aria-hidden="true">✓</div>
     </a>
-    <a href="?status=rejected" class="tf-stat" style="text-decoration:none;display:block">
+    <a href="?status=rejected" class="tf-stat" style="text-decoration:none;display:block" aria-label="Rejected documents: {{ rejected_count }}">
         <div class="label">Rejected</div>
         <div class="value">{{ rejected_count }}</div>
-        <div class="icon">✗</div>
+        <div class="icon" aria-hidden="true">✗</div>
     </a>
-    <a href="?status=all" class="tf-stat" style="text-decoration:none;display:block">
+    <a href="?status=all" class="tf-stat" style="text-decoration:none;display:block" aria-label="All documents: {{ total_count }}">
         <div class="label">Total</div>
         <div class="value">{{ total_count }}</div>
-        <div class="icon">📄</div>
+        <div class="icon" aria-hidden="true">📄</div>
     </a>
 </div>
 
@@ -60,9 +60,9 @@
                     <form method="post" class="tf-flex" style="gap:4px">
                         {% csrf_token %}
                         <input type="hidden" name="verification_id" value="{{ dv.id }}">
-                        <input type="text" name="comments" placeholder="Comments..." class="tf-input" style="width:120px;padding:4px 8px;font-size:12px">
-                        <button name="action" value="verified" class="tf-btn small" style="background:#22c55e;color:#fff">✓ Verify</button>
-                        <button name="action" value="rejected" class="tf-btn small" style="background:#ef4444;color:#fff">✗ Reject</button>
+                        <input type="text" name="comments" placeholder="Comments..." class="tf-input" style="width:120px;padding:4px 8px;font-size:12px" aria-label="Verification comments for {{ dv.document.application.candidate }}">
+                        <button name="action" value="verified" class="tf-btn small" style="background:#22c55e;color:#fff" aria-label="Verify document for {{ dv.document.application.candidate }}">✓ Verify</button>
+                        <button name="action" value="rejected" class="tf-btn small" style="background:#ef4444;color:#fff" aria-label="Reject document for {{ dv.document.application.candidate }}">✗ Reject</button>
                     </form>
                     {% else %}
                     <span class="tf-muted">—</span>

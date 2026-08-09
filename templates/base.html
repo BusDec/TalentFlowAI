@@ -11,13 +11,14 @@
     <link rel="stylesheet" href="{% static 'css/talentflow.css' %}">
 </head>
 <body>
+<a class="tf-skip-link" href="#main-content">Skip to main content</a>
 <div class="tf-app">
-    <aside class="tf-sidebar">
-        <a class="tf-brand" href="{% url 'dashboard' %}">
-            <span class="logo">TF</span>
+    <aside class="tf-sidebar" role="complementary" aria-label="Sidebar navigation">
+        <a class="tf-brand" href="{% url 'dashboard' %}" aria-label="TalentFlow AI — go to dashboard">
+            <span class="logo" aria-hidden="true">TF</span>
             <span>TalentFlow AI</span>
         </a>
-        <nav class="tf-nav">
+        <nav class="tf-nav" aria-label="Main navigation">
             <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                 <span class="icon">◈</span> Dashboard
             </a>
@@ -60,11 +61,11 @@
         </div>
     </aside>
 
-    <main class="tf-main">
+    <main class="tf-main" id="main-content" role="main">
         <div class="tf-topbar">
             <div class="tf-flex">
                 {% if request.resolver_match.url_name != 'dashboard' %}
-                <a href="#" onclick="history.back();return false;" class="tf-btn small ghost" title="Go back">&larr; Back</a>
+                <a href="#" onclick="history.back();return false;" class="tf-btn small ghost" title="Go back" aria-label="Go back to previous page">&larr; Back</a>
                 {% endif %}
                 <div>
                     <h1>{% block page_title %}TalentFlow AI{% endblock %}</h1>

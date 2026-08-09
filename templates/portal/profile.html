@@ -69,36 +69,36 @@
     <div class="tf-glass tf-card mb-4">
         <div class="tf-flex" style="justify-content:space-between">
             <div class="tf-section-title">{% trans "Academic Record" %}</div>
-            <button type="button" class="tf-btn small ghost" id="addAcademic">+ {% trans "Add Row" %}</button>
+            <button type="button" class="tf-btn small ghost" id="addAcademic" aria-label="{% trans 'Add new academic record' %}">+ {% trans "Add Row" %}</button>
         </div>
         <div id="academicRows">
             {% for rec in academic_records %}
             <div class="tf-grid-3 academic-row" style="align-items:end;margin-bottom:12px">
-                <div class="tf-field"><label class="tf-label">{% trans "Level" %}</label>
-                    <select name="academic_level_{{ forloop.counter0 }}" class="tf-select">
+                <div class="tf-field"><label class="tf-label" for="academic_level_{{ forloop.counter0 }}">{% trans "Level" %}</label>
+                    <select id="academic_level_{{ forloop.counter0 }}" name="academic_level_{{ forloop.counter0 }}" class="tf-select">
                         {% for value, label in rec.LEVEL_CHOICES %}
                         <option value="{{ value }}" {% if rec.level == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Discipline" %}</label>
-                    <input name="academic_discipline_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.discipline }}"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "University / Board" %}</label>
-                    <input name="academic_board_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.university_board }}" list="ugc-universities" autocomplete="off"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Year Passed" %}</label>
-                    <input name="academic_year_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.year_passed|default_if_none:'' }}"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Marking" %}</label>
-                    <select name="academic_marking_{{ forloop.counter0 }}" class="tf-select">
+                <div class="tf-field"><label class="tf-label" for="academic_discipline_{{ forloop.counter0 }}">{% trans "Discipline" %}</label>
+                    <input id="academic_discipline_{{ forloop.counter0 }}" name="academic_discipline_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.discipline }}"></div>
+                <div class="tf-field"><label class="tf-label" for="academic_board_{{ forloop.counter0 }}">{% trans "University / Board" %}</label>
+                    <input id="academic_board_{{ forloop.counter0 }}" name="academic_board_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.university_board }}" list="ugc-universities" autocomplete="off"></div>
+                <div class="tf-field"><label class="tf-label" for="academic_year_{{ forloop.counter0 }}">{% trans "Year Passed" %}</label>
+                    <input id="academic_year_{{ forloop.counter0 }}" name="academic_year_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.year_passed|default_if_none:'' }}"></div>
+                <div class="tf-field"><label class="tf-label" for="academic_marking_{{ forloop.counter0 }}">{% trans "Marking" %}</label>
+                    <select id="academic_marking_{{ forloop.counter0 }}" name="academic_marking_{{ forloop.counter0 }}" class="tf-select">
                         {% for value, label in rec.MARKING_CHOICES %}
                         <option value="{{ value }}" {% if rec.marking_type == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Score" %}</label>
-                    <input name="academic_score_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.score }}"></div>
+                <div class="tf-field"><label class="tf-label" for="academic_score_{{ forloop.counter0 }}">{% trans "Score" %}</label>
+                    <input id="academic_score_{{ forloop.counter0 }}" name="academic_score_{{ forloop.counter0 }}" class="tf-input" value="{{ rec.score }}"></div>
                 <div class="tf-field" style="display:flex;align-items:center;gap:8px">
-                    <input type="checkbox" name="academic_ugc_{{ forloop.counter0 }}" value="on" class="tf-input" style="width:18px;height:18px" {% if rec.is_ugc_recognized %}checked{% endif %}>
+                    <input type="checkbox" name="academic_ugc_{{ forloop.counter0 }}" value="on" class="tf-input" style="width:18px;height:18px" {% if rec.is_ugc_recognized %}checked{% endif %} aria-label="{% trans 'UGC recognized for academic record' %} {{ forloop.counter }}">
                     <span class="tf-muted" style="font-size:0.8rem">{% trans "UGC recognized" %}</span>
                 </div>
-                <button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ {% trans "Remove record" %}</button>
+                <button type="button" class="tf-btn small danger remove-row tf-remove-btn" aria-label="{% trans 'Remove academic record' %} {{ forloop.counter }}">✕ {% trans "Remove record" %}</button>
             </div>
             {% endfor %}
         </div>
@@ -110,31 +110,31 @@
     <div class="tf-glass tf-card mb-4">
         <div class="tf-flex" style="justify-content:space-between">
             <div class="tf-section-title">{% trans "Work Experience" %}</div>
-            <button type="button" class="tf-btn small ghost" id="addWork">+ {% trans "Add Row" %}</button>
+            <button type="button" class="tf-btn small ghost" id="addWork" aria-label="{% trans 'Add new work experience record' %}">+ {% trans "Add Row" %}</button>
         </div>
         <div id="workRows">
             {% for we in work_experiences %}
             <div class="tf-grid-3 work-row" style="align-items:end;margin-bottom:12px">
-                <div class="tf-field"><label class="tf-label">{% trans "Organisation" %}</label>
-                    <input name="work_org_{{ forloop.counter0 }}" class="tf-input" value="{{ we.org_name }}"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Type" %}</label>
-                    <select name="work_orgtype_{{ forloop.counter0 }}" class="tf-select">
+                <div class="tf-field"><label class="tf-label" for="work_org_{{ forloop.counter0 }}">{% trans "Organisation" %}</label>
+                    <input id="work_org_{{ forloop.counter0 }}" name="work_org_{{ forloop.counter0 }}" class="tf-input" value="{{ we.org_name }}"></div>
+                <div class="tf-field"><label class="tf-label" for="work_orgtype_{{ forloop.counter0 }}">{% trans "Type" %}</label>
+                    <select id="work_orgtype_{{ forloop.counter0 }}" name="work_orgtype_{{ forloop.counter0 }}" class="tf-select">
                         <option value="">—</option>
                         {% for value, label in we.ORG_TYPE_CHOICES %}
                         <option value="{{ value }}" {% if we.org_type == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Designation" %}</label>
-                    <input name="work_designation_{{ forloop.counter0 }}" class="tf-input" value="{{ we.designation }}"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Start" %}</label>
-                    <input name="work_start_{{ forloop.counter0 }}" type="date" class="tf-input" value="{{ we.start_date|date:'Y-m-d' }}"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "End" %}</label>
-                    <input name="work_end_{{ forloop.counter0 }}" type="date" class="tf-input" value="{{ we.end_date|date:'Y-m-d' }}"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Annual CTC (Lakhs)" %}</label>
-                    <input name="work_ctc_{{ forloop.counter0 }}" class="tf-input" value="{{ we.annual_ctc_lakhs|default_if_none:'' }}"></div>
-                <div class="tf-field"><label class="tf-label">{% trans "Org Turnover (Cr)" %}</label>
-                    <input name="work_turnover_{{ forloop.counter0 }}" class="tf-input" value="{{ we.turnover_cr|default_if_none:'' }}"></div>
-                <button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ {% trans "Remove record" %}</button>
+                <div class="tf-field"><label class="tf-label" for="work_designation_{{ forloop.counter0 }}">{% trans "Designation" %}</label>
+                    <input id="work_designation_{{ forloop.counter0 }}" name="work_designation_{{ forloop.counter0 }}" class="tf-input" value="{{ we.designation }}"></div>
+                <div class="tf-field"><label class="tf-label" for="work_start_{{ forloop.counter0 }}">{% trans "Start" %}</label>
+                    <input id="work_start_{{ forloop.counter0 }}" name="work_start_{{ forloop.counter0 }}" type="date" class="tf-input" value="{{ we.start_date|date:'Y-m-d' }}"></div>
+                <div class="tf-field"><label class="tf-label" for="work_end_{{ forloop.counter0 }}">{% trans "End" %}</label>
+                    <input id="work_end_{{ forloop.counter0 }}" name="work_end_{{ forloop.counter0 }}" type="date" class="tf-input" value="{{ we.end_date|date:'Y-m-d' }}"></div>
+                <div class="tf-field"><label class="tf-label" for="work_ctc_{{ forloop.counter0 }}">{% trans "Annual CTC (Lakhs)" %}</label>
+                    <input id="work_ctc_{{ forloop.counter0 }}" name="work_ctc_{{ forloop.counter0 }}" class="tf-input" value="{{ we.annual_ctc_lakhs|default_if_none:'' }}"></div>
+                <div class="tf-field"><label class="tf-label" for="work_turnover_{{ forloop.counter0 }}">{% trans "Org Turnover (Cr)" %}</label>
+                    <input id="work_turnover_{{ forloop.counter0 }}" name="work_turnover_{{ forloop.counter0 }}" class="tf-input" value="{{ we.turnover_cr|default_if_none:'' }}"></div>
+                <button type="button" class="tf-btn small danger remove-row tf-remove-btn" aria-label="{% trans 'Remove work experience record' %} {{ forloop.counter }}">✕ {% trans "Remove record" %}</button>
             </div>
             {% endfor %}
         </div>
@@ -218,18 +218,18 @@ $(document).ready(function(){
         $('#noAcademic').remove();
         const n = $('#academicRows .academic-row').length;
         const $row = $('<div class="tf-grid-3 academic-row" style="align-items:end;margin-bottom:12px">' +
-            '<div class="tf-field"><label class="tf-label">Level</label><select name="academic_level_'+n+'" class="tf-select">' +
+            '<div class="tf-field"><label class="tf-label" for="academic_level_'+n+'">Level</label><select id="academic_level_'+n+'" name="academic_level_'+n+'" class="tf-select">' +
             '<option value="10th">SSC / 10th</option><option value="12th">HSC / 12th</option>' +
             '<option value="diploma">Diploma</option><option value="ug">Graduate (UG)</option>' +
             '<option value="pg">Post-graduate (PG)</option><option value="other">Other</option></select></div>' +
-            '<div class="tf-field"><label class="tf-label">Discipline</label><input name="academic_discipline_'+n+'" class="tf-input"></div>' +
-            '<div class="tf-field"><label class="tf-label">University / Board</label><input name="academic_board_'+n+'" class="tf-input" list="ugc-universities" autocomplete="off"></div>' +
-            '<div class="tf-field"><label class="tf-label">Year Passed</label><input name="academic_year_'+n+'" class="tf-input"></div>' +
-            '<div class="tf-field"><label class="tf-label">Marking</label><select name="academic_marking_'+n+'" class="tf-select">' +
+            '<div class="tf-field"><label class="tf-label" for="academic_discipline_'+n+'">Discipline</label><input id="academic_discipline_'+n+'" name="academic_discipline_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="academic_board_'+n+'">University / Board</label><input id="academic_board_'+n+'" name="academic_board_'+n+'" class="tf-input" list="ugc-universities" autocomplete="off"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="academic_year_'+n+'">Year Passed</label><input id="academic_year_'+n+'" name="academic_year_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="academic_marking_'+n+'">Marking</label><select id="academic_marking_'+n+'" name="academic_marking_'+n+'" class="tf-select">' +
             '<option value="percentage">Percentage</option><option value="cgpa">CGPA</option><option value="grade">Grade</option></select></div>' +
-            '<div class="tf-field"><label class="tf-label">Score</label><input name="academic_score_'+n+'" class="tf-input"></div>' +
-            '<div class="tf-field" style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="academic_ugc_'+n+'" value="on" style="width:18px;height:18px"><span class="tf-muted" style="font-size:0.8rem">UGC recognized</span></div>' +
-            '<button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ Remove record</button></div>');
+            '<div class="tf-field"><label class="tf-label" for="academic_score_'+n+'">Score</label><input id="academic_score_'+n+'" name="academic_score_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field" style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="academic_ugc_'+n+'" value="on" style="width:18px;height:18px" aria-label="UGC recognized for academic record '+(n+1)+'"><span class="tf-muted" style="font-size:0.8rem">UGC recognized</span></div>' +
+            '<button type="button" class="tf-btn small danger remove-row tf-remove-btn" aria-label="Remove academic record '+(n+1)+'">✕ Remove record</button></div>');
         $('#academicRows').append($row);
     });
 
@@ -237,15 +237,15 @@ $(document).ready(function(){
         $('#noWork').remove();
         const n = $('#workRows .work-row').length;
         const $row = $('<div class="tf-grid-3 work-row" style="align-items:end;margin-bottom:12px">' +
-            '<div class="tf-field"><label class="tf-label">Organisation</label><input name="work_org_'+n+'" class="tf-input"></div>' +
-            '<div class="tf-field"><label class="tf-label">Type</label><select name="work_orgtype_'+n+'" class="tf-select"><option value="">—</option>' +
+            '<div class="tf-field"><label class="tf-label" for="work_org_'+n+'">Organisation</label><input id="work_org_'+n+'" name="work_org_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="work_orgtype_'+n+'">Type</label><select id="work_orgtype_'+n+'" name="work_orgtype_'+n+'" class="tf-select"><option value="">—</option>' +
             '<option value="psu">PSU</option><option value="private">Private</option><option value="govt">Government</option><option value="other">Other</option></select></div>' +
-            '<div class="tf-field"><label class="tf-label">Designation</label><input name="work_designation_'+n+'" class="tf-input"></div>' +
-            '<div class="tf-field"><label class="tf-label">Start</label><input name="work_start_'+n+'" type="date" class="tf-input"></div>' +
-            '<div class="tf-field"><label class="tf-label">End</label><input name="work_end_'+n+'" type="date" class="tf-input"></div>' +
-            '<div class="tf-field"><label class="tf-label">Annual CTC (Lakhs)</label><input name="work_ctc_'+n+'" class="tf-input"></div>' +
-            '<div class="tf-field"><label class="tf-label">Org Turnover (Cr)</label><input name="work_turnover_'+n+'" class="tf-input"></div>' +
-            '<button type="button" class="tf-btn small danger remove-row tf-remove-btn">✕ Remove record</button></div>');
+            '<div class="tf-field"><label class="tf-label" for="work_designation_'+n+'">Designation</label><input id="work_designation_'+n+'" name="work_designation_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="work_start_'+n+'">Start</label><input id="work_start_'+n+'" name="work_start_'+n+'" type="date" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="work_end_'+n+'">End</label><input id="work_end_'+n+'" name="work_end_'+n+'" type="date" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="work_ctc_'+n+'">Annual CTC (Lakhs)</label><input id="work_ctc_'+n+'" name="work_ctc_'+n+'" class="tf-input"></div>' +
+            '<div class="tf-field"><label class="tf-label" for="work_turnover_'+n+'">Org Turnover (Cr)</label><input id="work_turnover_'+n+'" name="work_turnover_'+n+'" class="tf-input"></div>' +
+            '<button type="button" class="tf-btn small danger remove-row tf-remove-btn" aria-label="Remove work experience record '+(n+1)+'">✕ Remove record</button></div>');
         $('#workRows').append($row);
     });
 

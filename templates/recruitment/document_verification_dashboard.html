@@ -5,26 +5,26 @@
 
 {% block content %}
 <div class="tf-stats" style="margin-bottom:24px">
-    <a class="tf-stat" style="text-decoration:none;display:block">
+    <div class="tf-stat" role="group" aria-label="Document verification totals">
         <div class="label">Total</div>
         <div class="value">{{ total }}</div>
-        <div class="icon">📄</div>
-    </a>
-    <a class="tf-stat" style="text-decoration:none;display:block">
+        <div class="icon" aria-hidden="true">📄</div>
+    </div>
+    <div class="tf-stat" role="group" aria-label="Pending verifications: {{ pending_count }}">
         <div class="label">Pending</div>
         <div class="value">{{ pending_count }}</div>
-        <div class="icon">⏳</div>
-    </a>
-    <a class="tf-stat" style="text-decoration:none;display:block">
+        <div class="icon" aria-hidden="true">⏳</div>
+    </div>
+    <div class="tf-stat" role="group" aria-label="Verified documents: {{ verified_count }}">
         <div class="label">Verified</div>
         <div class="value">{{ verified_count }}</div>
-        <div class="icon">✓</div>
-    </a>
-    <a class="tf-stat" style="text-decoration:none;display:block">
+        <div class="icon" aria-hidden="true">✓</div>
+    </div>
+    <div class="tf-stat" role="group" aria-label="Rejected documents: {{ rejected_count }}">
         <div class="label">Rejected</div>
         <div class="value">{{ rejected_count }}</div>
-        <div class="icon">✗</div>
-    </a>
+        <div class="icon" aria-hidden="true">✗</div>
+    </div>
 </div>
 
 <div class="tf-grid-3 mb-4">

@@ -6,8 +6,8 @@
 {% block content %}
 <div class="tf-flex mb-4">
     <a href="{% url 'advertisement_detail' advt.id %}" class="tf-btn small ghost">Back to Details</a>
-    <button class="tf-btn small" onclick="navigator.clipboard.writeText(document.getElementById('advtText').textContent)">Copy to Clipboard</button>
-    <button class="tf-btn small ghost" onclick="window.print()">Print / Save PDF</button>
+    <button class="tf-btn small" onclick="navigator.clipboard.writeText(document.getElementById('advtText').textContent)" aria-label="Copy advertisement text to clipboard">Copy to Clipboard</button>
+    <button class="tf-btn small ghost" onclick="window.print()" aria-label="Print or save as PDF">Print / Save PDF</button>
 </div>
 
 <div class="tf-glass tf-card" style="line-height:1.7">

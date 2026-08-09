@@ -5,22 +5,22 @@
 {% block subtitle %}Funnel conversion, category mix & score distribution{% endblock %}
 
 {% block content %}
-<div class="tf-stats mb-4">
-    <div class="tf-stat"><div class="label">Total Applications</div><div class="value">{{ total }}</div></div>
+<div class="tf-stats mb-4" role="group" aria-label="Recruitment analytics summary">
+    <div class="tf-stat" role="group" aria-label="Total applications: {{ total }}"><div class="label">Total Applications</div><div class="value">{{ total }}</div></div>
     {% for value, label in stage_cards %}
-    <div class="tf-stat"><div class="label">{{ label }}</div><div class="value">{{ status_counts|get_item:value|default:0 }}</div></div>
+    <div class="tf-stat" role="group" aria-label="{{ label }}: {{ status_counts|get_item:value|default:0 }}"><div class="label">{{ label }}</div><div class="value">{{ status_counts|get_item:value|default:0 }}</div></div>
     {% endfor %}
-    <div class="tf-stat"><div class="label">Interview→Offer</div><div class="value">{{ conversion.interview|default:"—" }}%</div></div>
+    <div class="tf-stat" role="group" aria-label="Interview to offer conversion: {{ conversion.interview|default:'—' }} percent"><div class="label">Interview→Offer</div><div class="value">{{ conversion.interview|default:"—" }}%</div></div>
 </div>
 
 <div class="tf-grid-3 mb-4">
     <div class="tf-glass tf-card">
         <div class="tf-section-title">📊 Status Funnel</div>
-        <div id="funnelChart"></div>
+        <div id="funnelChart" role="img" aria-label="Status funnel chart showing application counts by stage"></div>
     </div>
     <div class="tf-glass tf-card">
         <div class="tf-section-title">🏷 Resume Score Distribution</div>
-        <canvas id="scoreChart" height="200"></canvas>
+        <canvas id="scoreChart" height="200" role="img" aria-label="Doughnut chart showing resume score distribution"></canvas>
     </div>
     <div class="tf-glass tf-card">
         <div class="tf-section-title">🗂 Applications per Post</div>

@@ -23,11 +23,11 @@
         <h3 style="margin:0 0 8px;color:#fff;font-size:1.05rem">{{ advt.title }}</h3>
         <p class="tf-muted" style="font-size:0.85rem;margin:0 0 14px">{% trans "Closes" %}: {{ advt.closing_date }}</p>
         {% if advt.id in applied_advt_ids %}
-        <span class="tf-badge primary">{% trans "Applied" %} ✓</span>
+        <span class="tf-badge primary" role="status">{% trans "Applied" %} ✓</span>
         {% elif advt.closing_date <= today %}
-        <button class="tf-btn small ghost" disabled style="opacity:0.55;cursor:not-allowed">{% trans "Closed" %}</button>
+        <button class="tf-btn small ghost" disabled style="opacity:0.55;cursor:not-allowed" aria-label="{% trans 'Applications closed for' %} {{ advt.title }}">{% trans "Closed" %}</button>
         {% else %}
-        <a href="{% url 'portal_apply' advt.id %}" class="tf-btn small">{% trans "Apply Now" %}</a>
+        <a href="{% url 'portal_apply' advt.id %}" class="tf-btn small" aria-label="{% trans 'Apply for' %} {{ advt.title }}">{% trans "Apply Now" %}</a>
         {% endif %}
     </div>
     {% empty %}

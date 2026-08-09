@@ -31,12 +31,12 @@
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Score (0.0 – 10.0)</label>
-            <input type="number" name="score" class="tf-input" value="{{ score|default:'' }}" step="0.5" min="0" max="10" required>
+            <label class="tf-label" for="interview-score">Score (0.0 – 10.0)</label>
+            <input type="number" name="score" class="tf-input" value="{{ score|default:'' }}" step="0.5" min="0" max="10" required id="interview-score">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Comments (optional)</label>
-            <textarea name="comments" class="tf-textarea" rows="3">{{ comments|default:'' }}</textarea>
+            <label class="tf-label" for="score-comments">Comments (optional)</label>
+            <textarea name="comments" class="tf-textarea" rows="3" id="score-comments">{{ comments|default:'' }}</textarea>
         </div>
         <div class="tf-flex" style="gap:12px;margin-top:16px">
             <a href="{% url 'interview_results' slot.panel.post.pk %}" class="tf-btn ghost">Cancel</a>

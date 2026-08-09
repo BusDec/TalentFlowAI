@@ -5,20 +5,20 @@
 {% block subtitle %}{% trans "Payment status breakdown and reconciliation report" %}{% endblock %}
 
 {% block content %}
-<div class="tf-stats mb-4">
-    <div class="tf-stat">
+<div class="tf-stats mb-4" role="group" aria-label="{% trans 'Payment status summary' %}">
+    <div class="tf-stat" role="group" aria-label="{% trans 'Pending payments' %}: {{ status_counts.pending|default:0 }}">
         <div class="label">{% trans "Pending" %}</div>
         <div class="value">{{ status_counts.pending|default:0 }}</div>
     </div>
-    <div class="tf-stat">
+    <div class="tf-stat" role="group" aria-label="{% trans 'Paid payments' %}: {{ status_counts.completed|default:0 }}">
         <div class="label">{% trans "Paid" %}</div>
         <div class="value">{{ status_counts.completed|default:0 }}</div>
     </div>
-    <div class="tf-stat">
+    <div class="tf-stat" role="group" aria-label="{% trans 'Failed payments' %}: {{ status_counts.failed|default:0 }}">
         <div class="label">{% trans "Failed" %}</div>
         <div class="value">{{ status_counts.failed|default:0 }}</div>
     </div>
-    <div class="tf-stat">
+    <div class="tf-stat" role="group" aria-label="{% trans 'Refunded payments' %}: {{ status_counts.refunded|default:0 }}">
         <div class="label">{% trans "Refunded" %}</div>
         <div class="value">{{ status_counts.refunded|default:0 }}</div>
     </div>

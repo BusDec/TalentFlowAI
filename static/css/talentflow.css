@@ -6,7 +6,7 @@
     --tf-bg-2: #7f5af0;
     --tf-bg-3: #9d4edb;
     --tf-accent: #4cc9f0;
-    --tf-success: #06d6a0;
+    --tf-success: #0ee0a6;
     --tf-warning: #ffd166;
     --tf-danger: #ef476f;
     --tf-ink: #1a1b2e;
@@ -434,3 +434,45 @@ label.tf-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase
 
 /* ---------- Autofill badges (Phase 2) ---------- */
 .tf-autofill { color: var(--tf-success); font-size: .78rem; font-weight: 600; margin-left: 8px; white-space: nowrap; }
+
+/* ---------- Accessibility: skip navigation ---------- */
+.tf-skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 10000;
+    padding: 12px 24px;
+    background: var(--tf-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    border-radius: 0 0 12px 0;
+    text-decoration: none;
+    transition: left 0.15s ease;
+}
+.tf-skip-link:focus {
+    left: 0;
+}
+
+/* ---------- Accessibility: focus-visible outlines ---------- */
+.tf-btn:focus-visible,
+a.tf-btn:focus-visible,
+button:focus-visible,
+.tf-link:focus-visible,
+a.tf-link:focus-visible,
+.tf-nav a:focus-visible,
+.tf-hscroll-link:focus-visible {
+    outline: 3px solid var(--tf-accent);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(76, 201, 240, 0.25);
+}
+.tf-input:focus-visible,
+.tf-select:focus-visible,
+.tf-textarea:focus-visible {
+    outline: 2px solid var(--tf-accent);
+    outline-offset: 1px;
+}
+summary:focus-visible {
+    outline: 3px solid var(--tf-accent);
+    outline-offset: 2px;
+}

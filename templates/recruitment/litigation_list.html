@@ -39,10 +39,10 @@
                 <td>
                     <details>
                         <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">Add Order</summary>
-                        <form method="post" action="{% url 'litigation_add_order' case.pk %}" style="margin-top:8px">
+                        <form method="post" action="{% url 'litigation_add_order' case.pk %}" style="margin-top:8px" aria-label="Add court order for case {{ case.case_number }}">
                             {% csrf_token %}
                             <div class="tf-field" style="margin-bottom:6px">
-                                <select name="order_type" class="tf-select" style="max-width:200px">
+                                <select name="order_type" class="tf-select" style="max-width:200px" aria-label="Order type">
                                     <option value="stay_order">Stay Order</option>
                                     <option value="notice">Notice</option>
                                     <option value="interim_direction">Interim Direction</option>
@@ -50,18 +50,18 @@
                                 </select>
                             </div>
                             <div class="tf-field" style="margin-bottom:6px">
-                                <textarea name="order_text" class="tf-textarea" rows="2" placeholder="Order text…" required></textarea>
+                                <textarea name="order_text" class="tf-textarea" rows="2" placeholder="Order text…" required aria-label="Order text for case {{ case.case_number }}"></textarea>
                             </div>
-                            <button class="tf-btn small" type="submit">Add</button>
+                            <button class="tf-btn small" type="submit" aria-label="Add order to case {{ case.case_number }}">Add</button>
                         </form>
                     </details>
                     {% if case.status != 'resolved' and case.status != 'dismissed' %}
                     <details style="margin-top:6px">
                         <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">Update Status</summary>
-                        <form method="post" action="{% url 'litigation_update_status' case.pk %}" style="margin-top:8px">
+                        <form method="post" action="{% url 'litigation_update_status' case.pk %}" style="margin-top:8px" aria-label="Update status for case {{ case.case_number }}">
                             {% csrf_token %}
                             <div class="tf-field" style="margin-bottom:6px">
-                                <select name="status" class="tf-select" style="max-width:200px">
+                                <select name="status" class="tf-select" style="max-width:200px" aria-label="Case status">
                                     <option value="filed" {% if case.status == 'filed' %}selected{% endif %}>Filed</option>
                                     <option value="hearing" {% if case.status == 'hearing' %}selected{% endif %}>Hearing</option>
                                     <option value="stay" {% if case.status == 'stay' %}selected{% endif %}>Stay Granted</option>
@@ -70,12 +70,12 @@
                                 </select>
                             </div>
                             <div class="tf-field" style="margin-bottom:6px">
-                                <input type="date" name="resolved_on" class="tf-input" style="max-width:200px" placeholder="Resolved on">
+                                <input type="date" name="resolved_on" class="tf-input" style="max-width:200px" placeholder="Resolved on" aria-label="Resolved on date">
                             </div>
                             <div class="tf-field" style="margin-bottom:6px">
-                                <textarea name="final_order_text" class="tf-textarea" rows="2" placeholder="Final order text…"></textarea>
+                                <textarea name="final_order_text" class="tf-textarea" rows="2" placeholder="Final order text…" aria-label="Final order text"></textarea>
                             </div>
-                            <button class="tf-btn small" type="submit">Update</button>
+                            <button class="tf-btn small" type="submit" aria-label="Update status for case {{ case.case_number }}">Update</button>
                         </form>
                     </details>
                     {% endif %}

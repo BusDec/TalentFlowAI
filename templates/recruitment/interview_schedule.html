@@ -9,20 +9,20 @@
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Application ID</label>
-            <input type="text" name="application_id" class="tf-input" value="{{ application_id|default:'' }}" placeholder="e.g. TF20260001" required>
+            <label class="tf-label" for="application-id">Application ID</label>
+            <input type="text" name="application_id" class="tf-input" value="{{ application_id|default:'' }}" placeholder="e.g. TF20260001" required id="application-id">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Date &amp; Time</label>
-            <input type="datetime-local" name="datetime" class="tf-input" value="{{ datetime|default:'' }}" required>
+            <label class="tf-label" for="interview-datetime">Date &amp; Time</label>
+            <input type="datetime-local" name="datetime" class="tf-input" value="{{ datetime|default:'' }}" required id="interview-datetime">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Duration (minutes)</label>
-            <input type="number" name="duration_minutes" class="tf-input" value="{{ duration_minutes|default:'30' }}" min="5" max="180">
+            <label class="tf-label" for="duration">Duration (minutes)</label>
+            <input type="number" name="duration_minutes" class="tf-input" value="{{ duration_minutes|default:'30' }}" min="5" max="180" id="duration">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Notes (optional)</label>
-            <textarea name="notes" class="tf-textarea" rows="2">{{ notes|default:'' }}</textarea>
+            <label class="tf-label" for="interview-notes">Notes (optional)</label>
+            <textarea name="notes" class="tf-textarea" rows="2" id="interview-notes">{{ notes|default:'' }}</textarea>
         </div>
         <div class="tf-flex" style="gap:12px;margin-top:16px">
             <a href="{% url 'interview_results' panel.post.pk %}" class="tf-btn ghost">Cancel</a>

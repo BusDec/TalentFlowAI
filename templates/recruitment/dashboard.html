@@ -16,7 +16,7 @@
 
 <div class="tf-stats">
     {% for status, count in by_status.items %}
-    <a href="{% url 'application_list' %}?status={{ status }}" class="tf-stat" style="text-decoration:none;display:block">
+    <a href="{% url 'application_list' %}?status={{ status }}" class="tf-stat" style="text-decoration:none;display:block" aria-label="{{ status|title }}: {{ count }} applications">
         <div class="label">{{ status|title }}</div>
         <div class="value">{{ count }}</div>
         <div class="icon">◈</div>
@@ -27,7 +27,7 @@
 <div class="tf-grid-3 mb-4">
     <div class="tf-glass tf-card">
         <div class="tf-section-title">📊 Funnel Overview</div>
-        <div id="funnelChart"></div>
+        <div id="funnelChart" role="img" aria-label="Recruitment funnel chart showing application status breakdown"></div>
     </div>
 
     <div class="tf-glass tf-card">
@@ -65,7 +65,7 @@
         <thead><tr><th>Application</th><th>Candidate</th><th>Post</th><th>Score</th><th>Status</th></tr></thead>
         <tbody>
             {% for app in top_applications %}
-            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}">
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}" role="link" tabindex="0" aria-label="Application {{ app.application_id }} — {{ app.candidate }}">
                 <td>{{ app.application_id }}</td>
                 <td>{{ app.candidate }}</td>
                 <td>{{ app.post.name }}</td>

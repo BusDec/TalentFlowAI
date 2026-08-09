@@ -25,8 +25,8 @@
     <form method="post" enctype="multipart/form-data" class="tf-grid-2">
         {% csrf_token %}
         <div class="tf-field">
-            <label class="tf-label">Template File (.xlsx / .csv)</label>
-            <input type="file" name="csv_file" class="tf-input" accept=".xlsx,.csv,.txt" required>
+            <label class="tf-label" for="import-file">Template File (.xlsx / .csv)</label>
+            <input type="file" name="csv_file" class="tf-input" accept=".xlsx,.csv,.txt" required id="import-file">
         </div>
         <label class="tf-flex" style="gap:10px;cursor:pointer;align-items:center;margin-top:24px">
             <input type="checkbox" name="dry_run" value="on" class="tf-input" style="width:18px;height:18px">

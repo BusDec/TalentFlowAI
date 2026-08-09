@@ -24,28 +24,28 @@
         <div class="tf-section-title">📋 Advertisement Details</div>
         <div class="tf-grid-2">
             <div class="tf-field">
-                <label class="tf-label">Advt Number *</label>
+                <label class="tf-label" for="id_advt_number">Advt Number *</label>
                 {{ form.advt_number }}
                 {% for e in form.advt_number.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
             </div>
             <div class="tf-field">
-                <label class="tf-label">Title *</label>
+                <label class="tf-label" for="id_title">Title *</label>
                 {{ form.title }}
                 {% for e in form.title.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
             </div>
             <div class="tf-field">
-                <label class="tf-label">Published Date *</label>
+                <label class="tf-label" for="id_published_date">Published Date *</label>
                 {{ form.published_date }}
                 {% for e in form.published_date.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
             </div>
             <div class="tf-field">
-                <label class="tf-label">Closing Date *</label>
+                <label class="tf-label" for="id_closing_date">Closing Date *</label>
                 {{ form.closing_date }}
                 {% for e in form.closing_date.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
             </div>
         </div>
         <div class="tf-field">
-            <label class="tf-label">Company Profile / Description</label>
+            <label class="tf-label" for="id_description">Company Profile / Description</label>
             {{ form.description }}
             {% for e in form.description.errors %}<div class="tf-field-error">{{ e }}</div>{% endfor %}
         </div>
@@ -58,15 +58,15 @@
         <details class="tf-glass" style="padding:16px 20px;margin-top:18px">
             <summary style="cursor:pointer;font-weight:700;color:#fff">⚙ Boilerplate Sections (pre-filled — edit if needed)</summary>
             <div class="tf-field">
-                <label class="tf-label">Health Requirements</label>
+                <label class="tf-label" for="id_health_text">Health Requirements</label>
                 {{ form.health_text }}
             </div>
             <div class="tf-field">
-                <label class="tf-label">General Conditions</label>
+                <label class="tf-label" for="id_general_conditions">General Conditions</label>
                 {{ form.general_conditions }}
             </div>
             <div class="tf-field">
-                <label class="tf-label">How to Apply</label>
+                <label class="tf-label" for="id_how_to_apply">How to Apply</label>
                 {{ form.how_to_apply }}
             </div>
         </details>
@@ -83,7 +83,7 @@
             <div class="tf-glass post-form" style="padding:18px 20px;margin-bottom:16px;position:relative">
                 <div class="tf-flex" style="justify-content:space-between;margin-bottom:12px">
                     <span class="tf-badge primary">Post {{ forloop.counter }}</span>
-                    <button type="button" class="tf-btn small danger remove-post">✕ Remove Post</button>
+                    <button type="button" class="tf-btn small danger remove-post" aria-label="Remove Post {{ forloop.counter }}">✕ Remove Post</button>
                 </div>
                 {% if post_form.instance.pk %}
                 <div style="display:none">{{ post_form.DELETE }}</div>

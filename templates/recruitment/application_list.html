@@ -55,7 +55,7 @@
         </thead>
         <tbody>
             {% for app in applications %}
-            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}">
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}" role="link" tabindex="0" aria-label="Application {{ app.application_id }} — {{ app.candidate }}">
                 <td>{{ app.application_id }}</td>
                 <td>{{ app.candidate }}</td>
                 <td>{{ app.post.name }}</td>
