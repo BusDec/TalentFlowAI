@@ -99,6 +99,20 @@ DATABASES = {
 
 DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
+# ---------------------------------------------------------------------------
+# Cache (required by django-ratelimit; LocMem in dev, swap to Redis in prod)
+# ---------------------------------------------------------------------------
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
+# ---------------------------------------------------------------------------
+# django-ratelimit
+# ---------------------------------------------------------------------------
+RATELIMIT_USE_CACHE = "default"
+
 TENANT_MODEL = "tenants.Client"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
 

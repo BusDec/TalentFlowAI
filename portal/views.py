@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods, require_POST
+from django_ratelimit.decorators import ratelimit
 
 from agents.eligibility_verifier import verify_application
 from agents.resume_evaluator import evaluate_resume
@@ -63,6 +64,7 @@ def _clean_optional(value):
     return None if value in ("", "None") else value
 
 
+@ratelimit(key="ip", rate="5/m", block=True)
 def register(request):
     if request.method == "POST":
         form = CandidateRegistrationForm(request.POST)
@@ -88,6 +90,7 @@ def register(request):
     return render(request, "portal/register.html", {"form": form})
 
 
+@ratelimit(key="ip", rate="5/m", block=True)
 def verify_otp(request):
     if request.method == "POST":
         form = OTPVerifyForm(request.POST)
@@ -115,6 +118,7 @@ def verify_otp(request):
     return render(request, "portal/verify_otp.html", {"form": form})
 
 
+@ratelimit(key="ip", rate="5/m", block=True)
 def login_view(request):
     if request.user.is_authenticated and isinstance(request.user, CandidatePortalUser):
         return redirect("portal_dashboard")
@@ -316,6 +320,7 @@ def _build_prefill(files, user):
                 pass
 
 
+@ratelimit(key="user", rate="10/h", block=True)
 @require_portal_user
 def apply(request, advt_id):
     advt = get_object_or_404(Advertisement, id=advt_id)
@@ -491,6 +496,8 @@ def _application_detail_context(application):
     re-renders the page (e.g. consent checkbox missing) so the stepper,
     withdraw button and employee-number badge stay intact.
     """
+    from agents import doc_intel
+
     background_report = getattr(application, "background_report", None)
     stage_names = [s[0] for s in STAGES]
     stage_index = stage_names.index(application.status) if application.status in stage_names else len(stage_names)
@@ -499,6 +506,23 @@ def _application_detail_context(application):
     if is_terminal:
         rejected_stage = application.rejected_at_stage or "offered"
         terminal_index = stage_names.index(rejected_stage) if rejected_stage in stage_names else stage_names.index("offered")
+
+    # Cross-document consistency warnings from stored extracted_data.
+    docs_qs = application.documents.filter(extracted_data__isnull=False)
+    normalized = []
+    for d in docs_qs:
+        data = d.extracted_data or {}
+        fields = dict(data.get("fields") or {})
+        # Resume parser stores the candidate name as ``full_name``;
+        # check_consistency compares ``name``.
+        if d.doc_type == "resume" and fields.get("full_name"):
+            fields["name"] = fields.pop("full_name")
+        normalized.append({"doc_type": d.doc_type, "fields": fields})
+    consistency_warnings = [
+        issue["detail"]
+        for issue in doc_intel.check_consistency(normalized)
+        if issue.get("detail")
+    ]
 
     return {
         "application": application,
@@ -510,6 +534,7 @@ def _application_detail_context(application):
         "terminal_index": terminal_index,
         "can_withdraw": application.status
         in ("received", "document_verification", "shortlisted", "interview"),
+        "consistency_warnings": consistency_warnings,
     }
 
 

@@ -1,14 +1,18 @@
 """Candidate portal test foundation — registration, OTP login, apply, withdraw."""
 
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import HttpResponseForbidden
+from django.test import RequestFactory
 from django.urls import reverse
 
 from consent.models import Consent
 from portal.models import CandidatePortalUser
+from portal import views as portal_views
 from profiles.models import ExamDisclosure
-from recruitment.models import Application
+from recruitment.models import Application, Document
 
 # CandidatePortalUser is a separate model from accounts.User, so force_login
 # must pin the portal backend or the session user cannot be reloaded.
@@ -230,3 +234,95 @@ def test_accept_writes_audit(api_client, candidate_portal_user, application):
     api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
     api_client.post(reverse("portal_accept_offer", args=[application.application_id]), {"consent": "on"})
     assert AuditEvent.objects.filter(application=application, field_name="status", new_value="joined").exists()
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 — Rate limiting
+# ---------------------------------------------------------------------------
+
+def test_ratelimit_decorated_auth_views():
+    """register, verify_otp, and login_view are wrapped by @ratelimit."""
+    for view in (portal_views.register, portal_views.verify_otp, portal_views.login_view):
+        # @ratelimit uses functools.wraps, so __wrapped__ points to the original.
+        assert hasattr(view, "__wrapped__"), (
+            f"{view.__name__} does not appear to be decorated by @ratelimit"
+        )
+
+
+def test_ratelimit_decorated_apply():
+    """apply is wrapped by @ratelimit."""
+    # @ratelimit uses functools.wraps on the inner require_portal_user wrapper.
+    assert hasattr(portal_views.apply, "__wrapped__"), (
+        "apply does not appear to be decorated by @ratelimit"
+    )
+
+
+def test_rate_limit_blocks_register(api_client):
+    """Exceeding the rate limit on register returns 403."""
+    with patch("django_ratelimit.decorators.is_ratelimited", return_value=True):
+        r = api_client.post(
+            reverse("portal_register"),
+            {"email": "cand@example.com", "phone": "9876543210", "full_name": "Test"},
+        )
+    assert r.status_code == 403
+
+
+def test_rate_limit_blocks_login(api_client):
+    """Exceeding the rate limit on login_view returns 403."""
+    with patch("django_ratelimit.decorators.is_ratelimited", return_value=True):
+        r = api_client.post(
+            reverse("portal_login"),
+            {"email": "cand@example.com"},
+        )
+    assert r.status_code == 403
+
+
+def test_rate_limit_blocks_verify_otp(api_client):
+    """Exceeding the rate limit on verify_otp returns 403."""
+    with patch("django_ratelimit.decorators.is_ratelimited", return_value=True):
+        r = api_client.post(reverse("portal_verify"), {"otp": "000000"})
+    assert r.status_code == 403
+
+
+def test_rate_limit_blocks_apply(candidate_portal_user, advertisement):
+    """Exceeding the rate limit on apply raises Ratelimited (block=True)."""
+    import pytest
+    from django_ratelimit.exceptions import Ratelimited
+
+    factory = RequestFactory()
+    request = factory.get(reverse("portal_apply", args=[advertisement.id]))
+    request.user = candidate_portal_user
+    with patch("django_ratelimit.decorators.is_ratelimited", return_value=True):
+        with pytest.raises(Ratelimited):
+            portal_views.apply(request, advt_id=advertisement.id)
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 — DocConsistency
+# ---------------------------------------------------------------------------
+
+def test_consistency_warning_on_detail(api_client, candidate_portal_user, application):
+    """Name mismatch across documents surfaces a consistency warning on detail."""
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+
+    # Two documents with disagreeing names in extracted_data.
+    Document.objects.create(
+        application=application,
+        doc_type="pan",
+        extracted_data={"doc_type": "pan", "fields": {"name": "Ram Kumar"}},
+    )
+    Document.objects.create(
+        application=application,
+        doc_type="aadhaar",
+        extracted_data={"doc_type": "aadhaar", "fields": {"name": "Shyam Kumar"}},
+    )
+
+    r = api_client.get(
+        reverse("portal_application_detail", args=[application.application_id])
+    )
+    assert r.status_code == 200
+    content = r.content.decode()
+    assert "Document Consistency Warning" in content
+    assert "does not match" in content
