@@ -32,3 +32,32 @@ def test_classify_marksheet():
 def test_classify_unknown_defaults_resume():
     from agents import doc_intel
     assert doc_intel.classify_document("garbage text no markers") == "resume"
+
+
+def test_extract_pan_valid():
+    from agents import doc_intel
+    r = doc_intel.extract_pan("ABCDE1234F\nName: RAM KUMAR")
+    assert r["pan"] == "ABCDE1234F"
+
+
+def test_aadhaar_verhoeff_valid_and_invalid():
+    from agents import doc_intel
+    # Canonical Verhoeff fixtures: an all-zero payload (00000000000) has check
+    # digit 3, so 000000000003 is valid; 486199074618 is a valid Aadhaar
+    # checksum example. Corrupt one digit of a valid number -> must fail.
+    assert doc_intel._verhoeff_valid("000000000003") is True
+    assert doc_intel._verhoeff_valid("486199074618") is True
+    assert doc_intel._verhoeff_valid("486199074611") is False
+
+
+def test_extract_marksheet_fields():
+    from agents import doc_intel
+    text = "UNIVERSITY OF MEGHALAYA\nROLL NO: 2012013\nPERCENTAGE: 78.5%\nCGPA: 8.25\nYear: 2023"
+    r = doc_intel.extract_marksheet(text)
+    assert r["percentage"] == "78.5%" and r["cgpa"] == "8.25" and r["year"] == "2023"
+
+
+def test_extract_document_shape():
+    from agents import doc_intel
+    r = doc_intel.extract_document("missing.pdf")
+    assert "doc_type" in r and "fields" in r and "confidence" in r and "validations" in r

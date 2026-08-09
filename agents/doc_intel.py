@@ -11,9 +11,14 @@ Produces the two primitives every downstream document agent consumes:
   into one of the known document classes (resume/pan/aadhaar/marksheet/
   experience_letter/caste_certificate/unknown), with a best-effort LLM
   fallback when one is configured and a "resume" default otherwise.
+* Per-type extractors (``extract_pan``/``extract_aadhaar``/``extract_marksheet``/
+  ``extract_experience_letter``/``extract_caste_certificate``/``extract_resume``)
+  pull structured fields out of classified text, with ``_verhoeff_valid``
+  backing Aadhaar checksum validation.
+* ``extract_document(path)`` — orchestration: text -> classify -> per-type
+  extraction, returning per-field confidence and per-type validations.
 
-Consumed by Tasks 2-5 (per-type extractors, extraction orchestration,
-validation and PII handling).
+Consumed by Tasks 3-5 (validation and PII handling).
 """
 
 import os
@@ -246,3 +251,302 @@ def _llm_classify(text):
         return None
     label = raw.strip().strip(".,;:'\"`").lower()
     return label if label in CLASSES else None
+
+
+# ---------------------------------------------------------------------------
+# Verhoeff checksum (Aadhaar)
+# ---------------------------------------------------------------------------
+
+_VERHOEFF_D = (
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9), (1, 2, 3, 4, 0, 6, 7, 8, 9, 5),
+    (2, 3, 4, 0, 1, 7, 8, 9, 5, 6), (3, 4, 0, 1, 2, 8, 9, 5, 6, 7),
+    (4, 0, 1, 2, 3, 9, 5, 6, 7, 8), (5, 9, 8, 7, 6, 0, 4, 3, 2, 1),
+    (6, 5, 9, 8, 7, 1, 0, 4, 3, 2), (7, 6, 5, 9, 8, 2, 1, 0, 4, 3),
+    (8, 7, 6, 5, 9, 3, 2, 1, 0, 4), (9, 8, 7, 6, 5, 4, 3, 2, 1, 0),
+)
+_VERHOEFF_P = (
+    (0, 1, 2, 3, 4, 5, 6, 7, 8, 9), (1, 5, 7, 6, 2, 8, 3, 0, 9, 4),
+    (5, 8, 0, 3, 7, 9, 6, 1, 4, 2), (8, 9, 1, 6, 0, 4, 3, 5, 2, 7),
+    (9, 4, 5, 3, 1, 2, 6, 8, 7, 0), (4, 2, 8, 6, 5, 7, 3, 9, 0, 1),
+    (2, 7, 9, 3, 8, 0, 6, 4, 1, 5), (7, 0, 4, 6, 9, 1, 3, 2, 5, 8),
+)
+
+
+def _verhoeff_valid(number):
+    """Standard Verhoeff checksum validation (pure Python, dihedral tables).
+
+    Returns True for a valid number and False for anything else (malformed,
+    non-digit, or checksum mismatch). Never raises.
+    """
+    digits = str(number)
+    if not digits.isdigit():
+        return False
+    c = 0
+    for i, ch in enumerate(reversed(digits)):
+        c = _VERHOEFF_D[c][_VERHOEFF_P[i % 8][int(ch)]]
+    return c == 0
+
+
+# ---------------------------------------------------------------------------
+# Per-type extractors
+# ---------------------------------------------------------------------------
+
+_NAME_BLOCKED = ("father", "mother", "spouse", "husband", "wife", "guardian",
+                 "parent")
+_NAME_LABEL_RE = re.compile(
+    r"(?i)^\s*(?:"
+    r"(?:applicant|candidate|father|mother|spouse|husband|wife|guardian)'?s?\s+name"
+    r"|name\s+of\s+(?:the\s+)?(?:applicant|candidate)"
+    r"|full\s+name"
+    r"|name"
+    r")\s*[:.\-]?\s*(.+?)\s*$"
+)
+_DOB_RE = re.compile(
+    r"(?i)\b(?:date\s*of\s*birth|dob|d\.o\.b\.?|birth\s*date)\s*[:.\-]?\s*"
+    r"(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4})"
+)
+_PAN_FULL_RE = re.compile(r"\b[A-Z]{5}[0-9]{4}[A-Z]\b")
+_AADHAAR_FULL_RE = re.compile(r"\d{4}\s*\d{4}\s*\d{4}")
+_PCT_RE = re.compile(r"\d{1,3}(?:\.\d+)?\s?%")
+_CGPA_RE = re.compile(r"\b\d\.\d{2}\b")
+_CGPA_LOOSE_RE = re.compile(r"\b\d\.\d\b")
+_YEAR_RE = re.compile(r"\b(20\d{2})\b")
+_UNIVERSITY_KW = ("university", "board", "institute")
+_ROLL_RE = re.compile(r"(?i)\broll\s*(?:no\.?|number)?\s*[:.\-]?\s*(\d{6,10})\b")
+_ORG_RE = re.compile(r"(?i)^\s*(?:organization|organisation|company)\s*:?\s*(.+?)\s*$")
+_EXP_YEAR_RANGE_RE = re.compile(
+    r"(?i)\b((?:19|20)\d{2})\s*(?:-|–|—|to)\s*((?:19|20)\d{2}|till\s*date|present)\b"
+)
+_EXP_DAY_RANGE_RE = re.compile(
+    r"\b(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4})\s*(?:-|–|—|to)\s*"
+    r"(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4})\b"
+)
+_DESIGNATION_LABEL_RE = re.compile(
+    r"(?i)^\s*(?:designation|position|post|role)\s*:?\s*(.+?)\s*$"
+)
+_DESIGNATION_KW_RE = re.compile(
+    r"(?i)\b(?:assistant\s+manager|manager|engineer|medical\s+officer|"
+    r"supervisor|analyst|associate)\b"
+)
+_CAST_CATEGORY_RE = re.compile(r"\b(?:sc|st|obc|ews|pwbd|pwd)\b", re.IGNORECASE)
+_AUTHORITY_RE = re.compile(
+    r"(?i)^\s*(?:issuing\s*authority|issued\s*by|office|district)\s*:?\s*(.+?)\s*$"
+)
+_AUTHORITY_KW = ("district", "office", "tehsildar", "sub-divisional", "collector")
+
+
+def _extract_name(text):
+    """Best-effort labelled name extraction (ignores relative-name lines)."""
+    for line in text.splitlines():
+        if any(b in line.lower() for b in _NAME_BLOCKED):
+            continue
+        m = _NAME_LABEL_RE.match(line)
+        if m:
+            name = m.group(1).strip().strip(".,- ")
+            if name and len(name) >= 2:
+                return name
+    return None
+
+
+def _extract_dob(text):
+    """Raw date-of-birth string (DD/MM/YYYY family) or None."""
+    m = _DOB_RE.search(text)
+    return m.group(1) if m else None
+
+
+def extract_pan(text):
+    """Extract PAN and a nearby name from PAN-card text."""
+    m = _PAN_FULL_RE.search(text)
+    return {"pan": m.group(0) if m else None, "name": _extract_name(text)}
+
+
+def extract_aadhaar(text):
+    """Extract Aadhaar number (Verhoeff-validated), name and DOB."""
+    m = _AADHAAR_FULL_RE.search(text)
+    digits = re.sub(r"\s+", "", m.group(0)) if m else None
+    return {
+        "aadhaar": digits,
+        "name": _extract_name(text),
+        "dob": _extract_dob(text),
+        "valid": bool(digits and _verhoeff_valid(digits)),
+    }
+
+
+def extract_marksheet(text):
+    """Extract percentage, CGPA, university, year and roll number."""
+    pct = _PCT_RE.search(text)
+    cgpa = _CGPA_RE.search(text) or _CGPA_LOOSE_RE.search(text)
+    univ = None
+    for line in text.splitlines():
+        if any(k in line.lower() for k in _UNIVERSITY_KW):
+            univ = line.strip()
+            break
+    year = _YEAR_RE.search(text)
+    roll = _ROLL_RE.search(text)
+    return {
+        "percentage": pct.group(0).strip() if pct else None,
+        "cgpa": cgpa.group(0) if cgpa else None,
+        "university": univ,
+        "year": year.group(1) if year else None,
+        "roll_no": roll.group(1) if roll else None,
+    }
+
+
+def extract_experience_letter(text):
+    """Extract organisation, employment period and designation."""
+    org = None
+    for line in text.splitlines():
+        m = _ORG_RE.match(line)
+        if m:
+            org = m.group(1).strip()
+            break
+    start = end = None
+    m = _EXP_YEAR_RANGE_RE.search(text)
+    if m:
+        start, end = m.group(1), m.group(2)
+    else:
+        m = _EXP_DAY_RANGE_RE.search(text)
+        if m:
+            start, end = m.group(1), m.group(2)
+    designation = None
+    dm = _DESIGNATION_LABEL_RE.search(text)
+    if dm:
+        designation = dm.group(1).strip()
+    else:
+        km = _DESIGNATION_KW_RE.search(text)
+        if km:
+            designation = km.group(0).title()
+    return {
+        "organisation": org,
+        "start_date": start,
+        "end_date": end,
+        "designation": designation,
+    }
+
+
+def extract_caste_certificate(text):
+    """Extract category and issuing authority from a caste certificate."""
+    cm = _CAST_CATEGORY_RE.search(text)
+    category = cm.group(0).upper() if cm else None
+    authority = None
+    for line in text.splitlines():
+        m = _AUTHORITY_RE.match(line)
+        if m:
+            authority = m.group(1).strip()
+            break
+    if authority is None:
+        for line in text.splitlines():
+            low = line.lower()
+            if any(k in low for k in _AUTHORITY_KW) and len(line.strip()) > 5:
+                authority = line.strip()
+                break
+    return {"category": category, "issuing_authority": authority}
+
+
+def extract_resume(text):
+    """Delegate to the existing resume heuristic extractor."""
+    from agents.resume_parser import _heuristic_extract
+
+    fields = _heuristic_extract(text)
+    fields["_method"] = "heuristic"
+    return fields
+
+
+# ---------------------------------------------------------------------------
+# Orchestration: extract_document
+# ---------------------------------------------------------------------------
+
+_EXTRACTORS = {
+    "pan": extract_pan,
+    "aadhaar": extract_aadhaar,
+    "marksheet": extract_marksheet,
+    "experience_letter": extract_experience_letter,
+    "caste_certificate": extract_caste_certificate,
+    "resume": extract_resume,
+    "unknown": lambda text: {},
+}
+
+
+def _validations_for(doc_type, fields):
+    """Per-type validation flags (format / checksum / range)."""
+    if doc_type == "pan":
+        return {"pan_format": bool(fields.get("pan"))}
+    if doc_type == "aadhaar":
+        return {
+            "aadhaar_checksum": bool(
+                fields.get("aadhaar") and fields.get("valid")
+            )
+        }
+    if doc_type == "marksheet":
+        pct = fields.get("percentage")
+        value = re.sub(r"[^\d.]", "", pct) if pct else ""
+        try:
+            in_range = 0 <= float(value) <= 100
+        except ValueError:
+            in_range = False
+        return {"percentage_range": bool(pct) and in_range}
+    if doc_type == "experience_letter":
+        return {
+            "date_range": bool(
+                fields.get("start_date") and fields.get("end_date")
+            )
+        }
+    if doc_type == "caste_certificate":
+        return {"category_present": bool(fields.get("category"))}
+    return {}
+
+
+def _validated_field(doc_type, key, validations):
+    """True when a field's value is backed by a checksum/regex validation."""
+    if doc_type == "pan" and key == "pan":
+        return bool(validations.get("pan_format"))
+    if doc_type == "aadhaar" and key == "aadhaar":
+        return bool(validations.get("aadhaar_checksum"))
+    if doc_type == "marksheet" and key == "percentage":
+        return bool(validations.get("percentage_range"))
+    return False
+
+
+def _confidence_for(doc_type, fields, validations):
+    """Per-field confidence: 0.95 validated, 0.7 heuristic, 0.0 for None."""
+    conf = {}
+    for key, value in fields.items():
+        if key.startswith("_") or key == "valid":
+            continue
+        if value is None:
+            conf[key] = 0.0
+        elif _validated_field(doc_type, key, validations):
+            conf[key] = 0.95
+        else:
+            conf[key] = 0.7
+    return conf
+
+
+def extract_document(path):
+    """Full extraction pipeline: text -> classify -> per-type extractor.
+
+    Returns a dict with doc_type, fields, per-field confidence, method,
+    validations and extracted_text_length. Unreadable documents degrade to
+    the "unknown" shape so callers can always rely on the same keys.
+    """
+    text = extract_text(path)
+    if not text or not text.strip():
+        return {
+            "doc_type": "unknown",
+            "fields": {},
+            "confidence": {},
+            "method": "heuristic",
+            "validations": {},
+            "extracted_text_length": 0,
+        }
+    doc_type = classify_document(text)
+    fields = _EXTRACTORS[doc_type](text)
+    validations = _validations_for(doc_type, fields)
+    return {
+        "doc_type": doc_type,
+        "fields": fields,
+        "confidence": _confidence_for(doc_type, fields, validations),
+        "method": "heuristic",
+        "validations": validations,
+        "extracted_text_length": len(text),
+    }
