@@ -431,3 +431,6 @@ label.tf-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase
 }
 .tf-step.rejected::before { background: rgba(6,214,160,0.5); }
 .tf-step.rejected .tf-step-label { color: #ff9bb0; }
+
+/* ---------- Autofill badges (Phase 2) ---------- */
+.tf-autofill { color: var(--tf-success); font-size: .78rem; font-weight: 600; margin-left: 8px; white-space: nowrap; }

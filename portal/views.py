@@ -176,6 +176,133 @@ def portal_dashboard(request):
     )
 
 
+_SESSION_PREFILL = "apply_prefill_{advt_id}"
+_PREFILL_FIELDS = ("name", "email", "phone", "dob", "pan", "aadhaar", "education")
+_DOC_SOURCE_LABELS = {
+    "resume": "resume",
+    "pan": "PAN card",
+    "aadhaar": "Aadhaar card",
+    "marksheet": "marksheet",
+    "experience_letter": "experience letter",
+    "caste_certificate": "caste certificate",
+}
+
+
+def _upload_to_temp(uploaded):
+    """Persist an uploaded file to a temp path (extension preserved)."""
+    import os
+    import tempfile
+
+    suffix = os.path.splitext(uploaded.name or "")[1] or ".txt"
+    fd, path = tempfile.mkstemp(suffix=suffix)
+    os.close(fd)  # release the handle so extract_text can open it on Windows
+    with open(path, "wb") as handle:
+        handle.write(uploaded.read())
+    return path
+
+
+def _build_prefill(files, user):
+    """Parse uploaded documents into a candidate prefill (Autofill phase 1).
+
+    Returns a dict with one key per field in ``_PREFILL_FIELDS`` plus two
+    extras: ``sources`` (field -> human label of the document it came from)
+    and ``warnings`` (cross-document consistency issues as strings).
+    """
+    import os
+
+    from agents import doc_intel
+
+    prefill = {field: None for field in _PREFILL_FIELDS}
+    sources = {}
+    docs = []  # (extracted doc dict, temp path)
+    temp_paths = []
+
+    def fill(field, value, source):
+        if value and prefill[field] is None:
+            prefill[field] = value
+            sources[field] = source
+
+    try:
+        resume_file = files.get("resume")
+        if resume_file:
+            path = _upload_to_temp(resume_file)
+            temp_paths.append(path)
+            docs.append((doc_intel.extract_document(path), path))
+        # Certificate-style uploads: real forms use cert_<post>_<n>, tests use cert_<n>.
+        for key, uploaded in files.items():
+            if key.startswith("cert_"):
+                path = _upload_to_temp(uploaded)
+                temp_paths.append(path)
+                docs.append((doc_intel.extract_document(path), path))
+
+        for doc, path in docs:
+            doc_type = doc.get("doc_type")
+            fields = doc.get("fields") or {}
+            label = _DOC_SOURCE_LABELS.get(doc_type, doc_type or "document")
+            if doc_type == "resume":
+                name = fields.get("full_name")
+                if not name:
+                    # resume_parser's label regex can swallow the line after
+                    # "Name:" (then hit its blocklist); doc_intel's per-line
+                    # extractor handles that shape, so fall back to it.
+                    name = doc_intel._extract_name(doc_intel.extract_text(path))
+                    if name:
+                        fields["full_name"] = name
+                fill("name", name, label)
+                fill("email", fields.get("email"), label)
+                fill("phone", fields.get("phone"), label)
+                fill("dob", fields.get("date_of_birth"), label)
+                fill("education", fields.get("degree"), label)
+            elif doc_type == "pan":
+                fill("pan", fields.get("pan"), label)
+                fill("name", fields.get("name"), label)
+            elif doc_type == "aadhaar":
+                fill("aadhaar", fields.get("aadhaar"), label)
+                fill("dob", fields.get("dob"), label)
+                fill("name", fields.get("name"), label)
+            elif doc_type == "marksheet":
+                education = ", ".join(
+                    part
+                    for part in (
+                        fields.get("percentage"),
+                        fields.get("university"),
+                        fields.get("year"),
+                    )
+                    if part
+                )
+                fill("education", education or None, label)
+
+        # Registered-profile fallbacks for fields no document carried.
+        fill("name", user.full_name, "your profile")
+        fill("email", user.email, "your profile")
+        fill("phone", user.phone, "your profile")
+
+        # Cross-document consistency (the resume exposes its name as full_name).
+        normalized = []
+        for doc, _path in docs:
+            fields = dict(doc.get("fields") or {})
+            if (
+                doc.get("doc_type") == "resume"
+                and fields.get("full_name")
+                and not fields.get("name")
+            ):
+                fields["name"] = fields["full_name"]
+            normalized.append({"doc_type": doc.get("doc_type"), "fields": fields})
+        prefill["warnings"] = [
+            issue.get("detail")
+            for issue in doc_intel.check_consistency(normalized)
+            if issue.get("detail")
+        ]
+        prefill["sources"] = sources
+        return prefill
+    finally:
+        for path in temp_paths:
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+
+
 @require_portal_user
 def apply(request, advt_id):
     advt = get_object_or_404(Advertisement, id=advt_id)
@@ -206,11 +333,46 @@ def apply(request, advt_id):
         )
         return redirect("portal_application_detail", application_id=existing_application.application_id)
 
+    session_key = _SESSION_PREFILL.format(advt_id=advt.id)
+
     if request.method == "POST":
         post_id = request.POST.get("post")
         post = advt.posts.filter(id=post_id).first()
         resume_file = request.FILES.get("resume")
         declared = request.POST.get("declare") in ("on", "1", "true")
+        confirmed = request.POST.get("confirm") in ("on", "1", "true")
+        prefill = request.session.get(session_key)
+
+        # Phase 1: parse the uploaded documents into a session prefill.
+        if post and resume_file and not declared and not confirmed and prefill is None:
+            prefill = _build_prefill(request.FILES, request.user)
+            request.session[session_key] = prefill
+            return render(
+                request,
+                "portal/apply.html",
+                {
+                    "advt": advt,
+                    "candidate": candidate,
+                    "prefill": prefill,
+                    "sources": prefill["sources"],
+                    "warnings": prefill["warnings"],
+                },
+            )
+
+        # Phase 2 gate: a pending prefill must be explicitly confirmed.
+        if post and resume_file and prefill is not None and not confirmed:
+            return render(
+                request,
+                "portal/apply.html",
+                {
+                    "advt": advt,
+                    "candidate": candidate,
+                    "prefill": prefill,
+                    "sources": prefill["sources"],
+                    "warnings": prefill["warnings"],
+                    "confirm_error": _("Confirm the auto-filled information."),
+                },
+            )
 
         if post and not resume_file:
             messages.error(request, _("Please upload your resume before submitting."))
@@ -274,14 +436,23 @@ def apply(request, advt_id):
                                 file=cert_file,
                             )
                             parse_document_task.delay(document.id)
+                    # The prefill is consumed by a successful submission only.
+                    request.session.pop(session_key, None)
                     messages.success(request, _("Application submitted successfully."))
                     return redirect("portal_application_detail", application_id=application.application_id)
         messages.error(request, _("Post not found or already applied."))
-    return render(
-        request,
-        "portal/apply.html",
-        {"advt": advt, "candidate": candidate},
-    )
+
+    context = {"advt": advt, "candidate": candidate}
+    prefill = request.session.get(session_key)
+    if prefill is not None:
+        context.update(
+            {
+                "prefill": prefill,
+                "sources": prefill["sources"],
+                "warnings": prefill["warnings"],
+            }
+        )
+    return render(request, "portal/apply.html", context)
 
 
 @require_portal_user

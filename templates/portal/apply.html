@@ -34,6 +34,17 @@
 
     <div class="tf-glass tf-card">
         <div class="tf-section-title">{% trans "Submit Your Application" %}</div>
+        {% if confirm_error %}
+        <div class="tf-alert danger" style="margin-bottom:18px">{{ confirm_error }}</div>
+        {% endif %}
+        {% if warnings %}
+        <div class="tf-alert warning" style="margin-bottom:18px">
+            <strong>{% trans "Consistency warnings" %}</strong>
+            <ul style="margin:8px 0 0;padding-left:18px">
+                {% for warning in warnings %}<li>{{ warning }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="tf-field">
@@ -64,6 +75,67 @@
                 <input type="file" name="resume" class="tf-input" accept=".pdf,.doc,.docx" required>
                 <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">{% trans "PDF or Word. Your resume is stored once and reused across applications." %}</p>
             </div>
+            {% if prefill %}
+            <div class="tf-section-title" style="font-size:0.95rem;margin-top:22px">{% trans "Auto-filled Information" %}</div>
+            <p class="tf-muted" style="font-size:0.8rem;margin:0 0 14px">{% trans "The values below were extracted from your uploaded documents. Review them carefully." %}</p>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Full Name" %}</label>
+                <div style="display:flex;align-items:center">
+                    <input type="text" class="tf-input" value="{{ prefill.name|default:'' }}" readonly style="flex:1">
+                    {% if sources.name %}<span class="tf-autofill">✓ auto-filled (from {{ sources.name }})</span>{% endif %}
+                </div>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Email" %}</label>
+                <div style="display:flex;align-items:center">
+                    <input type="text" class="tf-input" value="{{ prefill.email|default:'' }}" readonly style="flex:1">
+                    {% if sources.email %}<span class="tf-autofill">✓ auto-filled (from {{ sources.email }})</span>{% endif %}
+                </div>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Phone" %}</label>
+                <div style="display:flex;align-items:center">
+                    <input type="text" class="tf-input" value="{{ prefill.phone|default:'' }}" readonly style="flex:1">
+                    {% if sources.phone %}<span class="tf-autofill">✓ auto-filled (from {{ sources.phone }})</span>{% endif %}
+                </div>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Date of Birth" %}</label>
+                <div style="display:flex;align-items:center">
+                    <input type="text" class="tf-input" value="{{ prefill.dob|default:'' }}" readonly style="flex:1">
+                    {% if sources.dob %}<span class="tf-autofill">✓ auto-filled (from {{ sources.dob }})</span>{% endif %}
+                </div>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "PAN" %}</label>
+                <div style="display:flex;align-items:center">
+                    <input type="text" class="tf-input" value="{{ prefill.pan|default:'' }}" readonly style="flex:1">
+                    {% if sources.pan %}<span class="tf-autofill">✓ auto-filled (from {{ sources.pan }})</span>{% endif %}
+                </div>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Aadhaar" %}</label>
+                <div style="display:flex;align-items:center">
+                    <input type="text" class="tf-input" value="{{ prefill.aadhaar|default:'' }}" readonly style="flex:1">
+                    {% if sources.aadhaar %}<span class="tf-autofill">✓ auto-filled (from {{ sources.aadhaar }})</span>{% endif %}
+                </div>
+            </div>
+            <div class="tf-field">
+                <label class="tf-label">{% trans "Education" %}</label>
+                <div style="display:flex;align-items:center">
+                    <input type="text" class="tf-input" value="{{ prefill.education|default:'' }}" readonly style="flex:1">
+                    {% if sources.education %}<span class="tf-autofill">✓ auto-filled (from {{ sources.education }})</span>{% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% if prefill %}
+            <label class="tf-flex" style="gap:10px;align-items:flex-start;cursor:pointer;margin-bottom:18px">
+                <input type="checkbox" name="confirm" value="on" class="tf-input" style="width:auto;margin-top:2px" required>
+                <span style="font-size:0.85rem;line-height:1.5;color:rgba(233,234,244,0.85)">
+                    {% trans "I confirm the auto-filled information above is correct." %}
+                </span>
+            </label>
+            {% endif %}
             <label class="tf-flex" style="gap:10px;align-items:flex-start;cursor:pointer;margin-bottom:18px">
                 <input type="checkbox" name="declare" value="on" class="tf-input" style="width:auto;margin-top:2px" required>
                 <span style="font-size:0.85rem;line-height:1.5;color:rgba(233,234,244,0.85)">
