@@ -588,3 +588,57 @@ class EligibilityOverride(models.Model):
 
     def __str__(self):
         return f"Override {self.application.application_id}: {self.verdict}"
+
+
+class PostBasedRoster(models.Model):
+    """DoPT 100-point roster for a post, persisted once generated.
+
+    ``roster_points`` holds the ordered list of roster entries
+    (``{"serial", "category", "point_type"}``) produced by
+    ``recruitment.roster.build_roster``.  ``current_position`` tracks the next
+    serial to fill as candidates are appointed; ``liaison_officer`` and
+    ``certified_by`` record human accountability for the cycle.
+    """
+
+    post = models.OneToOneField(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="roster",
+        help_text="Post this roster cycle belongs to.",
+    )
+    cycle_start_year = models.PositiveIntegerField(
+        help_text="Calendar year in which this roster cycle began."
+    )
+    roster_points = models.JSONField(
+        default=list,
+        help_text="Ordered 100-point roster: [{'serial', 'category', 'point_type'}, ...].",
+    )
+    current_position = models.PositiveIntegerField(
+        default=1, help_text="Next serial in the roster to be filled."
+    )
+    liaison_officer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="roster_liaison_for",
+        help_text="Officer responsible for maintaining this roster.",
+    )
+    certified_on = models.DateTimeField(
+        null=True, blank=True, help_text="When the roster was last certified."
+    )
+    certified_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="roster_certified",
+        help_text="User who certified the roster cycle.",
+    )
+
+    class Meta:
+        verbose_name = "Post Based Roster"
+        ordering = ["-cycle_start_year"]
+
+    def __str__(self):
+        return f"{self.post} roster ({self.cycle_start_year})"
