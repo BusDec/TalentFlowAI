@@ -9,6 +9,7 @@ import json
 import re
 
 from agents.llm_client import get_llm_client, is_configured, LLMClientError
+from agents.fairness import sanitize_resume_for_prompt
 
 
 SYSTEM_PROMPT = (
@@ -18,7 +19,11 @@ SYSTEM_PROMPT = (
     "overall_score (int 0-100), summary (2-line string), "
     "competencies (array of {name, score(int 0-100), notes}), "
     "positives (array of strings), concerns (array of strings). "
-    "Be fair, specific, and reference facts from the resume. No commentary outside JSON."
+    "Be fair, specific, and reference facts from the resume. "
+    "NEVER use or infer the candidate's name, gender, age, caste, religion, "
+    "marital status, address, or any other demographic attribute in your "
+    "evaluation. Score only on professional qualifications and experience. "
+    "No commentary outside JSON."
 )
 
 
@@ -126,9 +131,10 @@ def evaluate_resume(resume, post):
                 f"Post: {post.name}\nQualification: {post.qualification}\n"
                 f"Experience: {post.experience_required}"
             )
+            safe_resume = sanitize_resume_for_prompt(resume) if isinstance(resume, dict) else resume
             raw = client.complete(
                 SYSTEM_PROMPT,
-                f"POST REQUIREMENTS:\n{req_text}\n\nCANDIDATE RESUME (parsed):\n{json.dumps(resume)[:8000]}",
+                f"POST REQUIREMENTS:\n{req_text}\n\nCANDIDATE RESUME (parsed):\n{json.dumps(safe_resume)[:8000]}",
                 max_tokens=1500,
                 temperature=0.2,
             )

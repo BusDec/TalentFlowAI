@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Fairness Dashboard{% endblock %}
+{% block page_title %}Fairness Analysis{% endblock %}
+{% block subtitle %}Adverse impact (4/5ths rule) &amp; statistical parity by category{% endblock %}
+
+{% block content %}
+<div class="tf-grid-2 mb-4">
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">⚖️ Adverse Impact (4/5ths Rule)</div>
+        {% if adverse_impact.has_adverse_impact %}
+            <p class="text-danger" style="font-weight:600;">
+                ⚠ Adverse impact detected — the following categories fall below
+                {{ adverse_impact.threshold|floatformat:3 }} (80 % of the highest rate):
+            </p>
+            <ul>
+                {% for cat in adverse_impact.flagged %}
+                    <li><strong>{{ cat|upper }}</strong></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-success" style="font-weight:600;">✔ No adverse impact flagged.</p>
+        {% endif %}
+
+        {% if adverse_impact.categories %}
+        <table class="tf-table" style="margin-top:0.75rem;">
+            <thead><tr><th>Category</th><th>Rate</th><th>Ratio to Max</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for c in adverse_impact.categories %}
+                <tr>
+                    <td>{{ c.category|upper }}</td>
+                    <td>{{ c.rate|floatformat:3 }}</td>
+                    <td>{{ c.ratio_to_max|floatformat:3 }}</td>
+                    <td>{% if c.below_threshold %}<span class="text-danger">⚠ Flagged</span>{% else %}<span class="text-success">✔ OK</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">📊 Statistical Parity</div>
+        {% if statistical_parity.categories %}
+            <p>Overall rate: <strong>{{ statistical_parity.overall_rate|floatformat:3 }}</strong></p>
+            <p>Max disparity: <strong>{{ statistical_parity.max_disparity|floatformat:3 }}</strong></p>
+            <p>Range: {{ statistical_parity.min_rate|floatformat:3 }} – {{ statistical_parity.max_rate|floatformat:3 }}</p>
+
+            <table class="tf-table" style="margin-top:0.75rem;">
+                <thead><tr><th>Category</th><th>Rate</th><th>Deviation</th></tr></thead>
+                <tbody>
+                    {% for c in statistical_parity.categories %}
+                    <tr>
+                        <td>{{ c.category|upper }}</td>
+                        <td>{{ c.rate|floatformat:3 }}</td>
+                        <td>{% if c.deviation >= 0 %}+{% endif %}{{ c.deviation|floatformat:3 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No category allocation data available yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">📋 Category Selection Summary</div>
+    {% if categories %}
+    <table class="tf-table">
+        <thead><tr><th>Category</th><th>Total Applicants</th><th>Selected</th><th>Selection Rate</th></tr></thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td>{{ cat.label }}</td>
+                <td>{{ cat.total }}</td>
+                <td>{{ cat.selected }}</td>
+                <td>{{ cat.rate|floatformat:3 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No category allocation data found. Assign categories to applications to populate this dashboard.</p>
+    {% endif %}
+</div>
+{% endblock %}

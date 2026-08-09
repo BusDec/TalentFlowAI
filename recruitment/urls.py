@@ -35,4 +35,6 @@ urlpatterns = [
     path("requisitions/create/", views.requisition_create, name="requisition_create"),
     path("requisitions/<int:req_id>/", views.requisition_detail, name="requisition_detail"),
     path("requisitions/<int:req_id>/approve/", views.requisition_approve, name="requisition_approve"),
+    # Fairness dashboard
+    path("fairness/", views.fairness_dashboard, name="fairness_dashboard"),
 ]

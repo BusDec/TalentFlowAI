@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 
 from accounts.decorators import check_role, require_role
 from agents import eligibility_verifier, interview_copilot, roster_compliance
+from agents.fairness import compute_adverse_impact, compute_statistical_parity
 from agents.shortlist import build_shortlist
 from consent.models import Consent, ConsentEvent
 from notifications import notify as send_notification
@@ -1316,3 +1317,60 @@ def requisition_approve(request, req_id):
         messages.success(request, f"Requisition approved at {approval.get_stage_display()}.")
 
     return redirect("requisition_detail", req_id=req.pk)
+
+
+# ── Fairness Dashboard ──────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("viewer", "hr_manager", "org_admin", "auditor")
+def fairness_dashboard(request):
+    """Fairness analysis dashboard — adverse impact and statistical parity by category.
+
+    Aggregates selection rates from CategoryAllocation + Application status to
+    feed the EEOC 4/5ths rule and statistical-parity engine.
+    """
+    from collections import defaultdict
+    from .models import CategoryAllocation, Application
+
+    # Aggregate per-category: total applicants vs selected (offered/joined).
+    totals = defaultdict(int)
+    selected = defaultdict(int)
+
+    allocations = (
+        CategoryAllocation.objects
+        .select_related("application")
+        .values_list("category", "application__status")
+    )
+    for cat, status in allocations:
+        totals[cat] += 1
+        if status in ("offered", "joined"):
+            selected[cat] += 1
+
+    selection_rates = {}
+    for cat in sorted(totals):
+        selection_rates[cat] = selected[cat] / totals[cat] if totals[cat] else 0.0
+
+    adverse = compute_adverse_impact(selection_rates) if selection_rates else {}
+    parity = compute_statistical_parity(selection_rates) if selection_rates else {}
+
+    # Category display names from the model.
+    cat_labels = dict(CategoryAllocation.CATEGORY_CHOICES)
+
+    categories = []
+    for cat in sorted(totals):
+        categories.append({
+            "code": cat,
+            "label": cat_labels.get(cat, cat.upper()),
+            "total": totals[cat],
+            "selected": selected[cat],
+            "rate": selection_rates[cat],
+        })
+
+    context = {
+        "categories": categories,
+        "adverse_impact": adverse,
+        "statistical_parity": parity,
+        "has_data": bool(selection_rates),
+    }
+    return render(request, "recruitment/fairness_dashboard.html", context)
