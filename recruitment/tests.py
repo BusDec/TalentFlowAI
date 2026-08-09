@@ -170,3 +170,52 @@ def test_consistency_warning_on_staff_detail(api_client, staff_user, application
     content = r.content.decode()
     assert "Document Consistency Warning" in content
     assert "does not match" in content
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 — DigiLocker client
+# ---------------------------------------------------------------------------
+
+def test_digilocker_mock_client_returns_documents():
+    """Mock mode returns synthetic DocumentResult objects."""
+    from recruitment.digilocker.client import DocumentResult, fetch_documents
+
+    docs = fetch_documents("test-consent-ref", dob="1995-03-15")
+    assert len(docs) >= 1
+    assert all(isinstance(d, DocumentResult) for d in docs)
+    assert docs[0].data["dob"] == "1995-03-15"
+
+
+def test_digilocker_mock_verify_signature():
+    """Mock mode verify_signature returns the document's signature_valid flag."""
+    from recruitment.digilocker.client import DocumentResult, verify_signature
+
+    doc = DocumentResult("aadhaar", "UIDAI", "2020-01-01", {}, signature_valid=True)
+    assert verify_signature(doc) is True
+
+    doc_invalid = DocumentResult("aadhaar", "UIDAI", "2020-01-01", {}, signature_valid=False)
+    assert verify_signature(doc_invalid) is False
+
+
+def test_digilocker_real_client_raises_not_configured_when_key_absent(settings):
+    """With DIGILOCKER_MOCK=False and no API key, NotConfigured is raised."""
+    from recruitment.digilocker.client import NotConfigured, fetch_documents, verify_signature
+    from recruitment.digilocker.client import DocumentResult
+
+    settings.DIGILOCKER_MOCK = False
+    settings.DIGILOCKER_API_KEY = ""
+
+    import pytest
+    with pytest.raises(NotConfigured, match="DIGILOCKER_API_KEY"):
+        fetch_documents("test-ref")
+
+    doc = DocumentResult("aadhaar", "UIDAI", "2020-01-01", {})
+    with pytest.raises(NotConfigured, match="DIGILOCKER_API_KEY"):
+        verify_signature(doc)
+
+
+def test_digilocker_not_configured_is_digilocker_error():
+    """NotConfigured is a subclass of DigiLockerError for backward compatibility."""
+    from recruitment.digilocker.client import DigiLockerError, NotConfigured
+
+    assert issubclass(NotConfigured, DigiLockerError)

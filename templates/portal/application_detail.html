@@ -169,6 +169,38 @@
 </div>
 {% endif %}
 
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">🪪 {% trans "DigiLocker / NAD Document Verification" %}</div>
+    <p class="tf-muted" style="font-size:0.85rem;margin-top:0;margin-bottom:14px">
+        {% trans "Grant consent to allow the recruitment team to fetch and verify your documents (Aadhaar, degree certificates, marksheets) from DigiLocker / NAD. This is optional but speeds up document verification." %}
+    </p>
+    {% if digilocker_consent %}
+    <p style="margin-bottom:10px"><span class="tf-badge success">{% trans "Consent Active" %}</span></p>
+    <p class="tf-muted" style="font-size:0.82rem;margin-bottom:0">{% trans "Granted on" %} {{ digilocker_consent.granted_at|date:"d M Y" }}. {% trans "You may revoke this consent at any time from" %} <a href="{% url 'portal_consents' %}" style="color:var(--tf-primary)">{% trans "My Consents" %}</a>.</p>
+    {% else %}
+    <form method="post" action="{% url 'portal_grant_digilocker_consent' application.application_id %}">
+        {% csrf_token %}
+        <button class="tf-btn small success" type="submit">{% trans "Grant DigiLocker Consent" %}</button>
+    </form>
+    {% endif %}
+    {% if fetched_documents %}
+    <table class="tf-table mt-4">
+        <thead><tr><th>{% trans "Source" %}</th><th>{% trans "Doc Type" %}</th><th>{% trans "Issuer" %}</th><th>{% trans "Issued" %}</th><th>{% trans "Signature" %}</th></tr></thead>
+        <tbody>
+            {% for d in fetched_documents %}
+            <tr>
+                <td>{{ d.source|title }}</td>
+                <td>{{ d.doc_type|title }}</td>
+                <td>{{ d.issuer }}</td>
+                <td>{{ d.issue_date }}</td>
+                <td>{% if d.signature_valid %}<span class="tf-badge success">{% trans "Valid" %}</span>{% else %}<span class="tf-badge danger">{% trans "Invalid" %}</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
 <div class="tf-glass tf-card">
     <div class="tf-section-title">{% trans "Resume" %}</div>
     {% if resumes %}

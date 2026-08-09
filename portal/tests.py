@@ -326,3 +326,89 @@ def test_consistency_warning_on_detail(api_client, candidate_portal_user, applic
     content = r.content.decode()
     assert "Document Consistency Warning" in content
     assert "does not match" in content
+
+
+# ---------------------------------------------------------------------------
+# Phase 4 — DigiLocker consent flow
+# ---------------------------------------------------------------------------
+
+def test_grant_digilocker_consent_creates_consent(api_client, candidate_portal_user, application):
+    """POSTing to the consent-grant URL creates an active digilocker Consent."""
+    from consent.models import Consent, ConsentEvent
+
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    r = api_client.post(
+        reverse("portal_grant_digilocker_consent", args=[application.application_id])
+    )
+    assert r.status_code == 302  # redirect back to detail
+
+    consent = Consent.objects.filter(
+        candidate_portal_user=candidate_portal_user,
+        purpose="digilocker",
+    ).first()
+    assert consent is not None
+    assert consent.is_active
+    assert consent.application == application
+
+    # Audit event recorded.
+    event = ConsentEvent.objects.filter(consent=consent, action="granted").first()
+    assert event is not None
+
+
+def test_grant_digilocker_consent_idempotent(api_client, candidate_portal_user, application):
+    """Granting consent twice does not create a duplicate active consent."""
+    from consent.models import Consent
+
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    api_client.post(reverse("portal_grant_digilocker_consent", args=[application.application_id]))
+    api_client.post(reverse("portal_grant_digilocker_consent", args=[application.application_id]))
+
+    assert Consent.objects.filter(
+        candidate_portal_user=candidate_portal_user,
+        purpose="digilocker",
+        revoked_at__isnull=True,
+    ).count() == 1
+
+
+def test_portal_detail_shows_digilocker_consent_section(api_client, candidate_portal_user, application):
+    """The portal application detail page shows the DigiLocker section."""
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    r = api_client.get(
+        reverse("portal_application_detail", args=[application.application_id])
+    )
+    assert r.status_code == 200
+    content = r.content.decode()
+    assert "DigiLocker" in content
+    assert "Grant DigiLocker Consent" in content
+
+
+def test_portal_detail_shows_active_consent_badge(api_client, candidate_portal_user, application):
+    """After granting consent, the detail page shows 'Consent Active'."""
+    from consent.models import Consent
+
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+
+    Consent.objects.create(
+        candidate_portal_user=candidate_portal_user,
+        application=application,
+        purpose="digilocker",
+        scope_text="test",
+    )
+
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    r = api_client.get(
+        reverse("portal_application_detail", args=[application.application_id])
+    )
+    assert r.status_code == 200
+    content = r.content.decode()
+    assert "Consent Active" in content

@@ -526,6 +526,12 @@ def _application_detail_context(application):
         if issue.get("detail")
     ]
 
+    # DigiLocker consent status for this candidate.
+    digilocker_consent = Consent.objects.filter(
+        candidate_portal_user=application.candidate.portal_user,
+        purpose="digilocker",
+    ).first() if application.candidate.portal_user else None
+
     return {
         "application": application,
         "background_report": background_report,
@@ -537,6 +543,8 @@ def _application_detail_context(application):
         "can_withdraw": application.status
         in ("received", "document_verification", "shortlisted", "interview"),
         "consistency_warnings": consistency_warnings,
+        "digilocker_consent": digilocker_consent if digilocker_consent and digilocker_consent.is_active else None,
+        "fetched_documents": application.fetched_documents.all(),
     }
 
 
@@ -864,6 +872,54 @@ def consent_revoke(request, consent_id):
         )
         messages.success(request, _("Consent revoked. We will stop processing your data for this purpose."))
     return redirect("portal_consents")
+
+
+@require_portal_user
+@require_POST
+def grant_digilocker_consent(request, application_id):
+    """Grant DigiLocker document-fetch consent for a specific application.
+
+    Creates a purpose-limited ``Consent`` record (purpose=digilocker) linked
+    to the application so the recruitment staff can later invoke the
+    DigiLocker/NAD document-fetch workflow.
+    """
+    application = get_object_or_404(
+        Application,
+        application_id=application_id,
+        candidate__portal_user=request.user,
+    )
+
+    # Only one active digilocker consent per candidate — reuse if exists.
+    existing = Consent.objects.filter(
+        candidate_portal_user=request.user,
+        purpose="digilocker",
+    ).first()
+
+    if existing and existing.is_active:
+        messages.info(request, _("You have already granted DigiLocker consent."))
+        return redirect("portal_application_detail", application_id=application_id)
+
+    # If a revoked consent exists, create a fresh one rather than un-revoking.
+    consent = Consent.objects.create(
+        candidate_portal_user=request.user,
+        application=application,
+        purpose="digilocker",
+        scope_text=(
+            "Consent to fetch and verify my documents (e.g. Aadhaar, educational "
+            "certificates, marksheets) from DigiLocker / NAD for the purpose of "
+            "document verification related to this recruitment."
+        ),
+        ip_address=_client_ip(request),
+        user_agent=request.META.get("HTTP_USER_AGENT", ""),
+    )
+    ConsentEvent.objects.create(
+        consent=consent,
+        action="granted",
+        ip_address=_client_ip(request),
+        details="Candidate granted DigiLocker consent from the portal.",
+    )
+    messages.success(request, _("DigiLocker consent granted. The recruitment team may now fetch your verified documents."))
+    return redirect("portal_application_detail", application_id=application_id)
 
 
 # ── Grievance / Appeal ──────────────────────────────────────────────────────

@@ -15,7 +15,11 @@ from .mock import MOCK_DOCUMENTS
 
 
 class DigiLockerError(RuntimeError):
-    pass
+    """Base exception for all DigiLocker integration errors."""
+
+
+class NotConfigured(DigiLockerError):
+    """Raised when real DigiLocker credentials are missing and mock mode is off."""
 
 
 class DocumentResult:
@@ -30,6 +34,15 @@ class DocumentResult:
         self.source = source
 
 
+def _check_api_key():
+    """Raise NotConfigured when real DigiLocker is selected but API key is absent."""
+    if not getattr(settings, "DIGILOCKER_API_KEY", ""):
+        raise NotConfigured(
+            "DigiLocker requires a DIGILOCKER_API_KEY environment variable. "
+            "Set it in your .env file, or keep DIGILOCKER_MOCK=True for development."
+        )
+
+
 def fetch_documents(consent_reference, candidate_email=None, dob=None):
     """Return a list of DocumentResult for the consented candidate.
 
@@ -39,20 +52,23 @@ def fetch_documents(consent_reference, candidate_email=None, dob=None):
     if getattr(settings, "DIGILOCKER_MOCK", True):
         return _mock_fetch(consent_reference, candidate_email, dob)
 
+    _check_api_key()
     # Real implementation would:
     #   1. exchange consent token for an access token
     #   2. call DigiLocker issuer search API
     #   3. fetch + verify documents
     #   4. return list[DocumentResult]
-    raise DigiLockerError("Real DigiLocker integration not yet configured.")
+    raise DigiLockerError("Real DigiLocker integration not yet implemented.")
 
 
 def verify_signature(document_result):
     """Return True when the digital signature verifies."""
     if getattr(settings, "DIGILOCKER_MOCK", True):
         return document_result.signature_valid
+
+    _check_api_key()
     # Real implementation: verify XMLDSig against issuer cert.
-    raise DigiLockerError("Real DigiLocker integration not yet configured.")
+    raise DigiLockerError("Real DigiLocker integration not yet implemented.")
 
 
 def _mock_fetch(consent_reference, candidate_email=None, dob=None):
