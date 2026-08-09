@@ -1,35 +1,36 @@
 {% extends 'base.html' %}
-{% block title %}Create Interview Panel{% endblock %}
-{% block page_title %}Create Interview Panel{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Create Interview Panel" %}{% endblock %}
+{% block page_title %}{% trans "Create Interview Panel" %}{% endblock %}
 {% block subtitle %}For {{ post.name }} ({{ post.post_code }}){% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card" style="max-width:640px">
-    <div class="tf-section-title">New Interview Panel</div>
+    <div class="tf-section-title">{% trans "New Interview Panel" %}</div>
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="panel-name">Panel Name</label>
-            <input type="text" name="name" class="tf-input" value="{{ name|default:'' }}" placeholder="e.g. Panel A" required id="panel-name">
+            <label class="tf-label" for="panel-name">{% trans "Panel Name" %}</label>
+            <input type="text" name="name" class="tf-input" value="{{ name|default:'' }}" placeholder="{% trans "e.g. Panel A" %}" required id="panel-name">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="sitting-fee">Sitting Fee (₹ per member, optional)</label>
+            <label class="tf-label" for="sitting-fee">{% trans "Sitting Fee (₹ per member, optional)" %}</label>
             <input type="number" name="sitting_fee" class="tf-input" value="{{ sitting_fee|default:'' }}" step="0.01" min="0" placeholder="2000.00" id="sitting-fee">
         </div>
         {% if staff_users %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label">Panel Members</label>
+            <label class="tf-label">{% trans "Panel Members" %}</label>
             <select name="member_ids" class="tf-input" multiple style="height:120px">
                 {% for u in staff_users %}
                 <option value="{{ u.pk }}">{{ u.get_full_name|default:u.username }} ({{ u.email }})</option>
                 {% endfor %}
             </select>
-            <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">Hold Ctrl/Cmd to select multiple members.</p>
+            <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">{% trans "Hold Ctrl/Cmd to select multiple members." %}</p>
         </div>
         {% endif %}
         <div class="tf-flex" style="gap:12px;margin-top:16px">
-            <a href="{% url 'interview_results' post.pk %}" class="tf-btn ghost">Cancel</a>
-            <button type="submit" class="tf-btn">Create Panel</button>
+            <a href="{% url 'interview_results' post.pk %}" class="tf-btn ghost">{% trans "Cancel" %}</a>
+            <button type="submit" class="tf-btn">{% trans "Create Panel" %}</button>
         </div>
     </form>
 </div>

@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% load tf_filters %}
-{% block title %}Dashboard{% endblock %}
-{% block page_title %}Recruitment Dashboard{% endblock %}
-{% block subtitle %}{{ request.tenant.name }} — recruitment overview{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Dashboard" %}{% endblock %}
+{% block page_title %}{% trans "Recruitment Dashboard" %}{% endblock %}
+{% block subtitle %}{% blocktrans with name=request.tenant.name %}{{ name }} — recruitment overview{% endblocktrans %}{% endblock %}
 
 {% block content %}
 {% if roster_alerts %}
 <div class="tf-alert danger">
-    <strong>Roster Breach Alerts:</strong>
+    <strong>{% trans "Roster Breach Alerts:" %}</strong>
     <ul class="mb-0" style="margin-top:6px">
         {% for a in roster_alerts %}<li>{{ a }}</li>{% endfor %}
     </ul>
@@ -16,7 +17,7 @@
 
 <div class="tf-stats">
     {% for status, count in by_status.items %}
-    <a href="{% url 'application_list' %}?status={{ status }}" class="tf-stat" style="text-decoration:none;display:block" aria-label="{{ status|title }}: {{ count }} applications">
+    <a href="{% url 'application_list' %}?status={{ status }}" class="tf-stat" style="text-decoration:none;display:block" aria-label="{% blocktrans with status_title=status|title count=count %}{{ status_title }}: {{ count }} applications{% endblocktrans %}">
         <div class="label">{{ status|title }}</div>
         <div class="value">{{ count }}</div>
         <div class="icon">◈</div>
@@ -26,46 +27,46 @@
 
 <div class="tf-grid-3 mb-4">
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">📊 Funnel Overview</div>
-        <div id="funnelChart" role="img" aria-label="Recruitment funnel chart showing application status breakdown"></div>
+        <div class="tf-section-title">📊 {% trans "Funnel Overview" %}</div>
+        <div id="funnelChart" role="img" aria-label="{% trans "Recruitment funnel chart showing application status breakdown" %}"></div>
     </div>
 
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">⚑ Flags &amp; Actions</div>
+        <div class="tf-section-title">⚑ {% trans "Flags &amp; Actions" %}</div>
         <div class="tf-kv">
-            <span class="k">Pending duplicates</span><span class="v"><span class="tf-badge warning">{{ pending_duplicates }}</span></span>
-            <span class="k">Panel promotable</span><span class="v"><span class="tf-badge primary">{{ panel_promotable }}</span></span>
-            <span class="k">Active adverts</span><span class="v"><span class="tf-badge success">{{ advertisements|length }}</span></span>
-            <span class="k">Avg resume score</span><span class="v"><span class="tf-badge muted">{{ avg_score|default:"—" }}</span></span>
+            <span class="k">{% trans "Pending duplicates" %}</span><span class="v"><span class="tf-badge warning">{{ pending_duplicates }}</span></span>
+            <span class="k">{% trans "Panel promotable" %}</span><span class="v"><span class="tf-badge primary">{{ panel_promotable }}</span></span>
+            <span class="k">{% trans "Active adverts" %}</span><span class="v"><span class="tf-badge success">{{ advertisements|length }}</span></span>
+            <span class="k">{% trans "Avg resume score" %}</span><span class="v"><span class="tf-badge muted">{{ avg_score|default:"—" }}</span></span>
         </div>
         <div class="mt-4">
-            <a href="{% url 'application_list' %}" class="tf-btn small">Review Applications</a>
-            <a href="{% url 'duplicates_queue' %}" class="tf-btn small ghost">Duplicates</a>
+            <a href="{% url 'application_list' %}" class="tf-btn small">{% trans "Review Applications" %}</a>
+            <a href="{% url 'duplicates_queue' %}" class="tf-btn small ghost">{% trans "Duplicates" %}</a>
         </div>
     </div>
 
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">▤ Active Advertisements</div>
+        <div class="tf-section-title">▤ {% trans "Active Advertisements" %}</div>
         <div class="tf-hscroll">
             {% for advt in advertisements %}
             <a href="{% url 'advertisement_detail' advt.id %}" class="tf-hscroll-card tf-hscroll-link">
                 <span style="font-weight:700">{{ advt.advt_number }}</span>
-                <span class="tf-muted" style="font-size:0.8rem">Closes {{ advt.closing_date }}</span>
+                <span class="tf-muted" style="font-size:0.8rem">{% blocktrans with closing_date=advt.closing_date %}Closes {{ closing_date }}{% endblocktrans %}</span>
             </a>
             {% empty %}
-            <div class="tf-empty">No active advertisements.</div>
+            <div class="tf-empty">{% trans "No active advertisements." %}</div>
             {% endfor %}
         </div>
     </div>
 </div>
 
 <div class="tf-glass tf-card">
-    <div class="tf-section-title">📈 Top Candidates by Resume Score</div>
+    <div class="tf-section-title">📈 {% trans "Top Candidates by Resume Score" %}</div>
     <table class="tf-table">
-        <thead><tr><th>Application</th><th>Candidate</th><th>Post</th><th>Score</th><th>Status</th></tr></thead>
+        <thead><tr><th>{% trans "Application" %}</th><th>{% trans "Candidate" %}</th><th>{% trans "Post" %}</th><th>{% trans "Score" %}</th><th>{% trans "Status" %}</th></tr></thead>
         <tbody>
             {% for app in top_applications %}
-            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}" role="link" tabindex="0" aria-label="Application {{ app.application_id }} — {{ app.candidate }}">
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' app.application_id %}" role="link" tabindex="0" aria-label="{% blocktrans with app_id=app.application_id candidate=app.candidate %}Application {{ app_id }} — {{ candidate }}{% endblocktrans %}">
                 <td>{{ app.application_id }}</td>
                 <td>{{ app.candidate }}</td>
                 <td>{{ app.post.name }}</td>
@@ -75,7 +76,7 @@
                 <td><span class="tf-badge {% if app.status == 'rejected' %}danger{% elif app.status == 'withdrawn' %}muted{% elif app.status == 'joined' %}success{% else %}primary{% endif %}">{{ app.get_status_display }}</span></td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="tf-empty">No applications yet. Run the simulator to seed data.</td></tr>
+            <tr><td colspan="5" class="tf-empty">{% trans "No applications yet. Run the simulator to seed data." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

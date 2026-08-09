@@ -1,31 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Report — {{ advt.advt_number }}{% endblock %}
-{% block page_title %}Candidate Report{% endblock %}
-{% block subtitle %}{{ advt.advt_number }} — {{ advt.title }} · Generated {{ today|default:"" }}{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktrans with advt_number=advt.advt_number %}Report — {{ advt_number }}{% endblocktrans %}{% endblock %}
+{% block page_title %}{% trans "Candidate Report" %}{% endblock %}
+{% block subtitle %}{% blocktrans with advt_number=advt.advt_number title=advt.title today=today|default:"" %}{{ advt_number }} — {{ title }} · Generated {{ today }}{% endblocktrans %}{% endblock %}
 
 {% block topbar %}
 <div class="tf-flex">
-    <a href="javascript:window.print()" class="tf-btn small" aria-label="Print or save candidate report as PDF">🖨 Print / Save PDF</a>
+    <a href="javascript:window.print()" class="tf-btn small" aria-label="{% trans "Print or save candidate report as PDF" %}">🖨 {% trans "Print / Save PDF" %}</a>
 </div>
 {% endblock %}
 
 {% block content %}
 <div class="report-doc">
     <div class="report-header">
-        <div class="report-title">{{ org_profile.name_en|default:"Organisation" }}</div>
-        <div class="report-sub">{{ advt.advt_number }} — {{ advt.title }}</div>
-        <div class="report-meta">Published: {{ advt.published_date|date:"d-m-Y" }} · Closes: {{ advt.closing_date|date:"d-m-Y" }}</div>
+        <div class="report-title">{% if org_profile.name_en %}{{ org_profile.name_en }}{% else %}{% trans "Organisation" %}{% endif %}</div>
+        <div class="report-sub">{% blocktrans with advt_number=advt.advt_number title=advt.title %}{{ advt_number }} — {{ title }}{% endblocktrans %}</div>
+        <div class="report-meta">{% blocktrans with pub_date=advt.published_date|date:"d-m-Y" close_date=advt.closing_date|date:"d-m-Y" %}Published: {{ pub_date }} · Closes: {{ close_date }}{% endblocktrans %}</div>
     </div>
 
     {% for p in posts %}
     <div class="report-section">
-        <div class="report-post">{{ forloop.counter }}. {{ p.post.name }} <span class="report-meta">({{ p.post.post_code }} · {{ p.post.vacancies }} vacancies)</span></div>
+        <div class="report-post">{{ forloop.counter }}. {{ p.post.name }} <span class="report-meta">({{ p.post.post_code }} · {% blocktrans count vacancies=p.post.vacancies %}{{ vacancies }} vacancy{% plural %}{{ vacancies }} vacancies{% endblocktrans %})</span></div>
         {% if p.applications %}
         <table class="report-table">
             <thead>
                 <tr>
-                    <th>#</th><th>Candidate</th><th>App ID</th><th>Qualification Met</th>
-                    <th>Resume Score</th><th>Resume Evaluation</th><th>Observation / Remarks</th>
+                    <th>#</th><th>{% trans "Candidate" %}</th><th>{% trans "App ID" %}</th><th>{% trans "Qualification Met" %}</th>
+                    <th>{% trans "Resume Score" %}</th><th>{% trans "Resume Evaluation" %}</th><th>{% trans "Observation / Remarks" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,21 +36,21 @@
                     <td>{{ a.application.candidate }}<br><span class="report-meta">{{ a.application.candidate.email }}</span></td>
                     <td>{{ a.application.application_id }}</td>
                     <td>
-                        {% if a.met is True %}<span class="report-ok">✓ Met</span>
-                        {% elif a.met is False %}<span class="report-no">✗ Not Met ({{ a.matched }}/{{ a.total }})</span>
-                        {% else %}<span class="report-na">Review ({{ a.matched }}/{{ a.total }})</span>{% endif %}
+                        {% if a.met is True %}<span class="report-ok">{% trans "✓ Met" %}</span>
+                        {% elif a.met is False %}<span class="report-no">{% blocktrans with matched=a.matched total=a.total %}✗ Not Met ({{ matched }}/{{ total }}){% endblocktrans %}</span>
+                        {% else %}<span class="report-na">{% blocktrans with matched=a.matched total=a.total %}Review ({{ matched }}/{{ total }}){% endblocktrans %}</span>{% endif %}
                     </td>
                     <td>{{ a.application.resume_score }}/100</td>
                     <td class="report-eval">
-                        {% if a.evaluation.summary %}{{ a.evaluation.summary }}{% else %}<span class="report-meta">No evaluation</span>{% endif %}
-                        {% if a.resume and a.resume.parse_status == 'parsed' %}<span class="report-meta"><br>Resume: {{ a.resume.file.name }}</span>{% endif %}
+                        {% if a.evaluation.summary %}{{ a.evaluation.summary }}{% else %}<span class="report-meta">{% trans "No evaluation" %}</span>{% endif %}
+                        {% if a.resume and a.resume.parse_status == 'parsed' %}<span class="report-meta"><br>{% blocktrans with resume_name=a.resume.file.name %}Resume: {{ resume_name }}{% endblocktrans %}</span>{% endif %}
                     </td>
                     <td>
                         <form method="post" action="{% url 'advertisement_report' advt.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="application_id" value="{{ a.application.application_id }}">
                             <textarea name="remarks" class="report-remarks" rows="2">{{ a.application.evaluation_notes }}</textarea>
-                            <button class="tf-btn small" type="submit" style="margin-top:6px" aria-label="Save remarks for {{ a.application.candidate }}">Save Remarks</button>
+                            <button class="tf-btn small" type="submit" style="margin-top:6px" aria-label="{% blocktrans with candidate=a.application.candidate %}Save remarks for {{ candidate }}{% endblocktrans %}">{% trans "Save Remarks" %}</button>
                         </form>
                     </td>
                 </tr>
@@ -57,11 +58,11 @@
             </tbody>
         </table>
         {% else %}
-        <p class="report-meta">No applications for this post.</p>
+        <p class="report-meta">{% trans "No applications for this post." %}</p>
         {% endif %}
     </div>
     {% empty %}
-    <div class="tf-empty">No posts in this advertisement.</div>
+    <div class="tf-empty">{% trans "No posts in this advertisement." %}</div>
     {% endfor %}
 </div>
 

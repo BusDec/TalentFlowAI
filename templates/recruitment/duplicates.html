@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}Duplicate Queue{% endblock %}
-{% block page_title %}Duplicate Detection Queue{% endblock %}
-{% block subtitle %}AI flags potential duplicates across advertisements — humans resolve{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Duplicate Queue" %}{% endblock %}
+{% block page_title %}{% trans "Duplicate Detection Queue" %}{% endblock %}
+{% block subtitle %}{% trans "AI flags potential duplicates across advertisements — humans resolve" %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card">
     <table class="tf-table" id="dupTable">
-        <thead><tr><th>Candidate</th><th>App A</th><th>App B</th><th>Confidence</th><th>Matched</th><th>Resolution</th><th></th></tr></thead>
+        <thead><tr><th>{% trans "Candidate" %}</th><th>{% trans "App A" %}</th><th>{% trans "App B" %}</th><th>{% trans "Confidence" %}</th><th>{% trans "Matched" %}</th><th>{% trans "Resolution" %}</th><th></th></tr></thead>
         <tbody>
             {% for flag in flags %}
-            <tr class="tf-rowlink" data-href="{% url 'application_detail' flag.application_a.application_id %}" role="link" tabindex="0" aria-label="Duplicate flag: {{ flag.candidate }} — {{ flag.application_a.application_id }} vs {{ flag.application_b.application_id }}">
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' flag.application_a.application_id %}" role="link" tabindex="0" aria-label="{% blocktrans with candidate=flag.candidate app_a=flag.application_a.application_id app_b=flag.application_b.application_id %}Duplicate flag: {{ candidate }} — {{ app_a }} vs {{ app_b }}{% endblocktrans %}">
                 <td>{{ flag.candidate }}</td>
                 <td>{{ flag.application_a.application_id }} <span class="tf-muted">({{ flag.application_a.post.advertisement.advt_number }})</span></td>
                 <td>{{ flag.application_b.application_id }} <span class="tf-muted">({{ flag.application_b.post.advertisement.advt_number }})</span></td>
@@ -22,16 +23,16 @@
                     <form method="post" action="{% url 'duplicates_resolve' flag.id %}" class="tf-flex">
                         {% csrf_token %}
                         <select name="resolution" class="tf-select" style="width:auto;padding:6px 10px">
-                            <option value="genuine_duplicate">Genuine Duplicate</option>
-                            <option value="false_positive">False Positive</option>
-                            <option value="merged">Merged</option>
+                            <option value="genuine_duplicate">{% trans "Genuine Duplicate" %}</option>
+                            <option value="false_positive">{% trans "False Positive" %}</option>
+                            <option value="merged">{% trans "Merged" %}</option>
                         </select>
-                        <button class="tf-btn small ghost">Resolve</button>
+                        <button class="tf-btn small ghost">{% trans "Resolve" %}</button>
                     </form>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" class="tf-empty">No duplicate flags. Great — your data is clean!</td></tr>
+            <tr><td colspan="7" class="tf-empty">{% trans "No duplicate flags. Great — your data is clean!" %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

@@ -1,17 +1,18 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block title %}{{ advt.advt_number }}{% endblock %}
 {% block page_title %}{{ advt.advt_number }} — {{ advt.title }}{% endblock %}
-{% block subtitle %}Published {{ advt.published_date|date:"d-m-Y" }} · Closes {{ advt.closing_date|date:"d-m-Y" }}{% endblock %}
+{% block subtitle %}{% blocktrans with pub_date=advt.published_date|date:"d-m-Y" close_date=advt.closing_date|date:"d-m-Y" %}Published {{ pub_date }} · Closes {{ close_date }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card mb-4">
-    <div class="tf-section-title">Description</div>
-    <p style="margin:0;color:rgba(233,234,244,0.85)">{{ advt.description|default:"No description provided." }}</p>
+    <div class="tf-section-title">{% trans "Description" %}</div>
+    <p style="margin:0;color:rgba(233,234,244,0.85)">{% if advt.description %}{{ advt.description }}{% else %}{% trans "No description provided." %}{% endif %}</p>
 </div>
 
 {% if corrigenda %}
 <div class="tf-glass tf-card mb-4">
-    <div class="tf-section-title">Corrigenda ({{ corrigenda|length }})</div>
+    <div class="tf-section-title">{% blocktrans count counter=corrigenda|length %}Corrigendum ({{ counter }}){% plural %}Corrigenda ({{ counter }}){% endblocktrans %}</div>
     {% for c in corrigenda %}
     <div style="padding:0.75rem 0;{% if not forloop.last %}border-bottom:1px solid rgba(255,255,255,0.08);{% endif %}">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.25rem;">
@@ -26,28 +27,28 @@
 
 {% if is_hr_manager %}
 <div class="tf-glass tf-card mb-4">
-    <div class="tf-section-title">Add Corrigendum</div>
+    <div class="tf-section-title">{% trans "Add Corrigendum" %}</div>
     <form method="post" action="{% url 'corrigendum_create' advt.id %}">
         {% csrf_token %}
-        <textarea name="changes_text" rows="3" placeholder="Describe the changes…" required aria-label="Corrigendum changes text"
+        <textarea name="changes_text" rows="3" placeholder="{% trans "Describe the changes…" %}" required aria-label="{% trans "Corrigendum changes text" %}"
             style="width:100%;padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
             background:rgba(0,0,0,0.25);color:rgba(233,234,244,0.9);resize:vertical;margin-bottom:0.5rem;"></textarea>
-        <button type="submit" class="tf-btn small">Publish Corrigendum</button>
+        <button type="submit" class="tf-btn small">{% trans "Publish Corrigendum" %}</button>
     </form>
 </div>
 {% endif %}
 
 <div class="tf-glass tf-card">
     <div class="tf-flex" style="justify-content:space-between">
-        <div class="tf-section-title">Posts ({{ advt.posts.count }})</div>
+        <div class="tf-section-title">{% blocktrans count counter=advt.posts.count %}Post ({{ counter }}){% plural %}Posts ({{ counter }}){% endblocktrans %}</div>
         <div class="tf-flex">
-            <a href="{% url 'advertisement_generate' advt.id %}" class="tf-btn small ghost">Preview Text</a>
-            <a href="{% url 'advertisement_report' advt.id %}" class="tf-btn small ghost">Report</a>
-            <a href="{% url 'advertisement_pdf' advt.id %}" class="tf-btn small">Download PDF</a>
+            <a href="{% url 'advertisement_generate' advt.id %}" class="tf-btn small ghost">{% trans "Preview Text" %}</a>
+            <a href="{% url 'advertisement_report' advt.id %}" class="tf-btn small ghost">{% trans "Report" %}</a>
+            <a href="{% url 'advertisement_pdf' advt.id %}" class="tf-btn small">{% trans "Download PDF" %}</a>
         </div>
     </div>
     <table class="tf-table">
-        <thead><tr><th>Post</th><th>Code</th><th>Vacancies</th><th>Category</th><th>Max Age</th><th>Pay Scale</th><th>Actions</th></tr></thead>
+        <thead><tr><th>{% trans "Post" %}</th><th>{% trans "Code" %}</th><th>{% trans "Vacancies" %}</th><th>{% trans "Category" %}</th><th>{% trans "Max Age" %}</th><th>{% trans "Pay Scale" %}</th><th>{% trans "Actions" %}</th></tr></thead>
         <tbody>
             {% for post in advt.posts.all %}
             <tr>
@@ -58,13 +59,13 @@
                 <td>{{ post.max_age|default:"—" }}</td>
                 <td>{{ post.pay_scale }}</td>
                 <td><div class="tf-flex">
-                    <a href="{% url 'roster_view' post.id %}" class="tf-link">Roster</a>
-                    <a href="{% url 'panel_view' post.id %}" class="tf-link">Panel</a>
-                    <a href="{% url 'shortlist_view' post.id %}" class="tf-link">AI Shortlist</a>
+                    <a href="{% url 'roster_view' post.id %}" class="tf-link">{% trans "Roster" %}</a>
+                    <a href="{% url 'panel_view' post.id %}" class="tf-link">{% trans "Panel" %}</a>
+                    <a href="{% url 'shortlist_view' post.id %}" class="tf-link">{% trans "AI Shortlist" %}</a>
                 </div></td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" class="tf-empty">No posts in this advertisement.</td></tr>
+            <tr><td colspan="7" class="tf-empty">{% trans "No posts in this advertisement." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

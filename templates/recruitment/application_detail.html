@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% load tf_filters %}
-{% block title %}Application {{ application.application_id }}{% endblock %}
-{% block page_title %}Application: {{ application.application_id }}{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktrans with app_id=application.application_id %}Application {{ app_id }}{% endblocktrans %}{% endblock %}
+{% block page_title %}{% blocktrans with app_id=application.application_id %}Application: {{ app_id }}{% endblocktrans %}{% endblock %}
 {% block subtitle %}{{ application.candidate }} · {{ application.post.name }}{% endblock %}
 
 {% block content %}
 {% if consistency_warnings %}
 <div class="tf-alert warning" style="border-color:rgba(255,170,0,0.55);background:rgba(255,170,0,0.08);">
-    <strong>⚠️ Document Consistency Warning</strong>
+    <strong>{% trans "⚠️ Document Consistency Warning" %}</strong>
     <ul style="margin:6px 0 0;padding-left:18px;font-size:0.88rem;line-height:1.6">
         {% for w in consistency_warnings %}<li>{{ w }}</li>{% endfor %}
     </ul>
@@ -15,11 +16,11 @@
 {% endif %}
 {% if active_stay_cases %}
 <div class="tf-alert warning" style="border-color:rgba(255,170,0,0.55);background:rgba(255,170,0,0.08);">
-    <strong>⚠️ Active Stay Order</strong> — This application is affected by an active court stay.
+    <strong>{% trans "⚠️ Active Stay Order" %}</strong> — {% trans "This application is affected by an active court stay." %}
     {% for sc in active_stay_cases %}
     <div style="margin-top:6px;font-size:0.88rem;">
         <span class="tf-badge warning">{{ sc.case_number }}</span>
-        {{ sc.court }} &middot; Petitioner: {{ sc.petitioner }}
+        {% blocktrans with court=sc.court petitioner=sc.petitioner %}{{ court }} · Petitioner: {{ petitioner }}{% endblocktrans %}
         {% for order in sc.interim_orders %}{% if order.type == "stay_order" %}
         — <em>{{ order.text }}</em>
         {% endif %}{% endfor %}
@@ -35,21 +36,21 @@
         <!-- Candidate summary -->
         <div class="tf-glass tf-card mb-4">
             <div class="tf-flex" style="justify-content:space-between">
-                <div class="tf-section-title">Candidate &amp; Post</div>
+                <div class="tf-section-title">{% trans "Candidate & Post" %}</div>
                 {% if application.resume_score %}
                 <span class="tf-score {{ application.resume_score|score_class }}">{{ application.resume_score }}/100</span>
                 {% endif %}
             </div>
             <div class="tf-kv">
-                <span class="k">Candidate</span><span class="v">{{ application.candidate }}</span>
-                <span class="k">Email</span><span class="v">{{ application.candidate.email }}</span>
-                <span class="k">Mobile</span><span class="v">{{ application.candidate.mobile|default:"—" }}</span>
-                <span class="k">DOB</span><span class="v">{{ application.candidate.date_of_birth|default:"—" }}</span>
-                <span class="k">Post</span><span class="v">{{ application.post.name }}</span>
-                <span class="k">Pay Scale</span><span class="v">{{ application.post.pay_scale|default:"—" }}</span>
-                <span class="k">Status</span><span class="v"><span class="tf-badge {% if application.status == 'rejected' %}danger{% elif application.status == 'withdrawn' %}muted{% elif application.status == 'joined' %}success{% else %}primary{% endif %}">{{ application.get_status_display }}</span></span>
+                <span class="k">{% trans "Candidate" %}</span><span class="v">{{ application.candidate }}</span>
+                <span class="k">{% trans "Email" %}</span><span class="v">{{ application.candidate.email }}</span>
+                <span class="k">{% trans "Mobile" %}</span><span class="v">{{ application.candidate.mobile|default:"—" }}</span>
+                <span class="k">{% trans "DOB" %}</span><span class="v">{{ application.candidate.date_of_birth|default:"—" }}</span>
+                <span class="k">{% trans "Post" %}</span><span class="v">{{ application.post.name }}</span>
+                <span class="k">{% trans "Pay Scale" %}</span><span class="v">{{ application.post.pay_scale|default:"—" }}</span>
+                <span class="k">{% trans "Status" %}</span><span class="v"><span class="tf-badge {% if application.status == 'rejected' %}danger{% elif application.status == 'withdrawn' %}muted{% elif application.status == 'joined' %}success{% else %}primary{% endif %}">{{ application.get_status_display }}</span></span>
                 {% if application.employee_number %}
-                <span class="k">Emp No</span><span class="v"><span class="tf-badge success">{{ application.employee_number }}</span></span>
+                <span class="k">{% trans "Emp No" %}</span><span class="v"><span class="tf-badge success">{{ application.employee_number }}</span></span>
                 {% endif %}
             </div>
         </div>
@@ -58,27 +59,27 @@
         {% if resume and resume.parsed_json %}
         <div class="tf-glass tf-card mb-4">
             <div class="tf-flex" style="justify-content:space-between">
-                <div class="tf-section-title">📄 Parsed Resume</div>
+                <div class="tf-section-title">{% trans "📄 Parsed Resume" %}</div>
                 <span class="tf-badge {% if resume.parsed_json|get_item:'_method' == 'llm' %}success{% else %}warning{% endif %}">
-                    {{ resume.parsed_json|get_item:'_method'|default:"heuristic" }} extraction
+                    {% blocktrans with method=resume.parsed_json|get_item:'_method'|default:"heuristic" %}{{ method }} extraction{% endblocktrans %}
                 </span>
             </div>
             {% with p=resume.parsed_json %}
             <div class="tf-kv">
-                {% if p.full_name %}<span class="k">Name</span><span class="v">{{ p.full_name }}</span>{% endif %}
-                <span class="k">Email</span><span class="v">{{ p.email|default:"—" }}</span>
-                <span class="k">Phone</span><span class="v">{{ p.phone|default:"—" }}</span>
-                {% if p.date_of_birth %}<span class="k">DOB</span><span class="v">{{ p.date_of_birth }}</span>{% endif %}
-                <span class="k">Degree</span><span class="v">{{ p.degree|default:"—" }}</span>
-                {% if p.university %}<span class="k">University</span><span class="v">{{ p.university }}</span>{% endif %}
-                {% if p.year_of_passing %}<span class="k">Passing Year</span><span class="v">{{ p.year_of_passing }}</span>{% endif %}
-                {% if p.percentage %}<span class="k">Percentage</span><span class="v">{{ p.percentage }}</span>{% endif %}
-                {% if p.total_experience_years %}<span class="k">Experience</span><span class="v">{{ p.total_experience_years }} years</span>{% endif %}
-                {% if p.current_designation %}<span class="k">Designation</span><span class="v">{{ p.current_designation }}</span>{% endif %}
-                {% if p.current_organization %}<span class="k">Organization</span><span class="v">{{ p.current_organization }}</span>{% endif %}
+                {% if p.full_name %}<span class="k">{% trans "Name" %}</span><span class="v">{{ p.full_name }}</span>{% endif %}
+                <span class="k">{% trans "Email" %}</span><span class="v">{{ p.email|default:"—" }}</span>
+                <span class="k">{% trans "Phone" %}</span><span class="v">{{ p.phone|default:"—" }}</span>
+                {% if p.date_of_birth %}<span class="k">{% trans "DOB" %}</span><span class="v">{{ p.date_of_birth }}</span>{% endif %}
+                <span class="k">{% trans "Degree" %}</span><span class="v">{{ p.degree|default:"—" }}</span>
+                {% if p.university %}<span class="k">{% trans "University" %}</span><span class="v">{{ p.university }}</span>{% endif %}
+                {% if p.year_of_passing %}<span class="k">{% trans "Passing Year" %}</span><span class="v">{{ p.year_of_passing }}</span>{% endif %}
+                {% if p.percentage %}<span class="k">{% trans "Percentage" %}</span><span class="v">{{ p.percentage }}</span>{% endif %}
+                {% if p.total_experience_years %}<span class="k">{% trans "Experience" %}</span><span class="v">{% blocktrans with years=p.total_experience_years %}{{ years }} years{% endblocktrans %}</span>{% endif %}
+                {% if p.current_designation %}<span class="k">{% trans "Designation" %}</span><span class="v">{{ p.current_designation }}</span>{% endif %}
+                {% if p.current_organization %}<span class="k">{% trans "Organization" %}</span><span class="v">{{ p.current_organization }}</span>{% endif %}
             </div>
             {% if p.skills %}
-            <div class="tf-section-title mt-4" style="font-size:0.95rem">Skills</div>
+            <div class="tf-section-title mt-4" style="font-size:0.95rem">{% trans "Skills" %}</div>
             <div class="tf-flex" style="flex-wrap:wrap;gap:8px">
                 {% for s in p.skills %}<span class="tf-badge primary">{{ s }}</span>{% endfor %}
             </div>
@@ -89,9 +90,9 @@
 
         <!-- Update status -->
         <div class="tf-glass tf-card mb-4">
-            <div class="tf-section-title">⚡ Update Status</div>
+            <div class="tf-section-title">{% trans "⚡ Update Status" %}</div>
             <div class="tf-field" style="margin-bottom:10px">
-                <label class="tf-label" for="status-select">Status</label>
+                <label class="tf-label" for="status-select">{% trans "Status" %}</label>
                 <select name="status" class="tf-select" style="max-width:320px" id="status-select">
                     {% for value, label in application.STATUS_CHOICES %}
                     <option value="{{ value }}" {% if application.status == value %}selected{% endif %}>{{ label }}</option>
@@ -99,52 +100,52 @@
                 </select>
             </div>
             <div class="tf-field" id="rejectedStageField" style="display:none;margin-bottom:10px">
-                <label class="tf-label" for="rejected-stage-select">Rejected at stage</label>
+                <label class="tf-label" for="rejected-stage-select">{% trans "Rejected at stage" %}</label>
                 <select name="rejected_at_stage" class="tf-select" style="max-width:320px" id="rejected-stage-select">
                     {% for value, label in rejection_stage_choices %}
                     <option value="{{ value }}" {% if application.rejected_at_stage == value %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
-                <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">The candidate's progress tracker will show a red cross at this stage.</p>
+                <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">{% trans "The candidate's progress tracker will show a red cross at this stage." %}</p>
             </div>
             <div class="tf-flex" style="flex-wrap:wrap">
-                <a href="{% url 'run_eligibility' application.application_id %}" class="tf-btn small ghost">Run Eligibility</a>
+                <a href="{% url 'run_eligibility' application.application_id %}" class="tf-btn small ghost">{% trans "Run Eligibility" %}</a>
                 {% if application.status == "offered" or application.status == "joined" %}
-                <a href="{% url 'offer_letter' application.application_id %}" class="tf-btn small ghost">Offer Letter</a>
+                <a href="{% url 'offer_letter' application.application_id %}" class="tf-btn small ghost">{% trans "Offer Letter" %}</a>
                 {% endif %}
-                <a href="{% url 'communications' application.application_id %}" class="tf-btn small ghost">Communications</a>
+                <a href="{% url 'communications' application.application_id %}" class="tf-btn small ghost">{% trans "Communications" %}</a>
             </div>
         </div>
 
         <!-- Category allocation -->
         <div class="tf-glass tf-card">
-            <div class="tf-section-title">🏷 Category Allocation / Roster</div>
+            <div class="tf-section-title">{% trans "🏷 Category Allocation / Roster" %}</div>
             {% for alloc in category_allocations %}
             <div class="tf-flex" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
                 <span>{{ alloc.get_category_display }}</span>
                 <span class="tf-badge {% if alloc.is_verified %}success{% else %}warning{% endif %}">
-                    {% if alloc.is_verified %}Verified{% else %}Unverified{% endif %}
+                    {% if alloc.is_verified %}{% trans "Verified" %}{% else %}{% trans "Unverified" %}{% endif %}
                 </span>
             </div>
             {% empty %}
-            <div class="tf-muted" style="margin-bottom:10px">No allocation recorded.</div>
+            <div class="tf-muted" style="margin-bottom:10px">{% trans "No allocation recorded." %}</div>
             {% endfor %}
             <div class="tf-field">
-                <label class="tf-label" for="category-select">Category</label>
+                <label class="tf-label" for="category-select">{% trans "Category" %}</label>
                 <select name="category" class="tf-select" id="category-select">
-                    <option value="">— Add allocation —</option>
+                    <option value="">{% trans "— Add allocation —" %}</option>
                     {% for value, label in category_choices %}
                     <option value="{{ value }}">{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="tf-field">
-                <label class="tf-label" for="certificate-file">Category Certificate (PDF/scan of caste/disability certificate)</label>
+                <label class="tf-label" for="certificate-file">{% trans "Category Certificate (PDF/scan of caste/disability certificate)" %}</label>
                 <input type="file" name="certificate_file" class="tf-input" id="certificate-file">
             </div>
             <label class="tf-flex" style="gap:8px;cursor:pointer">
-                <input type="checkbox" name="is_verified" class="tf-input" style="width:auto" aria-label="Mark category allocation as verified">
-                <span>Mark verified</span>
+                <input type="checkbox" name="is_verified" class="tf-input" style="width:auto" aria-label="{% trans "Mark category allocation as verified" %}">
+                <span>{% trans "Mark verified" %}</span>
             </label>
         </div>
     </div>
@@ -155,7 +156,7 @@
         {% if application.resume_evaluation %}
         <div class="tf-glass tf-card mb-4">
             <div class="tf-flex" style="justify-content:space-between">
-                <div class="tf-section-title">🧠 Resume Evaluation</div>
+                <div class="tf-section-title">{% trans "🧠 Resume Evaluation" %}</div>
                 <span class="tf-score {{ application.resume_score|score_class }}">{{ application.resume_score }}/100</span>
             </div>
             <p style="margin:0 0 16px;color:rgba(233,234,244,0.85);font-size:0.95rem;line-height:1.6">{{ application.resume_evaluation.summary }}</p>
@@ -171,13 +172,13 @@
             {% endfor %}
             <div class="tf-grid-2 mt-4">
                 <div>
-                    <div class="tf-badge success" style="margin-bottom:8px">✓ Positives</div>
+                    <div class="tf-badge success" style="margin-bottom:8px">{% trans "✓ Positives" %}</div>
                     <ul style="margin:0;padding-left:18px;color:rgba(233,234,244,0.9);font-size:0.9rem;line-height:1.7">
                         {% for p in application.resume_evaluation.positives %}<li>{{ p }}</li>{% endfor %}
                     </ul>
                 </div>
                 <div>
-                    <div class="tf-badge danger" style="margin-bottom:8px">⚠ Concerns</div>
+                    <div class="tf-badge danger" style="margin-bottom:8px">{% trans "⚠ Concerns" %}</div>
                     <ul style="margin:0;padding-left:18px;color:rgba(233,234,244,0.9);font-size:0.9rem;line-height:1.7">
                         {% for c in application.resume_evaluation.concerns %}<li>{{ c }}</li>{% endfor %}
                     </ul>
@@ -188,11 +189,11 @@
 
         <!-- Background facts -->
         <div class="tf-glass tf-card mb-4">
-            <div class="tf-section-title">🛡 Background Facts Report</div>
+            <div class="tf-section-title">{% trans "🛡 Background Facts Report" %}</div>
             {% if background_report %}
                 {% if background_report.facts.rows %}
                 <table class="tf-table">
-                    <thead><tr><th>Category</th><th>Fact</th><th>Source</th><th>Status</th></tr></thead>
+                    <thead><tr><th>{% trans "Category" %}</th><th>{% trans "Fact" %}</th><th>{% trans "Source" %}</th><th>{% trans "Status" %}</th></tr></thead>
                     <tbody>
                         {% for row in background_report.facts.rows %}
                         <tr>
@@ -205,36 +206,36 @@
                     </tbody>
                 </table>
                 {% else %}
-                <div class="tf-muted">No facts compiled yet.</div>
+                <div class="tf-muted">{% trans "No facts compiled yet." %}</div>
                 {% endif %}
                 <div class="tf-field" style="margin-top:14px">
-                    <label class="tf-label" for="candidate-explanation">Candidate Explanation</label>
+                    <label class="tf-label" for="candidate-explanation">{% trans "Candidate Explanation" %}</label>
                     <textarea name="candidate_explanation" class="tf-textarea" rows="2" id="candidate-explanation">{{ background_report.candidate_explanation }}</textarea>
                 </div>
                 <div class="tf-field">
-                    <label class="tf-label" for="reviewer-notes">Reviewer Notes</label>
+                    <label class="tf-label" for="reviewer-notes">{% trans "Reviewer Notes" %}</label>
                     <textarea name="reviewer_notes" class="tf-textarea" rows="2" id="reviewer-notes">{{ background_report.reviewer_notes }}</textarea>
                 </div>
             {% else %}
-            <div class="tf-muted">No background report.</div>
+            <div class="tf-muted">{% trans "No background report." %}</div>
             {% endif %}
         </div>
 
         <!-- DigiLocker / NAD -->
         <div class="tf-glass tf-card mb-4">
-            <div class="tf-section-title">🪪 DigiLocker / NAD Document Fetch</div>
+            <div class="tf-section-title">{% trans "🪪 DigiLocker / NAD Document Fetch" %}</div>
             {% if digilocker_consent %}
-            <p class="tf-muted" style="font-size:0.85rem;margin-top:0">Active consent on file — documents may be fetched.</p>
+            <p class="tf-muted" style="font-size:0.85rem;margin-top:0">{% trans "Active consent on file — documents may be fetched." %}</p>
             <form method="post" action="{% url 'digilocker_fetch' application.application_id %}">
                 {% csrf_token %}
-                <button class="tf-btn small" type="submit">Fetch from DigiLocker / NAD</button>
+                <button class="tf-btn small" type="submit">{% trans "Fetch from DigiLocker / NAD" %}</button>
             </form>
             {% else %}
-            <p class="tf-muted" style="font-size:0.85rem;margin:0">No active DigiLocker/NAD consent from the candidate — documents will not be fetched.</p>
+            <p class="tf-muted" style="font-size:0.85rem;margin:0">{% trans "No active DigiLocker/NAD consent from the candidate — documents will not be fetched." %}</p>
             {% endif %}
             {% if fetched_documents %}
             <table class="tf-table mt-4">
-                <thead><tr><th>Source</th><th>Doc Type</th><th>Issuer</th><th>Issued</th><th>Signature</th></tr></thead>
+                <thead><tr><th>{% trans "Source" %}</th><th>{% trans "Doc Type" %}</th><th>{% trans "Issuer" %}</th><th>{% trans "Issued" %}</th><th>{% trans "Signature" %}</th></tr></thead>
                 <tbody>
                     {% for d in fetched_documents %}
                     <tr>
@@ -242,7 +243,7 @@
                         <td>{{ d.doc_type|title }}</td>
                         <td>{{ d.issuer }}</td>
                         <td>{{ d.issue_date }}</td>
-                        <td>{% if d.signature_valid %}<span class="tf-badge success">Valid</span>{% else %}<span class="tf-badge danger">Invalid</span>{% endif %}</td>
+                        <td>{% if d.signature_valid %}<span class="tf-badge success">{% trans "Valid" %}</span>{% else %}<span class="tf-badge danger">{% trans "Invalid" %}</span>{% endif %}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -252,7 +253,7 @@
 
         <!-- Interview questions -->
         <div class="tf-glass tf-card">
-            <div class="tf-section-title">💬 Interview Co-pilot Questions</div>
+            <div class="tf-section-title">{% trans "💬 Interview Co-pilot Questions" %}</div>
             <ul style="margin:0;padding-left:18px;color:rgba(233,234,244,0.9);font-size:0.92rem;line-height:1.8">
                 {% for q in suggested_questions %}<li>{{ q }}</li>{% endfor %}
             </ul>
@@ -260,11 +261,11 @@
 
         <!-- Police Verification -->
         <div class="tf-glass tf-card">
-            <div class="tf-section-title">🛡️ Police Verification</div>
+            <div class="tf-section-title">{% trans "🛡️ Police Verification" %}</div>
             {% if police_verifications %}
             <table class="tf-table" style="margin-bottom:12px">
                 <thead>
-                    <tr><th>District</th><th>Status</th><th>Initiated By</th><th>Report</th><th>Created</th><th>Actions</th></tr>
+                    <tr><th>{% trans "District" %}</th><th>{% trans "Status" %}</th><th>{% trans "Initiated By" %}</th><th>{% trans "Report" %}</th><th>{% trans "Created" %}</th><th>{% trans "Actions" %}</th></tr>
                 </thead>
                 <tbody>
                     {% for pv in police_verifications %}
@@ -272,29 +273,29 @@
                         <td>{{ pv.district }}</td>
                         <td><span class="tf-badge {% if pv.status == 'cleared' %}success{% elif pv.status == 'not_cleared' %}danger{% elif pv.status == 'in_progress' %}warning{% else %}primary{% endif %}">{{ pv.get_status_display }}</span></td>
                         <td>{{ pv.initiated_by|default:"—" }}</td>
-                        <td>{% if pv.report_file %}<a href="{{ pv.report_file.url }}" target="_blank" class="tf-btn small ghost">View Report</a>{% else %}—{% endif %}</td>
+                        <td>{% if pv.report_file %}<a href="{{ pv.report_file.url }}" target="_blank" class="tf-btn small ghost">{% trans "View Report" %}</a>{% else %}—{% endif %}</td>
                         <td>{{ pv.created_at|date:"d M Y" }}</td>
                         <td>
                             {% if pv.status != 'cleared' and pv.status != 'not_cleared' %}
                             <details>
-                                <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">Update</summary>
-                                <form method="post" action="{% url 'police_verification_update_status' pv.pk %}" enctype="multipart/form-data" style="margin-top:8px" aria-label="Update police verification status for {{ pv.district }}">
+                                <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">{% trans "Update" %}</summary>
+                                <form method="post" action="{% url 'police_verification_update_status' pv.pk %}" enctype="multipart/form-data" style="margin-top:8px" aria-label="{% blocktrans with district=pv.district %}Update police verification status for {{ district }}{% endblocktrans %}">
                                     {% csrf_token %}
                                     <div class="tf-field" style="margin-bottom:6px">
-                                        <select name="status" class="tf-select" aria-label="New status">
-                                            <option value="initiated" {% if pv.status == 'initiated' %}selected{% endif %}>Initiated</option>
-                                            <option value="in_progress" {% if pv.status == 'in_progress' %}selected{% endif %}>In Progress</option>
-                                            <option value="cleared">Cleared</option>
-                                            <option value="not_cleared">Not Cleared</option>
+                                        <select name="status" class="tf-select" aria-label="{% trans "New status" %}">
+                                            <option value="initiated" {% if pv.status == 'initiated' %}selected{% endif %}>{% trans "Initiated" %}</option>
+                                            <option value="in_progress" {% if pv.status == 'in_progress' %}selected{% endif %}>{% trans "In Progress" %}</option>
+                                            <option value="cleared">{% trans "Cleared" %}</option>
+                                            <option value="not_cleared">{% trans "Not Cleared" %}</option>
                                         </select>
                                     </div>
                                     <div class="tf-field" style="margin-bottom:6px">
-                                        <textarea name="notes" class="tf-textarea" rows="2" placeholder="Notes…" aria-label="Notes"></textarea>
+                                        <textarea name="notes" class="tf-textarea" rows="2" placeholder="{% trans "Notes…" %}" aria-label="{% trans "Notes" %}"></textarea>
                                     </div>
                                     <div class="tf-field" style="margin-bottom:6px">
-                                        <input type="file" name="report_file" class="tf-input" aria-label="Upload police report">
+                                        <input type="file" name="report_file" class="tf-input" aria-label="{% trans "Upload police report" %}">
                                     </div>
-                                    <button class="tf-btn small" type="submit">Save</button>
+                                    <button class="tf-btn small" type="submit">{% trans "Save" %}</button>
                                 </form>
                             </details>
                             {% endif %}
@@ -304,17 +305,17 @@
                 </tbody>
             </table>
             {% else %}
-            <p class="tf-muted" style="font-size:0.85rem;margin:0">No police verification initiated yet.</p>
+            <p class="tf-muted" style="font-size:0.85rem;margin:0">{% trans "No police verification initiated yet." %}</p>
             {% endif %}
-            <form method="post" action="{% url 'police_verification_initiate' application.application_id %}" style="margin-top:8px" aria-label="Initiate new police verification">
+            <form method="post" action="{% url 'police_verification_initiate' application.application_id %}" style="margin-top:8px" aria-label="{% trans "Initiate new police verification" %}">
                 {% csrf_token %}
                 <div class="tf-field" style="margin-bottom:6px">
-                    <input type="text" name="district" class="tf-input" placeholder="District (e.g. East Khasi Hills)" required aria-label="Police district">
+                    <input type="text" name="district" class="tf-input" placeholder="{% trans "District (e.g. East Khasi Hills)" %}" required aria-label="{% trans "Police district" %}">
                 </div>
                 <div class="tf-field" style="margin-bottom:6px">
-                    <textarea name="notes" class="tf-textarea" rows="2" placeholder="Notes (optional)…" aria-label="Initiation notes"></textarea>
+                    <textarea name="notes" class="tf-textarea" rows="2" placeholder="{% trans "Notes (optional)…" %}" aria-label="{% trans "Initiation notes" %}"></textarea>
                 </div>
-                <button class="tf-btn small" type="submit">🛡️ Initiate Police Verification</button>
+                <button class="tf-btn small" type="submit">{% trans "🛡️ Initiate Police Verification" %}</button>
             </form>
         </div>
     </div>
@@ -322,11 +323,11 @@
 
 <div class="tf-glass tf-card mt-4" style="position:sticky;bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div class="tf-muted" style="font-size:0.82rem">
-        Changes on this page are saved together. Review your inputs, then save your progress.
+        {% trans "Changes on this page are saved together. Review your inputs, then save your progress." %}
     </div>
     <div class="tf-flex">
-        <a href="#" onclick="history.back();return false;" class="tf-btn small ghost" aria-label="Cancel and go back">Cancel</a>
-        <button class="tf-btn" type="submit" aria-label="Save application changes">💾 Save Progress</button>
+        <a href="#" onclick="history.back();return false;" class="tf-btn small ghost" aria-label="{% trans "Cancel and go back" %}">{% trans "Cancel" %}</a>
+        <button class="tf-btn" type="submit" aria-label="{% trans "Save application changes" %}">{% trans "💾 Save Progress" %}</button>
     </div>
 </div>
 </form>

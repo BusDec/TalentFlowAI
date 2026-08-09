@@ -1,42 +1,43 @@
 {% extends 'base.html' %}
-{% block title %}Requisition {{ req.post_name }}{% endblock %}
-{% block page_title %}Requisition: {{ req.post_name }}{% endblock %}
-{% block subtitle %}{{ req.count }} position{{ req.count|pluralize }} · {{ req.get_status_display }}{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktrans with name=req.post_name %}Requisition {{ name }}{% endblocktrans %}{% endblock %}
+{% block page_title %}{% blocktrans with name=req.post_name %}Requisition: {{ name }}{% endblocktrans %}{% endblock %}
+{% block subtitle %}{% blocktrans count counter=req.count with status=req.get_status_display %}{{ counter }} position · {{ status }}{% plural %}{{ counter }} positions · {{ status }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="tf-grid-2">
     <!-- LEFT COLUMN: Details -->
     <div>
         <div class="tf-glass tf-card mb-4">
-            <div class="tf-section-title">📋 Requisition Details</div>
+            <div class="tf-section-title">📋 {% trans "Requisition Details" %}</div>
             <div class="tf-kv">
-                <span class="k">Post Name</span><span class="v">{{ req.post_name }}</span>
-                <span class="k">Positions</span><span class="v">{{ req.count }}</span>
-                <span class="k">Grade</span><span class="v">{{ req.grade }}</span>
-                <span class="k">Status</span>
+                <span class="k">{% trans "Post Name" %}</span><span class="v">{{ req.post_name }}</span>
+                <span class="k">{% trans "Positions" %}</span><span class="v">{{ req.count }}</span>
+                <span class="k">{% trans "Grade" %}</span><span class="v">{{ req.grade }}</span>
+                <span class="k">{% trans "Status" %}</span>
                 <span class="v">
                     <span class="tf-badge {% if req.status == 'draft' %}muted{% elif req.status == 'rejected' %}danger{% elif req.status == 'ca_approved' %}success{% else %}primary{% endif %}">
                         {{ req.get_status_display }}
                     </span>
                 </span>
-                <span class="k">Created By</span><span class="v">{{ req.created_by|default:"—" }}</span>
-                <span class="k">Created</span><span class="v">{{ req.created_at|date:"d M Y, H:i" }}</span>
+                <span class="k">{% trans "Created By" %}</span><span class="v">{{ req.created_by|default:"—" }}</span>
+                <span class="k">{% trans "Created" %}</span><span class="v">{{ req.created_at|date:"d M Y, H:i" }}</span>
             </div>
         </div>
 
         <div class="tf-glass tf-card mb-4">
-            <div class="tf-section-title">📝 Justification</div>
+            <div class="tf-section-title">📝 {% trans "Justification" %}</div>
             <p style="color:rgba(233,234,244,0.85);font-size:0.95rem;line-height:1.7;margin:0">{{ req.justification }}</p>
         </div>
 
         <!-- Submit action (draft only) -->
         {% if req.status == 'draft' %}
         <div class="tf-glass tf-card">
-            <div class="tf-section-title">⚡ Actions</div>
+            <div class="tf-section-title">⚡ {% trans "Actions" %}</div>
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="submit">
-                <button type="submit" class="tf-btn">Submit for Approval</button>
+                <button type="submit" class="tf-btn">{% trans "Submit for Approval" %}</button>
             </form>
         </div>
         {% endif %}
@@ -46,16 +47,16 @@
             {% for a in approvals %}
                 {% if a.decision == 'pending' %}
                 <div class="tf-glass tf-card">
-                    <div class="tf-section-title">⚡ {{ a.get_stage_display }} — Decision Required</div>
+                    <div class="tf-section-title">⚡ {{ a.get_stage_display }} — {% trans "Decision Required" %}</div>
                     <form method="post" action="{% url 'requisition_approve' req.pk %}">
                         {% csrf_token %}
                         <div class="tf-field" style="margin-bottom:14px">
-                            <label class="tf-label">Comments</label>
-                            <textarea name="comments" class="tf-textarea" rows="3" placeholder="Required for rejection"></textarea>
+                            <label class="tf-label">{% trans "Comments" %}</label>
+                            <textarea name="comments" class="tf-textarea" rows="3" placeholder="{% trans "Required for rejection" %}"></textarea>
                         </div>
                         <div class="tf-flex">
-                            <button type="submit" name="action" value="reject" class="tf-btn" style="background:var(--tf-danger,#e74c3c)">Reject</button>
-                            <button type="submit" name="action" value="approve" class="tf-btn">Approve</button>
+                            <button type="submit" name="action" value="reject" class="tf-btn" style="background:var(--tf-danger,#e74c3c)">{% trans "Reject" %}</button>
+                            <button type="submit" name="action" value="approve" class="tf-btn">{% trans "Approve" %}</button>
                         </div>
                     </form>
                 </div>
@@ -67,9 +68,9 @@
     <!-- RIGHT COLUMN: Approval History -->
     <div>
         <div class="tf-glass tf-card">
-            <div class="tf-section-title">📊 Approval Timeline</div>
+            <div class="tf-section-title">📊 {% trans "Approval Timeline" %}</div>
             <table class="tf-table">
-                <thead><tr><th>Stage</th><th>Decision</th><th>Approver</th><th>Comments</th><th>Date</th></tr></thead>
+                <thead><tr><th>{% trans "Stage" %}</th><th>{% trans "Decision" %}</th><th>{% trans "Approver" %}</th><th>{% trans "Comments" %}</th><th>{% trans "Date" %}</th></tr></thead>
                 <tbody>
                     {% for a in approvals %}
                     <tr>
@@ -84,7 +85,7 @@
                         <td>{{ a.timestamp|date:"d M Y, H:i" }}</td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5" class="tf-empty">No approval steps yet.</td></tr>
+                    <tr><td colspan="5" class="tf-empty">{% trans "No approval steps yet." %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

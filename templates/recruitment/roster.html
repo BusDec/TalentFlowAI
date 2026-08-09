@@ -1,57 +1,58 @@
 {% extends 'base.html' %}
-{% block title %}Roster Matrix{% endblock %}
-{% block page_title %}Roster Matrix{% endblock %}
-{% block subtitle %}Category-wise vacancy allocation · {{ post.name }} ({{ post.post_code }}){% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Roster Matrix" %}{% endblock %}
+{% block page_title %}{% trans "Roster Matrix" %}{% endblock %}
+{% block subtitle %}{% blocktrans with name=post.name code=post.post_code %}Category-wise vacancy allocation · {{ name }} ({{ code }}){% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card mb-4">
     <div class="tf-flex" style="justify-content:space-between">
-        <div class="tf-section-title">Manage Category Rows</div>
+        <div class="tf-section-title">{% trans "Manage Category Rows" %}</div>
         <div class="tf-flex" style="gap:8px">
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="generate">
-                <button class="tf-btn small ghost" type="submit">Sync from Category Breakup</button>
+                <button class="tf-btn small ghost" type="submit">{% trans "Sync from Category Breakup" %}</button>
             </form>
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="dopt_generate">
-                <button class="tf-btn small" type="submit">Generate DoPT Roster</button>
+                <button class="tf-btn small" type="submit">{% trans "Generate DoPT Roster" %}</button>
             </form>
         </div>
     </div>
     <form method="post" class="tf-grid-3" style="align-items:end">
         {% csrf_token %}
         <div class="tf-field">
-            <label class="tf-label" for="roster-category">Category</label>
+            <label class="tf-label" for="roster-category">{% trans "Category" %}</label>
             <select name="category" class="tf-select" required id="roster-category">
-                <option value="">— Select —</option>
+                <option value="">— {% trans "Select" %} —</option>
                 {% for value, label in category_choices %}
                 <option value="{{ value }}">{{ label }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="tf-field">
-            <label class="tf-label" for="vertical-vacancies">Vertical Vacancies</label>
+            <label class="tf-label" for="vertical-vacancies">{% trans "Vertical Vacancies" %}</label>
             <input type="number" name="vertical_vacancies" class="tf-input" min="0" value="0" id="vertical-vacancies">
         </div>
         <div class="tf-field">
-            <label class="tf-label" for="pwbd-vacancies">PwBD (Horizontal)</label>
+            <label class="tf-label" for="pwbd-vacancies">{% trans "PwBD (Horizontal)" %}</label>
             <input type="number" name="pwbd_horizontal_vacancies" class="tf-input" min="0" value="0" id="pwbd-vacancies">
         </div>
         <label class="tf-flex" style="gap:8px;cursor:pointer;margin-bottom:18px">
-            <input type="checkbox" name="carry_forward" value="on" class="tf-input" style="width:18px;height:18px" aria-label="Carry forward backlog vacancies">
-            <span>Carry forward (backlog)</span>
+            <input type="checkbox" name="carry_forward" value="on" class="tf-input" style="width:18px;height:18px" aria-label="{% trans "Carry forward backlog vacancies" %}">
+            <span>{% trans "Carry forward (backlog)" %}</span>
         </label>
         <div>
-            <button class="tf-btn small" type="submit">Save / Update Row</button>
+            <button class="tf-btn small" type="submit">{% trans "Save / Update Row" %}</button>
         </div>
     </form>
 </div>
 
 <div class="tf-glass tf-card mb-4">
     <table class="tf-table" id="rosterTable">
-        <thead><tr><th>Post</th><th>Category</th><th>Vertical</th><th>PwBD</th><th>Total</th><th>Filled</th><th>Full?</th><th>Carry Fwd</th><th>Warning</th></tr></thead>
+        <thead><tr><th>{% trans "Post" %}</th><th>{% trans "Category" %}</th><th>{% trans "Vertical" %}</th><th>{% trans "PwBD" %}</th><th>{% trans "Total" %}</th><th>{% trans "Filled" %}</th><th>{% trans "Full?" %}</th><th>{% trans "Carry Fwd" %}</th><th>{% trans "Warning" %}</th></tr></thead>
         <tbody>
             {% for row in rows %}
             <tr>
@@ -61,12 +62,12 @@
                 <td>{{ row.pwbd_horizontal_vacancies }}</td>
                 <td>{{ row.total_vacancies }}</td>
                 <td>{{ row.filled_count }}</td>
-                <td>{% if row.is_full %}<span class="tf-badge success">Full</span>{% else %}<span class="tf-badge muted">Open</span>{% endif %}</td>
-                <td>{{ row.carry_forward|yesno:"Yes,No" }}</td>
+                <td>{% if row.is_full %}<span class="tf-badge success">{% trans "Full" %}</span>{% else %}<span class="tf-badge muted">{% trans "Open" %}</span>{% endif %}</td>
+                <td>{% if row.carry_forward %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
                 <td>{% if row.breach_warning %}<span style="color:#ff9bb0;font-size:0.82rem">{{ row.breach_warning }}</span>{% else %}—{% endif %}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="9" class="tf-empty">No roster matrix rows for this post. Use "Sync from Category Breakup" or add rows above.</td></tr>
+            <tr><td colspan="9" class="tf-empty">{% trans 'No roster matrix rows for this post. Use "Sync from Category Breakup" or add rows above.' %}</td></tr>
             {% endfor %}
         </tbody>
     </table>
@@ -74,19 +75,19 @@
 
 {% if dopt %}
 <div class="tf-glass tf-card mb-4">
-    <div class="tf-section-title" style="margin-bottom:12px">DoPT 100-Point Roster</div>
+    <div class="tf-section-title" style="margin-bottom:12px">{% trans "DoPT 100-Point Roster" %}</div>
 
     <div class="tf-grid-3" style="margin-bottom:16px;gap:16px">
         <div>
-            <span class="tf-label">Cycle Start Year</span>
+            <span class="tf-label">{% trans "Cycle Start Year" %}</span>
             <div style="font-size:1.1rem;font-weight:600">{{ dopt.cycle_start_year }}</div>
         </div>
         <div>
-            <span class="tf-label">Current Position</span>
+            <span class="tf-label">{% trans "Current Position" %}</span>
             <div style="font-size:1.1rem;font-weight:600">{{ dopt.current_position }}</div>
         </div>
         <div>
-            <span class="tf-label">Liaison Officer</span>
+            <span class="tf-label">{% trans "Liaison Officer" %}</span>
             <div style="font-size:1.1rem;font-weight:600">{{ dopt.liaison_officer|default:"—" }}</div>
         </div>
     </div>
@@ -94,11 +95,11 @@
     {% if dopt.certified_on %}
     <div class="tf-grid-2" style="margin-bottom:16px;gap:16px">
         <div>
-            <span class="tf-label">Certified On</span>
+            <span class="tf-label">{% trans "Certified On" %}</span>
             <div style="font-size:0.95rem">{{ dopt.certified_on|date:"d M Y H:i" }}</div>
         </div>
         <div>
-            <span class="tf-label">Certified By</span>
+            <span class="tf-label">{% trans "Certified By" %}</span>
             <div style="font-size:0.95rem">{{ dopt.certified_by|default:"—" }}</div>
         </div>
     </div>
@@ -109,7 +110,7 @@
             <thead>
                 <tr>
                     {% for col_num in "12345678910" %}
-                    <th>Col {{ forloop.counter }}</th>
+                    <th>{% blocktrans with num=forloop.counter %}Col {{ num }}{% endblocktrans %}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -130,12 +131,12 @@
     </div>
 
     <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap;font-size:0.78rem">
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(59,130,246,0.2);border:1px solid #3b82f6;vertical-align:middle"></span> Current Position</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);vertical-align:middle"></span> SC</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);vertical-align:middle"></span> ST</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);vertical-align:middle"></span> OBC</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);vertical-align:middle"></span> EWS</span>
-        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:transparent;border:1px solid rgba(148,163,184,0.3);vertical-align:middle"></span> UR</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(59,130,246,0.2);border:1px solid #3b82f6;vertical-align:middle"></span> {% trans "Current Position" %}</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.3);vertical-align:middle"></span> {% trans "SC" %}</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.3);vertical-align:middle"></span> {% trans "ST" %}</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);vertical-align:middle"></span> {% trans "OBC" %}</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);vertical-align:middle"></span> {% trans "EWS" %}</span>
+        <span><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:transparent;border:1px solid rgba(148,163,184,0.3);vertical-align:middle"></span> {% trans "UR" %}</span>
     </div>
 </div>
 {% endif %}

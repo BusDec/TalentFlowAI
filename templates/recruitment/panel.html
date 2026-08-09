@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}Panel List{% endblock %}
-{% block page_title %}Panel List{% endblock %}
-{% block subtitle %}Ranked waitlist for this post{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Panel List" %}{% endblock %}
+{% block page_title %}{% trans "Panel List" %}{% endblock %}
+{% block subtitle %}{% trans "Ranked waitlist for this post" %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card">
     <table class="tf-table" id="panelTable">
-        <thead><tr><th>Rank</th><th>Application</th><th>Candidate</th><th>Valid Until</th><th>Promoted</th><th></th></tr></thead>
+        <thead><tr><th>{% trans "Rank" %}</th><th>{% trans "Application" %}</th><th>{% trans "Candidate" %}</th><th>{% trans "Valid Until" %}</th><th>{% trans "Promoted" %}</th><th></th></tr></thead>
         <tbody>
             {% for entry in entries %}
-            <tr class="tf-rowlink" data-href="{% url 'application_detail' entry.application.application_id %}" role="link" tabindex="0" aria-label="Panel entry {{ entry.panel_rank }} — {{ entry.application.candidate }}">
+            <tr class="tf-rowlink" data-href="{% url 'application_detail' entry.application.application_id %}" role="link" tabindex="0" aria-label="{% blocktrans with rank=entry.panel_rank candidate=entry.application.candidate %}Panel entry {{ rank }} — {{ candidate }}{% endblocktrans %}">
                 <td><span class="tf-score mid">{{ entry.panel_rank }}</span></td>
                 <td>{{ entry.application.application_id }}</td>
                 <td>{{ entry.application.candidate }}</td>
@@ -18,12 +19,12 @@
                 <td>
                     <form method="post" action="{% url 'panel_promote' post_id entry.id %}">
                         {% csrf_token %}
-                        <button class="tf-btn small success">Promote to Offer</button>
+                        <button class="tf-btn small success">{% trans "Promote to Offer" %}</button>
                     </form>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="6" class="tf-empty">No active panel entries.</td></tr>
+            <tr><td colspan="6" class="tf-empty">{% trans "No active panel entries." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

@@ -1,25 +1,26 @@
 {% extends 'base.html' %}
-{% block title %}Enter Interview Score{% endblock %}
-{% block page_title %}Enter Interview Score{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Enter Interview Score" %}{% endblock %}
+{% block page_title %}{% trans "Enter Interview Score" %}{% endblock %}
 {% block subtitle %}{{ slot.application.application_id }} — {{ slot.application.candidate }}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card" style="max-width:640px">
-    <div class="tf-section-title">Score for {{ slot.application.candidate }}</div>
+    <div class="tf-section-title">{% blocktrans %}Score for {{ slot.application.candidate }}{% endblocktrans %}</div>
     <div class="tf-kv" style="margin-bottom:16px">
-        <span class="k">Panel</span><span class="v">{{ slot.panel.name }}</span>
-        <span class="k">Date</span><span class="v">{{ slot.datetime|date:"d M Y H:i" }}</span>
-        <span class="k">Application</span><span class="v">{{ slot.application.application_id }}</span>
+        <span class="k">{% trans "Panel" %}</span><span class="v">{{ slot.panel.name }}</span>
+        <span class="k">{% trans "Date" %}</span><span class="v">{{ slot.datetime|date:"d M Y H:i" }}</span>
+        <span class="k">{% trans "Application" %}</span><span class="v">{{ slot.application.application_id }}</span>
     </div>
 
     {% if slot.scores.exists %}
-    <div class="tf-section-title" style="font-size:0.95rem;margin-bottom:8px">Existing Scores</div>
+    <div class="tf-section-title" style="font-size:0.95rem;margin-bottom:8px">{% trans "Existing Scores" %}</div>
     <table class="tf-table" style="margin-bottom:16px">
-        <thead><tr><th>Member</th><th>Score</th><th>Comments</th></tr></thead>
+        <thead><tr><th>{% trans "Member" %}</th><th>{% trans "Score" %}</th><th>{% trans "Comments" %}</th></tr></thead>
         <tbody>
             {% for s in slot.scores.all %}
             <tr>
-                <td>{{ s.panel_member|default:"External" }}</td>
+                <td>{% if s.panel_member %}{{ s.panel_member }}{% else %}{% trans "External" %}{% endif %}</td>
                 <td><span class="tf-score mid">{{ s.score }}</span></td>
                 <td>{{ s.comments|default:"—" }}</td>
             </tr>
@@ -31,16 +32,16 @@
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="interview-score">Score (0.0 – 10.0)</label>
+            <label class="tf-label" for="interview-score">{% trans "Score (0.0 – 10.0)" %}</label>
             <input type="number" name="score" class="tf-input" value="{{ score|default:'' }}" step="0.5" min="0" max="10" required id="interview-score">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="score-comments">Comments (optional)</label>
+            <label class="tf-label" for="score-comments">{% trans "Comments (optional)" %}</label>
             <textarea name="comments" class="tf-textarea" rows="3" id="score-comments">{{ comments|default:'' }}</textarea>
         </div>
         <div class="tf-flex" style="gap:12px;margin-top:16px">
-            <a href="{% url 'interview_results' slot.panel.post.pk %}" class="tf-btn ghost">Cancel</a>
-            <button type="submit" class="tf-btn">Submit Score</button>
+            <a href="{% url 'interview_results' slot.panel.post.pk %}" class="tf-btn ghost">{% trans "Cancel" %}</a>
+            <button type="submit" class="tf-btn">{% trans "Submit Score" %}</button>
         </div>
     </form>
 </div>

@@ -1,50 +1,51 @@
 {% extends 'base.html' %}
-{% block title %}Communications{% endblock %}
-{% block page_title %}Communication Hub — {{ application.application_id }}{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Communications" %}{% endblock %}
+{% block page_title %}{% blocktrans with app_id=application.application_id %}Communication Hub — {{ app_id }}{% endblocktrans %}{% endblock %}
 {% block subtitle %}{{ application.candidate }} · {{ application.post.name }}{% endblock %}
 
 {% block content %}
 <div class="tf-grid-2">
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">✉ Send Communication</div>
+        <div class="tf-section-title">✉ {% trans "Send Communication" %}</div>
         <form method="post">
             {% csrf_token %}
             <div class="tf-grid-2">
                 <div class="tf-field">
-                    <label class="tf-label">Type</label>
+                    <label class="tf-label">{% trans "Type" %}</label>
                     <select name="comm_type" class="tf-select">
-                        <option value="acknowledgement">Application Acknowledgement</option>
-                        <option value="status_update">Status Update</option>
-                        <option value="interview_invite">Interview Invite</option>
-                        <option value="offer">Offer Letter</option>
-                        <option value="rejection">Rejection</option>
+                        <option value="acknowledgement">{% trans "Application Acknowledgement" %}</option>
+                        <option value="status_update">{% trans "Status Update" %}</option>
+                        <option value="interview_invite">{% trans "Interview Invite" %}</option>
+                        <option value="offer">{% trans "Offer Letter" %}</option>
+                        <option value="rejection">{% trans "Rejection" %}</option>
                     </select>
                 </div>
                 <div class="tf-field">
-                    <label class="tf-label">Channel</label>
+                    <label class="tf-label">{% trans "Channel" %}</label>
                     <select name="channel" class="tf-select">
-                        <option value="portal">Portal Notification</option>
-                        <option value="email">Email</option>
-                        <option value="sms">SMS</option>
+                        <option value="portal">{% trans "Portal Notification" %}</option>
+                        <option value="email">{% trans "Email" %}</option>
+                        <option value="sms">{% trans "SMS" %}</option>
                     </select>
                 </div>
             </div>
             <div class="tf-field">
-                <label class="tf-label">Subject</label>
-                <input type="text" name="subject" class="tf-input" placeholder="e.g. Interview scheduled">
+                <label class="tf-label">{% trans "Subject" %}</label>
+                <input type="text" name="subject" class="tf-input" placeholder="{% trans 'e.g. Interview scheduled' %}">
             </div>
             <div class="tf-field">
-                <label class="tf-label">Body</label>
-                <textarea name="body" class="tf-textarea" rows="5" placeholder="Message content..."></textarea>
+                <label class="tf-label">{% trans "Body" %}</label>
+                <textarea name="body" class="tf-textarea" rows="5" placeholder="{% trans 'Message content...' %}"></textarea>
             </div>
-            <button class="tf-btn small" type="submit">Send</button>
+            <button class="tf-btn small" type="submit">{% trans "Send" %}</button>
         </form>
     </div>
 
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">📜 Communication History</div>
+        <div class="tf-section-title">📜 {% trans "Communication History" %}</div>
         <table class="tf-table">
-            <thead><tr><th>Type</th><th>Channel</th><th>Subject</th><th>Sent</th></tr></thead>
+            <thead><tr><th>{% trans "Type" %}</th><th>{% trans "Channel" %}</th><th>{% trans "Subject" %}</th><th>{% trans "Sent" %}</th></tr></thead>
             <tbody>
                 {% for log in logs %}
                 <tr>
@@ -54,7 +55,7 @@
                     <td>{{ log.sent_at|date:"d M Y H:i" }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="4" class="tf-empty">No communications sent yet.</td></tr>
+                <tr><td colspan="4" class="tf-empty">{% trans "No communications sent yet." %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>

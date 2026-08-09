@@ -1,54 +1,55 @@
 {% extends 'base.html' %}
 {% load tf_filters %}
-{% block title %}Analytics{% endblock %}
-{% block page_title %}Recruitment Analytics{% endblock %}
-{% block subtitle %}Funnel conversion, category mix & score distribution{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Analytics" %}{% endblock %}
+{% block page_title %}{% trans "Recruitment Analytics" %}{% endblock %}
+{% block subtitle %}{% trans "Funnel conversion, category mix & score distribution" %}{% endblock %}
 
 {% block content %}
-<div class="tf-stats mb-4" role="group" aria-label="Recruitment analytics summary">
-    <div class="tf-stat" role="group" aria-label="Total applications: {{ total }}"><div class="label">Total Applications</div><div class="value">{{ total }}</div></div>
+<div class="tf-stats mb-4" role="group" aria-label="{% trans "Recruitment analytics summary" %}">
+    <div class="tf-stat" role="group" aria-label="{% blocktrans with total=total %}Total applications: {{ total }}{% endblocktrans %}"><div class="label">{% trans "Total Applications" %}</div><div class="value">{{ total }}</div></div>
     {% for value, label in stage_cards %}
     <div class="tf-stat" role="group" aria-label="{{ label }}: {{ status_counts|get_item:value|default:0 }}"><div class="label">{{ label }}</div><div class="value">{{ status_counts|get_item:value|default:0 }}</div></div>
     {% endfor %}
-    <div class="tf-stat" role="group" aria-label="Interview to offer conversion: {{ conversion.interview|default:'—' }} percent"><div class="label">Interview→Offer</div><div class="value">{{ conversion.interview|default:"—" }}%</div></div>
+    <div class="tf-stat" role="group" aria-label="{% blocktrans with conv=conversion.interview|default:"—" %}Interview to offer conversion: {{ conv }} percent{% endblocktrans %}"><div class="label">{% trans "Interview→Offer" %}</div><div class="value">{{ conversion.interview|default:"—" }}%</div></div>
 </div>
 
 <div class="tf-grid-3 mb-4">
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">📊 Status Funnel</div>
-        <div id="funnelChart" role="img" aria-label="Status funnel chart showing application counts by stage"></div>
+        <div class="tf-section-title">{% trans "📊 Status Funnel" %}</div>
+        <div id="funnelChart" role="img" aria-label="{% trans "Status funnel chart showing application counts by stage" %}"></div>
     </div>
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">🏷 Resume Score Distribution</div>
-        <canvas id="scoreChart" height="200" role="img" aria-label="Doughnut chart showing resume score distribution"></canvas>
+        <div class="tf-section-title">{% trans "🏷 Resume Score Distribution" %}</div>
+        <canvas id="scoreChart" height="200" role="img" aria-label="{% trans "Doughnut chart showing resume score distribution" %}"></canvas>
     </div>
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">🗂 Applications per Post</div>
+        <div class="tf-section-title">{% trans "🗂 Applications per Post" %}</div>
         <div class="tf-kv" id="postChart">
             {% for key, value in post_chart_data.items %}
             <span class="k">{{ key }}</span><span class="v"><span class="tf-badge primary">{{ value }}</span></span>
             {% empty %}
-            <span class="tf-muted">No applications yet.</span>
+            <span class="tf-muted">{% trans "No applications yet." %}</span>
             {% endfor %}
         </div>
     </div>
 </div>
 
 <div class="tf-glass tf-card mb-4">
-    <div class="tf-section-title">🎯 Category Mix (Allocations)</div>
+    <div class="tf-section-title">{% trans "🎯 Category Mix (Allocations)" %}</div>
     <div class="tf-flex" style="flex-wrap:wrap;gap:10px">
         {% for row in category_counts %}
         <span class="tf-badge primary">{{ row.category|upper }} — {{ row.c }}</span>
         {% empty %}
-        <span class="tf-muted">No category allocations yet.</span>
+        <span class="tf-muted">{% trans "No category allocations yet." %}</span>
         {% endfor %}
     </div>
 </div>
 
 <div class="tf-glass tf-card">
-    <div class="tf-section-title">📈 Conversion Rates</div>
+    <div class="tf-section-title">{% trans "📈 Conversion Rates" %}</div>
     <table class="tf-table">
-        <thead><tr><th>Stage</th><th>Count</th><th>% of Received</th></tr></thead>
+        <thead><tr><th>{% trans "Stage" %}</th><th>{% trans "Count" %}</th><th>{% trans "% of Received" %}</th></tr></thead>
         <tbody>
             {% for s, c in status_counts.items %}
             <tr>

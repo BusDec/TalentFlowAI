@@ -1,39 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}Medical Exam — {{ application.application_id }}{% endblock %}
-{% block page_title %}Medical Examination{% endblock %}
+{% load i18n %}
+{% block title %}{% blocktrans with app_id=application.application_id %}Medical Exam — {{ app_id }}{% endblocktrans %}{% endblock %}
+{% block page_title %}{% trans "Medical Examination" %}{% endblock %}
 {% block subtitle %}{{ application.candidate }} · {{ application.post.name }}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card">
-    <div class="tf-section-title">🏥 Schedule Medical Exam</div>
+    <div class="tf-section-title">🏥 {% trans "Schedule Medical Exam" %}</div>
     <div class="tf-kv" style="margin-bottom:16px">
-        <span class="k">Application</span><span class="v">{{ application.application_id }}</span>
-        <span class="k">Candidate</span><span class="v">{{ application.candidate }}</span>
-        <span class="k">Post</span><span class="v">{{ application.post.name }}</span>
+        <span class="k">{% trans "Application" %}</span><span class="v">{{ application.application_id }}</span>
+        <span class="k">{% trans "Candidate" %}</span><span class="v">{{ application.candidate }}</span>
+        <span class="k">{% trans "Post" %}</span><span class="v">{{ application.post.name }}</span>
     </div>
 
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="hospital">Hospital / Medical Facility</label>
+            <label class="tf-label" for="hospital">{% trans "Hospital / Medical Facility" %}</label>
             <input type="text" name="hospital" id="hospital" class="tf-input" style="max-width:400px"
                    value="{{ hospital|default:'' }}" required
-                   placeholder="e.g. AIIMS Guwahati" aria-label="Hospital name">
+                   placeholder="{% trans 'e.g. AIIMS Guwahati' %}" aria-label="{% trans 'Hospital name' %}">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="exam_date">Exam Date</label>
+            <label class="tf-label" for="exam_date">{% trans "Exam Date" %}</label>
             <input type="date" name="exam_date" id="exam_date" class="tf-input" style="max-width:200px"
-                   value="{{ exam_date|default:'' }}" required aria-label="Examination date">
+                   value="{{ exam_date|default:'' }}" required aria-label="{% trans 'Examination date' %}">
         </div>
         <div class="tf-field" style="margin-bottom:16px">
-            <label class="tf-label" for="notes">Notes (optional)</label>
+            <label class="tf-label" for="notes">{% trans "Notes (optional)" %}</label>
             <textarea name="notes" id="notes" class="tf-textarea" rows="3"
-                      placeholder="Any scheduling notes or special instructions…"
-                      aria-label="Scheduling notes">{{ notes|default:'' }}</textarea>
+                      placeholder="{% trans 'Any scheduling notes or special instructions…' %}"
+                      aria-label="{% trans 'Scheduling notes' %}">{{ notes|default:'' }}</textarea>
         </div>
         <div class="tf-flex">
-            <a href="{% url 'application_detail' application.application_id %}" class="tf-btn small ghost" aria-label="Cancel and go back">Cancel</a>
-            <button class="tf-btn" type="submit" aria-label="Schedule medical exam">🏥 Schedule Exam</button>
+            <a href="{% url 'application_detail' application.application_id %}" class="tf-btn small ghost" aria-label="{% trans 'Cancel and go back' %}">{% trans "Cancel" %}</a>
+            <button class="tf-btn" type="submit" aria-label="{% trans 'Schedule medical exam' %}">🏥 {% trans "Schedule Exam" %}</button>
         </div>
     </form>
 </div>

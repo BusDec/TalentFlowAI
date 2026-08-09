@@ -1,32 +1,33 @@
 {% extends 'base.html' %}
-{% block title %}Schedule Interview Slot{% endblock %}
-{% block page_title %}Schedule Interview Slot{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Schedule Interview Slot" %}{% endblock %}
+{% block page_title %}{% trans "Schedule Interview Slot" %}{% endblock %}
 {% block subtitle %}{{ panel.name }} — {{ panel.post.name }}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card" style="max-width:640px">
-    <div class="tf-section-title">Schedule a Slot</div>
+    <div class="tf-section-title">{% trans "Schedule a Slot" %}</div>
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="application-id">Application ID</label>
-            <input type="text" name="application_id" class="tf-input" value="{{ application_id|default:'' }}" placeholder="e.g. TF20260001" required id="application-id">
+            <label class="tf-label" for="application-id">{% trans "Application ID" %}</label>
+            <input type="text" name="application_id" class="tf-input" value="{{ application_id|default:'' }}" placeholder="{% trans "e.g. TF20260001" %}" required id="application-id">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="interview-datetime">Date &amp; Time</label>
+            <label class="tf-label" for="interview-datetime">{% trans "Date & Time" %}</label>
             <input type="datetime-local" name="datetime" class="tf-input" value="{{ datetime|default:'' }}" required id="interview-datetime">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="duration">Duration (minutes)</label>
+            <label class="tf-label" for="duration">{% trans "Duration (minutes)" %}</label>
             <input type="number" name="duration_minutes" class="tf-input" value="{{ duration_minutes|default:'30' }}" min="5" max="180" id="duration">
         </div>
         <div class="tf-field" style="margin-bottom:12px">
-            <label class="tf-label" for="interview-notes">Notes (optional)</label>
+            <label class="tf-label" for="interview-notes">{% trans "Notes (optional)" %}</label>
             <textarea name="notes" class="tf-textarea" rows="2" id="interview-notes">{{ notes|default:'' }}</textarea>
         </div>
         <div class="tf-flex" style="gap:12px;margin-top:16px">
-            <a href="{% url 'interview_results' panel.post.pk %}" class="tf-btn ghost">Cancel</a>
-            <button type="submit" class="tf-btn">Schedule Slot</button>
+            <a href="{% url 'interview_results' panel.post.pk %}" class="tf-btn ghost">{% trans "Cancel" %}</a>
+            <button type="submit" class="tf-btn">{% trans "Schedule Slot" %}</button>
         </div>
     </form>
 </div>

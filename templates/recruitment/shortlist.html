@@ -1,24 +1,25 @@
 {% extends 'base.html' %}
 {% load tf_filters %}
-{% block title %}Smart Shortlist{% endblock %}
-{% block page_title %}Smart Shortlist — {{ post.name }}{% endblock %}
-{% block subtitle %}AI-ranked candidates for human review{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Smart Shortlist" %}{% endblock %}
+{% block page_title %}{% blocktrans with post_name=post.name %}Smart Shortlist — {{ post_name }}{% endblocktrans %}{% endblock %}
+{% block subtitle %}{% trans "AI-ranked candidates for human review" %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card mb-4">
     <form method="get" class="tf-flex">
-        <label class="tf-label" for="keywords-input" style="margin:0 10px 0 0">Keywords (comma-separated)</label>
-        <input type="text" id="keywords-input" name="keywords" value="{{ keywords|join:", " }}" class="tf-input" style="max-width:420px" aria-label="Enter keywords for AI ranking">
-        <button class="tf-btn small">Rank</button>
+        <label class="tf-label" for="keywords-input" style="margin:0 10px 0 0">{% trans "Keywords (comma-separated)" %}</label>
+        <input type="text" id="keywords-input" name="keywords" value="{{ keywords|join:", " }}" class="tf-input" style="max-width:420px" aria-label="{% trans "Enter keywords for AI ranking" %}">
+        <button class="tf-btn small">{% trans "Rank" %}</button>
     </form>
     <p class="tf-muted mt-3" style="font-size:0.82rem;margin-bottom:0">
-        Composite = 70% AI resume score + 30% skill-keyword match. This is a recommendation — final shortlist decisions are human.
+        {% trans "Composite = 70% AI resume score + 30% skill-keyword match. This is a recommendation — final shortlist decisions are human." %}
     </p>
 </div>
 
 <div class="tf-glass tf-card">
     <table class="tf-table" id="shortlistTable">
-        <thead><tr><th>Rank</th><th>Application</th><th>Candidate</th><th>Resume Score</th><th>Keyword Matches</th><th>Composite</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th>{% trans "Rank" %}</th><th>{% trans "Application" %}</th><th>{% trans "Candidate" %}</th><th>{% trans "Resume Score" %}</th><th>{% trans "Keyword Matches" %}</th><th>{% trans "Composite" %}</th><th>{% trans "Status" %}</th><th></th></tr></thead>
         <tbody>
             {% for row in ranked %}
             <tr>
@@ -33,10 +34,10 @@
                 </td>
                 <td><span class="tf-badge success">{{ row.composite_score }}</span></td>
                 <td><span class="tf-badge muted">{{ row.application.get_status_display }}</span></td>
-                <td><a href="{% url 'application_detail' row.application.application_id %}" class="tf-link">View →</a></td>
+                <td><a href="{% url 'application_detail' row.application.application_id %}" class="tf-link">{% trans "View →" %}</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="8" class="tf-empty">No applications to rank. Upload resumes first.</td></tr>
+            <tr><td colspan="8" class="tf-empty">{% trans "No applications to rank. Upload resumes first." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

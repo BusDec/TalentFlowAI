@@ -1,31 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Create Requisition{% endblock %}
-{% block page_title %}Create Vacancy Requisition{% endblock %}
-{% block subtitle %}Submit a new vacancy request for approval{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Create Requisition" %}{% endblock %}
+{% block page_title %}{% trans "Create Vacancy Requisition" %}{% endblock %}
+{% block subtitle %}{% trans "Submit a new vacancy request for approval" %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card">
     <form method="post">
         {% csrf_token %}
         <div class="tf-field" style="margin-bottom:14px">
-            <label class="tf-label" for="post-name">Post Name</label>
+            <label class="tf-label" for="post-name">{% trans "Post Name" %}</label>
             <input type="text" name="post_name" class="tf-input" value="{{ post_name|default:'' }}" required id="post-name">
         </div>
         <div class="tf-field" style="margin-bottom:14px">
-            <label class="tf-label" for="position-count">Number of Positions</label>
+            <label class="tf-label" for="position-count">{% trans "Number of Positions" %}</label>
             <input type="number" name="count" class="tf-input" value="{{ count|default:'' }}" min="1" required id="position-count">
         </div>
         <div class="tf-field" style="margin-bottom:14px">
-            <label class="tf-label" for="pay-grade">Pay Grade</label>
-            <input type="text" name="grade" class="tf-input" value="{{ grade|default:'' }}" placeholder="e.g. E-5" required id="pay-grade">
+            <label class="tf-label" for="pay-grade">{% trans "Pay Grade" %}</label>
+            <input type="text" name="grade" class="tf-input" value="{{ grade|default:'' }}" placeholder="{% trans "e.g. E-5" %}" required id="pay-grade">
         </div>
         <div class="tf-field" style="margin-bottom:14px">
-            <label class="tf-label" for="justification">Business Justification</label>
+            <label class="tf-label" for="justification">{% trans "Business Justification" %}</label>
             <textarea name="justification" class="tf-textarea" rows="4" required id="justification">{{ justification|default:'' }}</textarea>
         </div>
         <div class="tf-flex">
-            <a href="{% url 'requisition_list' %}" class="tf-btn ghost">Cancel</a>
-            <button type="submit" class="tf-btn">Create Requisition</button>
+            <a href="{% url 'requisition_list' %}" class="tf-btn ghost">{% trans "Cancel" %}</a>
+            <button type="submit" class="tf-btn">{% trans "Create Requisition" %}</button>
         </div>
     </form>
 </div>

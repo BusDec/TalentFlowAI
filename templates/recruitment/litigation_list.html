@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
-{% block title %}Litigation Cases{% endblock %}
-{% block page_title %}Litigation Cases{% endblock %}
-{% block subtitle %}Court case tracker{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Litigation Cases" %}{% endblock %}
+{% block page_title %}{% trans "Litigation Cases" %}{% endblock %}
+{% block subtitle %}{% trans "Court case tracker" %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card">
-    <div class="tf-section-title">📋 Active &amp; Resolved Cases</div>
+    <div class="tf-section-title">📋 {% trans "Active &amp; Resolved Cases" %}</div>
     {% if cases %}
     <table class="tf-table">
         <thead>
             <tr>
-                <th>Case Number</th>
-                <th>Court</th>
-                <th>Petitioner</th>
-                <th>Status</th>
-                <th>Filed On</th>
-                <th>Resolved On</th>
-                <th>Stay</th>
-                <th>Actions</th>
+                <th>{% trans "Case Number" %}</th>
+                <th>{% trans "Court" %}</th>
+                <th>{% trans "Petitioner" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Filed On" %}</th>
+                <th>{% trans "Resolved On" %}</th>
+                <th>{% trans "Stay" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -31,51 +32,51 @@
                 <td>{{ case.resolved_on|default:"—" }}</td>
                 <td>
                     {% if case.has_active_stay %}
-                    <span class="tf-badge danger">Active Stay</span>
+                    <span class="tf-badge danger">{% trans "Active Stay" %}</span>
                     {% else %}
-                    <span class="tf-badge muted">None</span>
+                    <span class="tf-badge muted">{% trans "None" %}</span>
                     {% endif %}
                 </td>
                 <td>
                     <details>
-                        <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">Add Order</summary>
-                        <form method="post" action="{% url 'litigation_add_order' case.pk %}" style="margin-top:8px" aria-label="Add court order for case {{ case.case_number }}">
+                        <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">{% trans "Add Order" %}</summary>
+                        <form method="post" action="{% url 'litigation_add_order' case.pk %}" style="margin-top:8px" aria-label="{% blocktrans with case_num=case.case_number %}Add court order for case {{ case_num }}{% endblocktrans %}">
                             {% csrf_token %}
                             <div class="tf-field" style="margin-bottom:6px">
-                                <select name="order_type" class="tf-select" style="max-width:200px" aria-label="Order type">
-                                    <option value="stay_order">Stay Order</option>
-                                    <option value="notice">Notice</option>
-                                    <option value="interim_direction">Interim Direction</option>
-                                    <option value="other">Other</option>
+                                <select name="order_type" class="tf-select" style="max-width:200px" aria-label="{% trans 'Order type' %}">
+                                    <option value="stay_order">{% trans "Stay Order" %}</option>
+                                    <option value="notice">{% trans "Notice" %}</option>
+                                    <option value="interim_direction">{% trans "Interim Direction" %}</option>
+                                    <option value="other">{% trans "Other" %}</option>
                                 </select>
                             </div>
                             <div class="tf-field" style="margin-bottom:6px">
-                                <textarea name="order_text" class="tf-textarea" rows="2" placeholder="Order text…" required aria-label="Order text for case {{ case.case_number }}"></textarea>
+                                <textarea name="order_text" class="tf-textarea" rows="2" placeholder="{% trans 'Order text…' %}" required aria-label="{% blocktrans with case_num=case.case_number %}Order text for case {{ case_num }}{% endblocktrans %}"></textarea>
                             </div>
-                            <button class="tf-btn small" type="submit" aria-label="Add order to case {{ case.case_number }}">Add</button>
+                            <button class="tf-btn small" type="submit" aria-label="{% blocktrans with case_num=case.case_number %}Add order to case {{ case_num }}{% endblocktrans %}">{% trans "Add" %}</button>
                         </form>
                     </details>
                     {% if case.status != 'resolved' and case.status != 'dismissed' %}
                     <details style="margin-top:6px">
-                        <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">Update Status</summary>
-                        <form method="post" action="{% url 'litigation_update_status' case.pk %}" style="margin-top:8px" aria-label="Update status for case {{ case.case_number }}">
+                        <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">{% trans "Update Status" %}</summary>
+                        <form method="post" action="{% url 'litigation_update_status' case.pk %}" style="margin-top:8px" aria-label="{% blocktrans with case_num=case.case_number %}Update status for case {{ case_num }}{% endblocktrans %}">
                             {% csrf_token %}
                             <div class="tf-field" style="margin-bottom:6px">
-                                <select name="status" class="tf-select" style="max-width:200px" aria-label="Case status">
-                                    <option value="filed" {% if case.status == 'filed' %}selected{% endif %}>Filed</option>
-                                    <option value="hearing" {% if case.status == 'hearing' %}selected{% endif %}>Hearing</option>
-                                    <option value="stay" {% if case.status == 'stay' %}selected{% endif %}>Stay Granted</option>
-                                    <option value="resolved">Resolved</option>
-                                    <option value="dismissed">Dismissed</option>
+                                <select name="status" class="tf-select" style="max-width:200px" aria-label="{% trans 'Case status' %}">
+                                    <option value="filed" {% if case.status == 'filed' %}selected{% endif %}>{% trans "Filed" %}</option>
+                                    <option value="hearing" {% if case.status == 'hearing' %}selected{% endif %}>{% trans "Hearing" %}</option>
+                                    <option value="stay" {% if case.status == 'stay' %}selected{% endif %}>{% trans "Stay Granted" %}</option>
+                                    <option value="resolved">{% trans "Resolved" %}</option>
+                                    <option value="dismissed">{% trans "Dismissed" %}</option>
                                 </select>
                             </div>
                             <div class="tf-field" style="margin-bottom:6px">
-                                <input type="date" name="resolved_on" class="tf-input" style="max-width:200px" placeholder="Resolved on" aria-label="Resolved on date">
+                                <input type="date" name="resolved_on" class="tf-input" style="max-width:200px" placeholder="{% trans 'Resolved on' %}" aria-label="{% trans 'Resolved on date' %}">
                             </div>
                             <div class="tf-field" style="margin-bottom:6px">
-                                <textarea name="final_order_text" class="tf-textarea" rows="2" placeholder="Final order text…" aria-label="Final order text"></textarea>
+                                <textarea name="final_order_text" class="tf-textarea" rows="2" placeholder="{% trans 'Final order text…' %}" aria-label="{% trans 'Final order text' %}"></textarea>
                             </div>
-                            <button class="tf-btn small" type="submit" aria-label="Update status for case {{ case.case_number }}">Update</button>
+                            <button class="tf-btn small" type="submit" aria-label="{% blocktrans with case_num=case.case_number %}Update status for case {{ case_num }}{% endblocktrans %}">{% trans "Update" %}</button>
                         </form>
                     </details>
                     {% endif %}
@@ -85,7 +86,7 @@
         </tbody>
     </table>
     {% else %}
-    <div class="tf-muted">No litigation cases recorded.</div>
+    <div class="tf-muted">{% trans "No litigation cases recorded." %}</div>
     {% endif %}
 </div>
 {% endblock %}

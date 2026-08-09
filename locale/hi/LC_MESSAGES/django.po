@@ -1,14 +1,13 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Hindi translations for TalentFlow AI.
+# Copyright (C) 2026 TalentFlow AI
 # This file is distributed under the same license as the TalentFlow AI package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: TalentFlow AI 3.0\n"
+"Project-Id-Version: TalentFlow AI 4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-04 10:00+0530\n"
-"PO-Revision-Date: 2026-08-04 10:00+0530\n"
+"POT-Creation-Date: 2026-08-09 10:00+0530\n"
+"PO-Revision-Date: 2026-08-09 10:00+0530\n"
 "Last-Translator: \n"
 "Language-Team: Hindi <hi@talentflow.local>\n"
 "Language: hi\n"
@@ -17,71 +16,204 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Register"
-msgstr "पंजीकरण"
 
-msgid "Login"
-msgstr "लॉगिन"
+msgid "% of Received"
+msgstr "प्राप्त का %"
 
-msgid "Candidate Registration"
-msgstr "उम्मीदवार पंजीकरण"
+msgid "%(advt_number)s — %(title)s"
+msgstr "%(advt_number)s — %(title)s"
 
-msgid "Candidate Login"
-msgstr "उम्मीदवार लॉगिन"
+msgid "%(advt_number)s — %(title)s · Generated %(today)s"
+msgstr "%(advt_number)s — %(title)s · जनरेटेड %(today)s"
 
-msgid "Already have an account?"
-msgstr "क्या आपके पास पहले से खाता है?"
+msgid "%(advt_number)s — Generated Advertisement"
+msgstr "%(advt_number)s — जनरेटेड विज्ञापन"
 
-msgid "New here?"
-msgstr "नए हैं?"
+msgid "%(app_id)s · %(post)s · Cut-off %(cutoff)s"
+msgstr "%(app_id)s · %(post)s · कट-ऑफ़ %(cutoff)s"
 
-msgid "Send OTP"
-msgstr "OTP भेजें"
+msgid "%(counter)s position · %(status)s%(counter)s positions · %(status)s"
+msgstr "%(counter)s पद · %(status)s%(counter)s पद · %(status)s"
 
-msgid "Verify OTP"
-msgstr "OTP सत्यापित करें"
+msgid "%(court)s · Petitioner: %(petitioner)s"
+msgstr "%(court)s · याचिकाकर्ता: %(petitioner)s"
 
-msgid "Verify"
-msgstr "सत्यापित करें"
+msgid "%(method)s extraction"
+msgstr "%(method)s निष्कर्षण"
 
-msgid "Dashboard"
-msgstr "डैशबोर्ड"
+msgid "%(name)s — recruitment overview"
+msgstr "%(name)s — भर्ती अवलोकन"
 
-msgid "Candidate Dashboard"
-msgstr "उम्मीदवार डैशबोर्ड"
+msgid "%(status_title)s: %(count)s applications"
+msgstr "%(status_title)s: %(count)s आवेदन"
+
+msgid "%(vacancies)s vacancy%(vacancies)s vacancies"
+msgstr "%(vacancies)s रिक्ति%(vacancies)s रिक्तियां"
+
+msgid "%(years)s years"
+msgstr "%(years)s वर्ष"
+
+msgid "(at least 1 required)"
+msgstr "(कम से कम 1 आवश्यक)"
+
+msgid "+ Add Post"
+msgstr "+ पद जोड़ें"
+
+msgid "+ Create Advertisement"
+msgstr "+ विज्ञापन बनाएं"
+
+msgid "+ Create Requisition"
+msgstr "+ अनुरोध बनाएं"
+
+msgid "+ New Panel"
+msgstr "+ नया पैनल"
+
+msgid "+ Schedule Slot"
+msgstr "+ स्लॉट निर्धारित करें"
+
+msgid "AI Shortlist"
+msgstr "AI शॉर्टलिस्ट"
+
+msgid "AI flags potential duplicates across advertisements — humans resolve"
+msgstr "AI विज्ञापनों में संभावित डुप्लिकेट चिह्नित करता है — मनुष्य समाधान करते हैं"
+
+msgid "AI-ranked candidates for human review"
+msgstr "मानव समीक्षा के लिए AI-रैंक किए गए उम्मीदवार"
+
+msgid "Actions"
+msgstr "कार्रवाई"
+
+msgid "Active"
+msgstr "सक्रिय"
+
+msgid "Active &amp; Resolved Cases"
+msgstr "सक्रिय और हल किए गए मामले"
+
+msgid "Active Advertisements"
+msgstr "सक्रिय विज्ञापन"
+
+msgid "Active Stay"
+msgstr "सक्रिय स्टे"
+
+msgid "Active advertisement"
+msgstr "सक्रिय विज्ञापन"
 
 msgid "Active advertisements"
 msgstr "सक्रिय विज्ञापन"
 
-msgid "Closes"
-msgstr "अंतिम तिथि"
+msgid "Active adverts"
+msgstr "सक्रिय विज्ञापन"
 
-msgid "Apply Now"
-msgstr "अभी आवेदन करें"
+msgid "Active consent on file — documents may be fetched."
+msgstr "फ़ाइल में सक्रिय सहमति — दस्तावेज़ प्राप्त किए जा सकते हैं।"
 
-msgid "No active advertisements."
-msgstr "कोई सक्रिय विज्ञापन नहीं।"
+msgid "Add"
+msgstr "जोड़ें"
 
-msgid "My Applications"
-msgstr "मेरे आवेदन"
+msgid "Add Corrigendum"
+msgstr "संशोधन जोड़ें"
+
+msgid "Add Order"
+msgstr "आदेश जोड़ें"
+
+msgid "Add court order for case %(case_num)s"
+msgstr "मामला %(case_num)s के लिए न्यायालय आदेश जोड़ें"
+
+msgid "Add order to case %(case_num)s"
+msgstr "मामला %(case_num)s में आदेश जोड़ें"
+
+msgid "Admin"
+msgstr "व्यवस्थापक"
+
+msgid "Adverse Impact (4/5ths Rule)"
+msgstr "प्रतिकूल प्रभाव (4/5 नियम)"
+
+msgid "Adverse impact (4/5ths rule) &amp; statistical parity by category"
+msgstr "श्रेणी-वार प्रतिकूल प्रभाव (4/5 नियम) और सांख्यिकी समानता"
+
+msgid "Advertisement"
+msgstr "विज्ञापन"
+
+msgid "Advertisement %(advt_number)s — %(title)s"
+msgstr "विज्ञापन %(advt_number)s — %(title)s"
+
+msgid "Advertisement Details"
+msgstr "विज्ञापन विवरण"
+
+msgid "Advertisements"
+msgstr "विज्ञापन"
+
+msgid "Advt No."
+msgstr "विज्ञापन सं."
+
+msgid "Advt Number"
+msgstr "विज्ञापन संख्या"
+
+msgid "All"
+msgstr "सभी"
+
+msgid "All advertisements"
+msgstr "सभी विज्ञापन"
+
+msgid "All documents: %(total_count)s"
+msgstr "सभी दस्तावेज़: %(total_count)s"
+
+msgid "All statuses"
+msgstr "सभी स्थितियां"
+
+msgid "Already have an account?"
+msgstr "क्या आपके पास पहले से खाता है?"
+
+msgid "Amount"
+msgstr "राशि"
+
+msgid "An account with this email already exists."
+msgstr "इस ईमेल के साथ खाता पहले से मौजूद है।"
+
+msgid "Analytics"
+msgstr "विश्लेषण"
+
+msgid "Any score"
+msgstr "कोई भी स्कोर"
+
+msgid "App A"
+msgstr "आवेदन A"
+
+msgid "App B"
+msgstr "आवेदन B"
+
+msgid "App ID"
+msgstr "आवेदन आईडी"
+
+msgid "Application"
+msgstr "आवेदन"
+
+msgid "Application %(app_id)s"
+msgstr "आवेदन %(app_id)s"
+
+msgid "Application %(app_id)s — %(candidate)s"
+msgstr "आवेदन %(app_id)s — %(candidate)s"
+
+msgid "Application Acknowledgement"
+msgstr "आवेदन पावती"
+
+msgid "Application Detail"
+msgstr "आवेदन विवरण"
 
 msgid "Application ID"
 msgstr "आवेदन आईडी"
 
-msgid "Post"
-msgstr "पद"
+msgid "Application submitted successfully."
+msgstr "आवेदन सफलतापूर्वक जमा किया गया।"
 
-msgid "Status"
-msgstr "स्थिति"
+msgid "Application: %(app_id)s"
+msgstr "आवेदन: %(app_id)s"
 
-msgid "View"
-msgstr "देखें"
+msgid "Applications"
+msgstr "आवेदन"
 
-msgid "No applications yet."
-msgstr "अभी कोई आवेदन नहीं।"
-
-msgid "No applications."
-msgstr "कोई आवेदन नहीं।"
+msgid "Applied"
+msgstr "आवेदन तिथि"
 
 msgid "Applied On"
 msgstr "आवेदन दिनांक"
@@ -89,125 +221,1598 @@ msgstr "आवेदन दिनांक"
 msgid "Apply"
 msgstr "आवेदन करें"
 
-msgid "Select Post"
-msgstr "पद चुनें"
+msgid "Apply Filters"
+msgstr "फ़िल्टर लागू करें"
 
-msgid "vacancies"
-msgstr "रिक्तियां"
+msgid "Apply Now"
+msgstr "अभी आवेदन करें"
 
-msgid "Max Age"
-msgstr "अधिकतम आयु"
+msgid "Approval Timeline"
+msgstr "अनुमोदन टाइमलाइन"
 
-msgid "Submit Application"
-msgstr "आवेदन जमा करें"
+msgid "Approve"
+msgstr "स्वीकृत करें"
 
-msgid "By applying you consent to processing of your application and documents as required for recruitment."
-msgstr "आवेदन करके आप भर्ती हेतु अपने आवेदन और दस्तावेज़ों के प्रसंस्करण हेतु सहमति देते हैं।"
+msgid "Approver"
+msgstr "अनुमोदनकर्ता"
 
-msgid "Application Detail"
-msgstr "आवेदन विवरण"
+msgid "Assign grievance %(gpk)s"
+msgstr "शिकायत %(gpk)s सौंपें"
 
-msgid "Application"
-msgstr "आवेदन"
+msgid "Assign grievance %(gpk)s to yourself"
+msgstr "शिकायत %(gpk)s अपने आप को सौंपें"
+
+msgid "Assign to Me"
+msgstr "मुझे सौंपें"
+
+msgid "Assigned To"
+msgstr "सौंपा गया"
+
+msgid "Avg"
+msgstr "औसत"
+
+msgid "Avg Score"
+msgstr "औसत स्कोर"
+
+msgid "Avg resume score"
+msgstr "औसत रिज्यूमे स्कोर"
 
 msgid "Back"
 msgstr "वापस"
 
-msgid "Employee Number"
-msgstr "कर्मचारी संख्या"
+msgid "Back to Details"
+msgstr "विवरण पर वापस"
 
 msgid "Background Verification — Facts for Your Explanation"
 msgstr "पृष्ठभूमि सत्यापन — आपके स्पष्टीकरण हेतु तथ्य"
 
+msgid "Body"
+msgstr "सामग्री"
+
+msgid "Boilerplate Sections (pre-filled — edit if needed)"
+msgstr "बॉयलरप्लेट अनुभाग (पहले से भरे — आवश्यकतानुसार संपादित करें)"
+
+msgid "Bond (₹)"
+msgstr "बॉन्ड (₹)"
+
+msgid "Business Justification"
+msgstr "व्यावसायिक औचित्य"
+
+msgid "By applying you consent to processing of your application and documents as required for recruitment."
+msgstr "आवेदन करके आप भर्ती हेतु अपने आवेदन और दस्तावेज़ों के प्रसंस्करण हेतु सहमति देते हैं।"
+
+msgid "Cancel"
+msgstr "रद्द करें"
+
+msgid "Cancel and go back"
+msgstr "रद्द करें और वापस जाएं"
+
+msgid "Candidate"
+msgstr "उम्मीदवार"
+
+msgid "Candidate & Post"
+msgstr "उम्मीदवार और पद"
+
+msgid "Candidate Dashboard"
+msgstr "उम्मीदवार डैशबोर्ड"
+
+msgid "Candidate Explanation"
+msgstr "उम्मीदवार स्पष्टीकरण"
+
+msgid "Candidate Login"
+msgstr "उम्मीदवार लॉगिन"
+
+msgid "Candidate Registration"
+msgstr "उम्मीदवार पंजीकरण"
+
+msgid "Candidate Report"
+msgstr "उम्मीदवार रिपोर्ट"
+
+msgid "Candidate grievance management"
+msgstr "उम्मीदवार शिकायत प्रबंधन"
+
+msgid "Carry Fwd"
+msgstr "आगे ले जाएं"
+
+msgid "Carry forward (backlog)"
+msgstr "आगे ले जाएं (बैकलॉग)"
+
+msgid "Carry forward backlog vacancies"
+msgstr "बैकलॉग रिक्तियां आगे ले जाएं"
+
+msgid "Case Number"
+msgstr "मामला संख्या"
+
 msgid "Category"
 msgstr "श्रेणी"
 
-msgid "Fact"
-msgstr "तथ्य"
+msgid "Category Certificate (PDF/scan of caste/disability certificate)"
+msgstr "श्रेणी प्रमाणपत्र (जाति/विकलांगता प्रमाणपत्र की PDF/स्कैन)"
 
-msgid "Source"
-msgstr "स्रोत"
+msgid "Category Selection Summary"
+msgstr "श्रेणी चयन सारांश"
 
-msgid "Your Explanation (optional)"
-msgstr "आपका स्पष्टीकरण (वैकल्पिक)"
+msgid "Category-wise Vacancies"
+msgstr "श्रेणी-वार रिक्तियां"
 
-msgid "Submit Explanation"
-msgstr "स्पष्टीकरण जमा करें"
+msgid "Category-wise vacancy allocation · %(name)s (%(code)s)"
+msgstr "श्रेणी-वार रिक्ति आवंटन · %(name)s (%(code)s)"
 
-msgid "Documents"
-msgstr "दस्तावेज़"
+msgid "Certified By"
+msgstr "प्रमाणित किया गया"
 
-msgid "Upload Resume"
-msgstr "बायोडाटा अपलोड करें"
+msgid "Certified On"
+msgstr "प्रमाणित तिथि"
 
-msgid "Upload"
-msgstr "अपलोड करें"
+msgid "Changes on this page are saved together. Review your inputs, then save your progress."
+msgstr "इस पृष्ठ पर परिवर्तन एक साथ सहेजे जाते हैं। अपने इनपुट की समीक्षा करें, फिर अपनी प्रगति सहेजें।"
 
-msgid "No resumes uploaded."
-msgstr "कोई बायोडाटा अपलोड नहीं किया गया।"
+msgid "Channel"
+msgstr "चैनल"
 
-msgid "My Consents"
-msgstr "मेरी सहमति"
+msgid "Check"
+msgstr "जांच"
+
+msgid "Clear"
+msgstr "साफ़ करें"
+
+msgid "Cleared"
+msgstr "साफ़ किया गया"
+
+msgid "Closed"
+msgstr "बंद"
+
+msgid "Closes"
+msgstr "अंतिम तिथि"
+
+msgid "Closes %(closing_date)s"
+msgstr "अंतिम तिथि %(closing_date)s"
+
+msgid "Closing Date"
+msgstr "अंतिम तिथि"
+
+msgid "Code"
+msgstr "कोड"
+
+msgid "Col %(num)s"
+msgstr "कॉलम %(num)s"
+
+msgid "Comments"
+msgstr "टिप्पणियां"
+
+msgid "Comments (optional)"
+msgstr "टिप्पणियां (वैकल्पिक)"
+
+msgid "Comments..."
+msgstr "टिप्पणियां..."
+
+msgid "Communication History"
+msgstr "संचार इतिहास"
+
+msgid "Communication Hub — %(app_id)s"
+msgstr "संचार केंद्र — %(app_id)s"
+
+msgid "Communications"
+msgstr "संचार"
+
+msgid "Company Profile / Description"
+msgstr "कंपनी प्रोफ़ाइल / विवरण"
+
+msgid "Composite"
+msgstr "समग्र"
+
+msgid "Composite = 70% AI resume score + 30% skill-keyword match. This is a recommendation — final shortlist decisions are human."
+msgstr "समग्र = 70% AI रिज्यूमे स्कोर + 30% कौशल-कीवर्ड मेल। यह एक सिफारिश है — अंतिम शॉर्टलिस्ट निर्णय मानव द्वारा लिए जाते हैं。"
+
+msgid "Confidence"
+msgstr "विश्वास स्तर"
+
+msgid "Confirm"
+msgstr "पुष्टि करें"
+
+msgid "Confirm %(app_id)s"
+msgstr "%(app_id)s की पुष्टि करें"
+
+msgid "Confirm employee %(app_id)s"
+msgstr "कर्मचारी %(app_id)s की पुष्टि करें"
+
+msgid "Confirmed"
+msgstr "पुष्टि की गई"
+
+msgid "Confirmed On"
+msgstr "पुष्टि तिथि"
 
 msgid "Consent Management"
 msgstr "सहमति प्रबंधन"
 
-msgid "View and manage your data consent. You may revoke consent at any time."
-msgstr "अपनी डेटा सहमति देखें और प्रबंधित करें। आप किसी भी समय सहमति रद्द कर सकते हैं।"
+msgid "Consent revoked."
+msgstr "सहमति रद्द कर दी गई।"
 
-msgid "Purpose"
-msgstr "उद्देश्य"
+msgid "Consents"
+msgstr "सहमति"
 
-msgid "Scope"
-msgstr "दायरा"
+msgid "Copy advertisement text to clipboard"
+msgstr "विज्ञापन पाठ क्लिपबोर्ड पर कॉपी करें"
 
-msgid "Granted"
-msgstr "दी गई"
+msgid "Copy to Clipboard"
+msgstr "क्लिपबोर्ड पर कॉपी करें"
+
+msgid "Corrigendum (%(counter)s)Corrigenda (%(counter)s)"
+msgstr "संशोधन (%(counter)s)संशोधन (%(counter)s)"
+
+msgid "Corrigendum changes text"
+msgstr "संशोधन परिवर्तन पाठ"
+
+msgid "Count"
+msgstr "गणना"
+
+msgid "Court"
+msgstr "न्यायालय"
+
+msgid "Court case tracker"
+msgstr "न्यायालय मामला ट्रैकर"
+
+msgid "Create Advertisement"
+msgstr "विज्ञापन बनाएं"
+
+msgid "Create First Panel"
+msgstr "पहला पैनल बनाएं"
+
+msgid "Create Interview Panel"
+msgstr "साक्षात्कार पैनल बनाएं"
+
+msgid "Create Panel"
+msgstr "पैनल बनाएं"
+
+msgid "Create Requisition"
+msgstr "अनुरोध बनाएं"
+
+msgid "Create Vacancy Requisition"
+msgstr "रिक्ति अनुरोध बनाएं"
+
+msgid "Created"
+msgstr "बनाया गया"
+
+msgid "Created By"
+msgstr "द्वारा बनाया गया"
+
+msgid "Current Position"
+msgstr "वर्तमान स्थिति"
+
+msgid "Cycle Start Year"
+msgstr "चक्र प्रारंभ वर्ष"
+
+msgid "DOB"
+msgstr "जन्म तिथि"
+
+msgid "Dashboard"
+msgstr "डैशबोर्ड"
+
+msgid "Date"
+msgstr "तिथि"
+
+msgid "Date & Time"
+msgstr "तिथि और समय"
+
+msgid "Decision"
+msgstr "निर्णय"
+
+msgid "Decision Required"
+msgstr "निर्णय आवश्यक"
+
+msgid "Degree"
+msgstr "डिग्री"
+
+msgid "Deputation"
+msgstr "प्रतिनियुक्ति"
+
+msgid "Describe the changes…"
+msgstr "परिवर्तनों का वर्णन करें…"
+
+msgid "Description"
+msgstr "विवरण"
+
+msgid "Description:"
+msgstr "विवरण:"
+
+msgid "Designation"
+msgstr "पदनाम"
+
+msgid "Detail"
+msgstr "विवरण"
+
+msgid "Deviation"
+msgstr "विचलन"
+
+msgid "Dismissed"
+msgstr "खारिज"
+
+msgid "District"
+msgstr "जिला"
+
+msgid "District (e.g. East Khasi Hills)"
+msgstr "जिला (उदा. पूर्व खासी हिल्स)"
+
+msgid "DoPT 100-Point Roster"
+msgstr "DoPT 100-बिंदु रोस्टर"
+
+msgid "Doc Type"
+msgstr "दस्तावेज़ प्रकार"
+
+msgid "Document Verification"
+msgstr "दस्तावेज़ सत्यापन"
+
+msgid "Document Verification Dashboard"
+msgstr "दस्तावेज़ सत्यापन डैशबोर्ड"
+
+msgid "Document verification totals"
+msgstr "दस्तावेज़ सत्यापन कुल"
+
+msgid "Documents"
+msgstr "दस्तावेज़"
+
+msgid "Doughnut chart showing resume score distribution"
+msgstr "रिज्यूमे स्कोर वितरण दर्शाने वाला डोनट चार्ट"
+
+msgid "Download PDF"
+msgstr "PDF डाउनलोड करें"
+
+msgid "Duplicate Detection Queue"
+msgstr "डुप्लिकेट पहचान कतार"
+
+msgid "Duplicate Queue"
+msgstr "डुप्लिकेट कतार"
+
+msgid "Duplicate flag: %(candidate)s — %(app_a)s vs %(app_b)s"
+msgstr "डुप्लिकेट फ़्लैग: %(candidate)s — %(app_a)s vs %(app_b)s"
+
+msgid "Duplicates"
+msgstr "डुप्लिकेट"
+
+msgid "Duration (minutes)"
+msgstr "अवधि (मिनट)"
+
+msgid "EWS"
+msgstr "EWS"
+
+msgid "Eligibility Result"
+msgstr "पात्रता परिणाम"
+
+msgid "Eligible"
+msgstr "पात्र"
+
+msgid "Email"
+msgstr "ईमेल"
+
+msgid "Emp No"
+msgstr "कर्मचारी सं."
+
+msgid "Employee Number"
+msgstr "कर्मचारी संख्या"
+
+msgid "End Date"
+msgstr "समाप्ति तिथि"
+
+msgid "Enter Interview Score"
+msgstr "साक्षात्कार स्कोर दर्ज करें"
+
+msgid "Enter keywords for AI ranking"
+msgstr "AI रैंकिंग के लिए कीवर्ड दर्ज करें"
+
+msgid "Exam Date"
+msgstr "परीक्षा तिथि"
+
+msgid "Exempt"
+msgstr "छूट प्राप्त"
+
+msgid "Exempt vs Non-Exempt"
+msgstr "छूट प्राप्त बनाम गैर-छूट प्राप्त"
+
+msgid "Existing Scores"
+msgstr "मौजूदा स्कोर"
+
+msgid "Experience"
+msgstr "अनुभव"
+
+msgid "Expired"
+msgstr "समाप्त"
 
 msgid "Expires"
 msgstr "समाप्ति"
 
-msgid "Active"
-msgstr "सक्रिय"
+msgid "Explanation submitted."
+msgstr "स्पष्टीकरण जमा किया गया।"
 
-msgid "Revoked"
-msgstr "रद्द की गई"
+msgid "Export CSV"
+msgstr "CSV निर्यात करें"
 
-msgid "Revoke"
-msgstr "रद्द करें"
+msgid "External"
+msgstr "बाहरी"
 
-msgid "No consents recorded."
-msgstr "कोई सहमति दर्ज नहीं।"
+msgid "Fact"
+msgstr "तथ्य"
 
-msgid "An account with this email already exists."
-msgstr "इस ईमेल के साथ खाता पहले से मौजूद है।"
+msgid "Failed"
+msgstr "विफल"
 
-msgid "Simulated OTP sent to email (console): %(otp)s"
-msgstr "ईमेल पर सिम्युलेटेड OTP भेजा गया (कंसोल): %(otp)s"
+msgid "Fairness Analysis"
+msgstr "निष्पक्षता विश्लेषण"
 
-msgid "OTP verified. Welcome!"
-msgstr "OTP सत्यापित। स्वागत है!"
+msgid "Fairness Dashboard"
+msgstr "निष्पक्षता डैशबोर्ड"
 
-msgid "Verification session expired."
-msgstr "सत्यापन सत्र समाप्त हो गया।"
+msgid "False Positive"
+msgstr "गलत सकारात्मक"
+
+msgid "Fee Reconciliation"
+msgstr "शुल्क समाधान"
+
+msgid "Fetch from DigiLocker / NAD"
+msgstr "DigiLocker / NAD से प्राप्त करें"
+
+msgid "Fetched %(counter)s documentFetched %(counter)s documents"
+msgstr "%(counter)s दस्तावेज़ प्राप्त%(counter)s दस्तावेज़ प्राप्त"
+
+msgid "Filed"
+msgstr "दायर"
+
+msgid "Filed On"
+msgstr "दायर तिथि"
+
+msgid "Fill the form — the NEEPCO/THDC-format advertisement is generated automatically"
+msgstr "फ़ॉर्म भरें — NEEPCO/THDC-प्रारूप विज्ञापन स्वचालित रूप से बनेगा"
+
+msgid "Filled"
+msgstr "भरा हुआ"
+
+msgid "Filter"
+msgstr "फ़िल्टर"
+
+msgid "Filter by status:"
+msgstr "स्थिति से फ़िल्टर करें:"
+
+msgid "Filter, search and rank candidates"
+msgstr "उम्मीदवारों को फ़िल्टर, खोज और रैंक करें"
+
+msgid "Flagged"
+msgstr "चिह्नित"
+
+msgid "Flags &amp; Actions"
+msgstr "फ़्लैग और कार्रवाई"
+
+msgid "From paid, non-exempt payments"
+msgstr "भुगतान किए गए, गैर-छूट प्राप्त भुगतानों से"
+
+msgid "Full"
+msgstr "पूर्ण"
+
+msgid "Full?"
+msgstr "पूर्ण?"
+
+msgid "Funnel Overview"
+msgstr "फ़नल अवलोकन"
+
+msgid "Funnel conversion, category mix & score distribution"
+msgstr "फ़नल रूपांतरण, श्रेणी मिश्रण और स्कोर वितरण"
+
+msgid "General Conditions"
+msgstr "सामान्य शर्तें"
+
+msgid "Generate DoPT Roster"
+msgstr "DoPT रोस्टर बनाएं"
+
+msgid "Generated Advertisement"
+msgstr "जनरेटेड विज्ञापन"
+
+msgid "Genuine Duplicate"
+msgstr "वास्तविक डुप्लिकेट"
+
+msgid "Go to Verification Queue →"
+msgstr "सत्यापन कतार पर जाएं →"
+
+msgid "Grade"
+msgstr "ग्रेड"
+
+msgid "Granted"
+msgstr "दी गई"
+
+msgid "Grievance Queue"
+msgstr "शिकायत कतार"
+
+msgid "Grievances"
+msgstr "शिकायतें"
+
+msgid "Grievances &amp; Appeals"
+msgstr "शिकायतें और अपील"
+
+msgid "Health Requirements"
+msgstr "स्वास्थ्य आवश्यकताएं"
+
+msgid "Hearing"
+msgstr "सुनवाई"
+
+msgid "Hold Ctrl/Cmd to select multiple members."
+msgstr "एकाधिक सदस्य चुनने के लिए Ctrl/Cmd दबाएं。"
+
+msgid "Hospital / Medical Facility"
+msgstr "अस्पताल / चिकित्सा सुविधा"
+
+msgid "How to Apply"
+msgstr "आवेदन कैसे करें"
+
+msgid "Human Override"
+msgstr "मानव ओवरराइड"
+
+msgid "ID"
+msgstr "आईडी"
+
+msgid "In Progress"
+msgstr "प्रगति में"
+
+msgid "Info"
+msgstr "जानकारी"
+
+msgid "Initiate new police verification"
+msgstr "नया पुलिस सत्यापन आरंभ करें"
+
+msgid "Initiated"
+msgstr "आरंभ किया गया"
+
+msgid "Initiated By"
+msgstr "द्वारा आरंभ किया गया"
+
+msgid "Initiation notes"
+msgstr "आरंभ नोट्स"
+
+msgid "Interim Direction"
+msgstr "अंतरिम निर्देश"
+
+msgid "Internal Job Postings"
+msgstr "आंतरिक नौकरी पोस्टिंग"
+
+msgid "Internal Postings"
+msgstr "आंतरिक पद"
+
+msgid "Interview Invite"
+msgstr "साक्षात्कार निमंत्रण"
+
+msgid "Interview Results"
+msgstr "साक्षात्कार परिणाम"
+
+msgid "Interview Results — %(name)s"
+msgstr "साक्षात्कार परिणाम — %(name)s"
+
+msgid "Interview to offer conversion: %(conv)s percent"
+msgstr "साक्षात्कार से प्रस्ताव रूपांतरण: %(conv)s प्रतिशत"
+
+msgid "Interview→Offer"
+msgstr "साक्षात्कार→प्रस्ताव"
+
+msgid "Invalid"
+msgstr "अमान्य"
 
 msgid "Invalid OTP."
 msgstr "अमान्य OTP।"
 
+msgid "Issued"
+msgstr "जारी"
+
+msgid "Issuer"
+msgstr "जारीकर्ता"
+
+msgid "Justification"
+msgstr "औचित्य"
+
+msgid "Justification for overriding the automated verdict"
+msgstr "स्वचालित निर्णय को ओवरराइड करने का कारण"
+
+msgid "Keyword Matches"
+msgstr "कीवर्ड मेल"
+
+msgid "Keywords (comma-separated)"
+msgstr "कीवर्ड (अल्पविराम से अलग)"
+
+msgid "Leave blank to auto-detect certification keywords from the JD."
+msgstr "JD से प्रमाणन कीवर्ड स्वतः पहचानने के लिए खाली छोड़ें。"
+
+msgid "Liaison Officer"
+msgstr "समन्वय अधिकारी"
+
+msgid "Litigation Cases"
+msgstr "मुकदमेबाजी मामले"
+
+msgid "Location"
+msgstr "स्थान"
+
+msgid "Login"
+msgstr "लॉगिन"
+
+msgid "Logout"
+msgstr "लॉगआउट"
+
+msgid "Manage Category Rows"
+msgstr "श्रेणी पंक्तियां प्रबंधित करें"
+
+msgid "Manage recruitment notifications"
+msgstr "भर्ती सूचनाएं प्रबंधित करें"
+
+msgid "Manage vacancy requests and approval workflow"
+msgstr "रिक्ति अनुरोध और अनुमोदन वर्कफ़्लो प्रबंधित करें"
+
+msgid "Manual Review Required"
+msgstr "मैनुअल समीक्षा आवश्यक"
+
+msgid "Mark candidate <strong>Eligible</strong> (uncheck to mark <strong>Not Eligible</strong>)"
+msgstr "उम्मीदवार को <strong>पात्र</strong> चिह्नित करें (<strong>अपात्र</strong> चिह्नित करने के लिए अनचेक करें)"
+
+msgid "Mark category allocation as verified"
+msgstr "श्रेणी आवंटन को सत्यापित चिह्नित करें"
+
+msgid "Mark verified"
+msgstr "सत्यापित चिह्नित करें"
+
+msgid "Matched"
+msgstr "मेल खाया"
+
+msgid "Max Age"
+msgstr "अधिकतम आयु"
+
+msgid "Max disparity:"
+msgstr "अधिकतम विचलन:"
+
+msgid "Medical Exam — %(app_id)s"
+msgstr "चिकित्सा परीक्षण — %(app_id)s"
+
+msgid "Medical Examination"
+msgstr "चिकित्सा परीक्षण"
+
+msgid "Member"
+msgstr "सदस्य"
+
+msgid "Members:"
+msgstr "सदस्य:"
+
+msgid "Merged"
+msgstr "विलय किया गया"
+
+msgid "Minimum Score"
+msgstr "न्यूनतम स्कोर"
+
+msgid "Mobile"
+msgstr "मोबाइल"
+
+msgid "My Applications"
+msgstr "मेरे आवेदन"
+
+msgid "My Consents"
+msgstr "मेरी सहमति"
+
+msgid "Name"
+msgstr "नाम"
+
+msgid "Name, email, or ID"
+msgstr "नाम, ईमेल, या आईडी"
+
+msgid "New Interview Panel"
+msgstr "नया साक्षात्कार पैनल"
+
+msgid "New here?"
+msgstr "नए हैं?"
+
+msgid "New status"
+msgstr "नई स्थिति"
+
+msgid "No"
+msgstr "नहीं"
+
 msgid "No account found with this email."
 msgstr "इस ईमेल के साथ कोई खाता नहीं मिला।"
 
-msgid "Application submitted successfully."
-msgstr "आवेदन सफलतापूर्वक जमा किया गया।"
+msgid "No active DigiLocker/NAD consent from the candidate — documents will not be fetched."
+msgstr "उम्मीदवार से कोई सक्रिय DigiLocker/NAD सहमति नहीं — दस्तावेज़ प्राप्त नहीं किए जाएंगे।"
+
+msgid "No active advertisements."
+msgstr "कोई सक्रिय विज्ञापन नहीं।"
+
+msgid "No active panel entries."
+msgstr "कोई सक्रिय पैनल प्रविष्टि नहीं।"
+
+msgid "No adverse impact flagged."
+msgstr "कोई प्रतिकूल प्रभाव चिह्नित नहीं।"
+
+msgid "No advertisements yet. Create your first one!"
+msgstr "अभी कोई विज्ञापन नहीं। अपना पहला विज्ञापन बनाएं!"
+
+msgid "No allocation recorded."
+msgstr "कोई आवंटन दर्ज नहीं।"
+
+msgid "No applications for this post."
+msgstr "इस पद के लिए कोई आवेदन नहीं।"
+
+msgid "No applications to rank. Upload resumes first."
+msgstr "रैंक करने के लिए कोई आवेदन नहीं। पहले रिज्यूमे अपलोड करें。"
+
+msgid "No applications yet."
+msgstr "अभी कोई आवेदन नहीं।"
+
+msgid "No applications yet. Run the simulator to seed data."
+msgstr "अभी कोई आवेदन नहीं। डेटा बनाने के लिए सिम्युलेटर चलाएं।"
+
+msgid "No applications."
+msgstr "कोई आवेदन नहीं।"
+
+msgid "No approval steps yet."
+msgstr "अभी कोई अनुमोदन चरण नहीं।"
+
+msgid "No background report."
+msgstr "कोई पृष्ठभूमि रिपोर्ट नहीं।"
+
+msgid "No category allocation data available yet."
+msgstr "अभी कोई श्रेणी आवंटन डेटा उपलब्ध नहीं।"
+
+msgid "No category allocation data found. Assign categories to applications to populate this dashboard."
+msgstr "कोई श्रेणी आवंटन डेटा नहीं मिला। इस डैशबोर्ड को भरने के लिए आवेदनों को श्रेणियां सौंपें।"
+
+msgid "No category allocations yet."
+msgstr "अभी कोई श्रेणी आवंटन नहीं।"
+
+msgid "No communications sent yet."
+msgstr "अभी कोई संचार नहीं भेजा गया।"
+
+msgid "No completed verifications yet."
+msgstr "अभी कोई पूर्ण सत्यापन नहीं।"
+
+msgid "No consents recorded."
+msgstr "कोई सहमति दर्ज नहीं।"
+
+msgid "No description provided."
+msgstr "कोई विवरण नहीं दिया गया।"
+
+msgid "No documents match the current filter."
+msgstr "वर्तमान फ़िल्टर से कोई दस्तावेज़ मेल नहीं खाता।"
+
+msgid "No duplicate flags. Great — your data is clean!"
+msgstr "कोई डुप्लिकेट फ़्लैग नहीं। बढ़िया — आपका डेटा स्वच्छ है!"
+
+msgid "No evaluation"
+msgstr "कोई मूल्यांकन नहीं"
+
+msgid "No facts compiled yet."
+msgstr "अभी कोई तथ्य संकलित नहीं।"
+
+msgid "No grievances found."
+msgstr "कोई शिकायत नहीं मिली।"
+
+msgid "No internal postings."
+msgstr "कोई आंतरिक पोस्टिंग नहीं।"
+
+msgid "No interview panels created for this post yet."
+msgstr "इस पद के लिए अभी कोई साक्षात्कार पैनल नहीं बनाया गया।"
+
+msgid "No litigation cases recorded."
+msgstr "कोई मुकदमेबाजी मामला दर्ज नहीं।"
+
+msgid "No payments recorded yet."
+msgstr "अभी कोई भुगतान दर्ज नहीं।"
+
+msgid "No police verification initiated yet."
+msgstr "अभी कोई पुलिस सत्यापन आरंभ नहीं हुआ।"
+
+msgid "No posts in this advertisement."
+msgstr "इस विज्ञापन में कोई पद नहीं।"
+
+msgid "No probation records found."
+msgstr "कोई प्रोबेशन रिकॉर्ड नहीं मिला।"
+
+msgid "No requisitions yet. Create your first one!"
+msgstr "अभी कोई अनुरोध नहीं। अपना पहला अनुरोध बनाएं!"
+
+msgid "No resumes uploaded."
+msgstr "कोई बायोडाटा अपलोड नहीं किया गया।"
+
+msgid "No verification data yet."
+msgstr "अभी कोई सत्यापन डेटा नहीं।"
+
+msgid "Non-Exempt"
+msgstr "गैर-छूट प्राप्त"
+
+msgid "None"
+msgstr "कोई नहीं"
+
+msgid "Not Cleared"
+msgstr "साफ़ नहीं किया गया"
+
+msgid "Not Eligible"
+msgstr "अपात्र"
+
+msgid "Notes"
+msgstr "नोट्स"
+
+msgid "Notes (optional)"
+msgstr "नोट्स (वैकल्पिक)"
+
+msgid "Notes (optional)…"
+msgstr "नोट्स (वैकल्पिक)…"
+
+msgid "Notes…"
+msgstr "नोट्स…"
+
+msgid "Notice"
+msgstr "नोटिस"
+
+msgid "Number of Positions"
+msgstr "पदों की संख्या"
+
+msgid "OBC"
+msgstr "OBC"
+
+msgid "OK"
+msgstr "ठीक है"
+
+msgid "OTP verified. Welcome!"
+msgstr "OTP सत्यापित। स्वागत है!"
+
+msgid "Observation / Remarks"
+msgstr "टिप्पणी / रिमार्क"
+
+msgid "Offer Letter"
+msgstr "नियुक्ति पत्र"
+
+msgid "On Probation"
+msgstr "प्रोबेशन पर"
+
+msgid "Open"
+msgstr "खुला"
+
+msgid "Open Until"
+msgstr "तक खुला"
+
+msgid "Opportunities for existing employees"
+msgstr "मौजूदा कर्मचारियों के लिए अवसर"
+
+msgid "Order text for case %(case_num)s"
+msgstr "मामला %(case_num)s के लिए आदेश पाठ"
+
+msgid "Organisation"
+msgstr "संगठन"
+
+msgid "Organization"
+msgstr "संगठन"
+
+msgid "Other"
+msgstr "अन्य"
+
+msgid "Overall rate:"
+msgstr "कुल दर:"
+
+msgid "Overridden"
+msgstr "ओवरराइड किया गया"
+
+msgid "Override:"
+msgstr "ओवरराइड:"
+
+msgid "Overview of document verification progress"
+msgstr "दस्तावेज़ सत्यापन प्रगति का अवलोकन"
+
+msgid "Paid"
+msgstr "भुगतान किया गया"
+
+msgid "Paid At"
+msgstr "भुगतान तिथि"
+
+msgid "Panel"
+msgstr "पैनल"
+
+msgid "Panel List"
+msgstr "पैनल सूची"
+
+msgid "Panel Members"
+msgstr "पैनल सदस्य"
+
+msgid "Panel Name"
+msgstr "पैनल का नाम"
+
+msgid "Panel entry %(rank)s — %(candidate)s"
+msgstr "पैनल प्रविष्टि %(rank)s — %(candidate)s"
+
+msgid "Panel promotable"
+msgstr "पैनल पदोन्नति योग्य"
+
+msgid "Panels & Slots"
+msgstr "पैनल और स्लॉट"
+
+msgid "Passing Year"
+msgstr "उत्तीर्ण वर्ष"
+
+msgid "Pay Grade"
+msgstr "वेतन ग्रेड"
+
+msgid "Pay Scale"
+msgstr "वेतनमान"
+
+msgid "Pay Scale (Rs added automatically)"
+msgstr "वेतनमान (रु. स्वचालित रूप से जुड़ेगा)"
+
+msgid "Payment status breakdown and reconciliation report"
+msgstr "भुगतान स्थिति विवरण और समाधान रिपोर्ट"
+
+msgid "Pending"
+msgstr "लंबित"
+
+msgid "Pending duplicates"
+msgstr "लंबित डुप्लिकेट"
+
+msgid "Pending verifications: %(pending_count)s"
+msgstr "लंबित सत्यापन: %(pending_count)s"
+
+msgid "Percentage"
+msgstr "प्रतिशत"
+
+msgid "Period of Engagement"
+msgstr "नियोजन अवधि"
+
+msgid "Petitioner"
+msgstr "याचिकाकर्ता"
+
+msgid "Phone"
+msgstr "फ़ोन"
+
+msgid "Please fix the errors below."
+msgstr "कृपया नीचे दी गई त्रुटियां ठीक करें।"
+
+msgid "Police district"
+msgstr "पुलिस जिला"
+
+msgid "Portal Notification"
+msgstr "पोर्टल सूचना"
+
+msgid "Positions"
+msgstr "पद"
+
+msgid "Post"
+msgstr "पद"
+
+msgid "Post %(counter)s"
+msgstr "पद %(counter)s"
+
+msgid "Post (%(counter)s)Posts (%(counter)s)"
+msgstr "पद (%(counter)s)पद (%(counter)s)"
+
+msgid "Post Code"
+msgstr "पद कोड"
+
+msgid "Post Name"
+msgstr "पद का नाम"
 
 msgid "Post not found or already applied."
 msgstr "पद नहीं मिला या पहले ही आवेदन किया जा चुका है।"
 
+msgid "Posts / Vacancies"
+msgstr "पद / रिक्तियां"
+
+msgid "Preview Text"
+msgstr "पाठ पूर्वावलोकन"
+
+msgid "Print / Save PDF"
+msgstr "प्रिंट / PDF सहेजें"
+
+msgid "Print or save as PDF"
+msgstr "प्रिंट करें या PDF के रूप में सहेजें"
+
+msgid "Print or save candidate report as PDF"
+msgstr "उम्मीदवार रिपोर्ट प्रिंट करें या PDF के रूप में सहेजें"
+
+msgid "Priority"
+msgstr "प्राथमिकता"
+
+msgid "Probation &amp; Bond"
+msgstr "प्रोबेशन और बॉन्ड"
+
+msgid "Probation Records"
+msgstr "प्रोबेशन रिकॉर्ड"
+
+msgid "Promote to Offer"
+msgstr "प्रस्ताव में पदोन्नत करें"
+
+msgid "Promoted"
+msgstr "पदोन्नत"
+
+msgid "Publish Corrigendum"
+msgstr "संशोधन प्रकाशित करें"
+
+msgid "Published"
+msgstr "प्रकाशित"
+
+msgid "Published %(pub_date)s · Closes %(close_date)s"
+msgstr "प्रकाशित %(pub_date)s · अंतिम तिथि %(close_date)s"
+
+msgid "Published Date"
+msgstr "प्रकाशन तिथि"
+
+msgid "Published: %(pub_date)s · Closes: %(close_date)s"
+msgstr "प्रकाशित: %(pub_date)s · अंतिम तिथि %(close_date)s"
+
+msgid "Purpose"
+msgstr "उद्देश्य"
+
+msgid "PwBD"
+msgstr "PwBD"
+
+msgid "PwBD (Horizontal)"
+msgstr "PwBD (क्षैतिज)"
+
+msgid "Qualification"
+msgstr "योग्यता"
+
+msgid "Qualification Met"
+msgstr "योग्यता पूर्ण"
+
+msgid "Range: %(min_rate)s – %(max_rate)s"
+msgstr "सीमा: %(min_rate)s – %(max_rate)s"
+
+msgid "Rank"
+msgstr "रैंक"
+
+msgid "Ranked waitlist for this post"
+msgstr "इस पद के लिए रैंक की गई प्रतीक्षा सूची"
+
+msgid "Rate"
+msgstr "दर"
+
+msgid "Ratio to Max"
+msgstr "अधिकतम अनुपात"
+
+msgid "Ready to copy into your notice"
+msgstr "अपनी सूचना में कॉपी करने के लिए तैयार"
+
+msgid "Reason"
+msgstr "कारण"
+
+msgid "Recent Payments"
+msgstr "हालिया भुगतान"
+
+msgid "Recruitment"
+msgstr "भर्ती"
+
+msgid "Recruitment Analytics"
+msgstr "भर्ती विश्लेषण"
+
+msgid "Recruitment Dashboard"
+msgstr "भर्ती डैशबोर्ड"
+
+msgid "Recruitment analytics summary"
+msgstr "भर्ती विश्लेषण सारांश"
+
+msgid "Recruitment funnel chart showing application status breakdown"
+msgstr "आवेदन स्थिति विभाजन दर्शाने वाला भर्ती फ़नल चार्ट"
+
+msgid "Refunded"
+msgstr "वापस किया गया"
+
+msgid "Register"
+msgstr "पंजीकरण"
+
+msgid "Reject"
+msgstr "अस्वीकार करें"
+
+msgid "Reject document for %(name)s"
+msgstr "%(name)s के लिए दस्तावेज़ अस्वीकार करें"
+
+msgid "Rejected"
+msgstr "अस्वीकृत"
+
+msgid "Rejected at stage"
+msgstr "चरण में अस्वीकृत"
+
+msgid "Rejected documents: %(rejected_count)s"
+msgstr "अस्वीकृत दस्तावेज़: %(rejected_count)s"
+
+msgid "Rejection"
+msgstr "अस्वीकृति"
+
+msgid "Remove Post"
+msgstr "पद हटाएं"
+
+msgid "Remove Post %(counter)s"
+msgstr "पद %(counter)s हटाएं"
+
+msgid "Report"
+msgstr "रिपोर्ट"
+
+msgid "Report — %(advt_number)s"
+msgstr "रिपोर्ट — %(advt_number)s"
+
+msgid "Report →"
+msgstr "रिपोर्ट →"
+
+msgid "Required Certificates (comma-separated)"
+msgstr "आवश्यक प्रमाणपत्र (अल्पविराम से अलग)"
+
+msgid "Required for rejection"
+msgstr "अस्वीकृति के लिए आवश्यक"
+
+msgid "Requisition %(name)s"
+msgstr "अनुरोध %(name)s"
+
+msgid "Requisition Details"
+msgstr "अनुरोध विवरण"
+
+msgid "Requisition: %(name)s"
+msgstr "अनुरोध: %(name)s"
+
+msgid "Requisition: %(name)s — %(status)s"
+msgstr "अनुरोध: %(name)s — %(status)s"
+
+msgid "Requisitions"
+msgstr "अनुरोध"
+
+msgid "Resolution"
+msgstr "समाधान"
+
+msgid "Resolution Notes:"
+msgstr "समाधान नोट्स:"
+
+msgid "Resolve"
+msgstr "समाधान करें"
+
+msgid "Resolved"
+msgstr "हल किया गया"
+
+msgid "Resolved On"
+msgstr "हल तिथि"
+
+msgid "Result"
+msgstr "परिणाम"
+
+msgid "Resume Evaluation"
+msgstr "रिज्यूमे मूल्यांकन"
+
+msgid "Resume Score"
+msgstr "रिज्यूमे स्कोर"
+
 msgid "Resume uploaded. Parsing will run shortly."
 msgstr "बायोडाटा अपलोड हो गया। पार्सिंग शीघ्र चलेगी।"
 
-msgid "Explanation submitted."
-msgstr "स्पष्टीकरण जमा किया गया।"
+msgid "Resume: %(resume_name)s"
+msgstr "रिज्यूमे: %(resume_name)s"
 
-msgid "Consent revoked."
-msgstr "सहमति रद्द कर दी गई।"
+msgid "Review (%(matched)s/%(total)s)"
+msgstr "समीक्षा (%(matched)s/%(total)s)"
+
+msgid "Review Applications"
+msgstr "आवेदन की समीक्षा करें"
+
+msgid "Review and verify candidate-submitted documents"
+msgstr "उम्मीदवार द्वारा प्रस्तुत दस्तावेजों की समीक्षा और सत्यापन करें"
+
+msgid "Reviewer Notes"
+msgstr "समीक्षक नोट्स"
+
+msgid "Revoke"
+msgstr "रद्द करें"
+
+msgid "Revoked"
+msgstr "रद्द की गई"
+
+msgid "Roster"
+msgstr "रोस्टर"
+
+msgid "Roster Breach Alerts:"
+msgstr "रोस्टर उल्लंघन अलर्ट:"
+
+msgid "Roster Matrix"
+msgstr "रोस्टर मैट्रिक्स"
+
+msgid "Run Eligibility"
+msgstr "पात्रता जांचें"
+
+msgid "SC"
+msgstr "SC"
+
+msgid "SMS"
+msgstr "SMS"
+
+msgid "ST"
+msgstr "ST"
+
+msgid "Save"
+msgstr "सहेजें"
+
+msgid "Save / Update Row"
+msgstr "पंक्ति सहेजें / अपडेट करें"
+
+msgid "Save Override"
+msgstr "ओवरराइड सहेजें"
+
+msgid "Save Remarks"
+msgstr "रिमार्क सहेजें"
+
+msgid "Save application changes"
+msgstr "आवेदन परिवर्तन सहेजें"
+
+msgid "Save remarks for %(candidate)s"
+msgstr "%(candidate)s के लिए रिमार्क सहेजें"
+
+msgid "Schedule Exam"
+msgstr "परीक्षण निर्धारित करें"
+
+msgid "Schedule Interview Slot"
+msgstr "साक्षात्कार स्लॉट निर्धारित करें"
+
+msgid "Schedule Medical Exam"
+msgstr "चिकित्सा परीक्षण निर्धारित करें"
+
+msgid "Schedule Slot"
+msgstr "स्लॉट निर्धारित करें"
+
+msgid "Schedule a Slot"
+msgstr "स्लॉट निर्धारित करें"
+
+msgid "Scope"
+msgstr "दायरा"
+
+msgid "Score"
+msgstr "स्कोर"
+
+msgid "Score (0.0 – 10.0)"
+msgstr "स्कोर (0.0 – 10.0)"
+
+msgid "Score Summary"
+msgstr "स्कोर सारांश"
+
+msgid "Score for %(slot.application.candidate)s"
+msgstr "%(slot.application.candidate)s के लिए स्कोर"
+
+msgid "Scores"
+msgstr "स्कोर"
+
+msgid "Search"
+msgstr "खोजें"
+
+msgid "Select"
+msgstr "चुनें"
+
+msgid "Select Post"
+msgstr "पद चुनें"
+
+msgid "Selected"
+msgstr "चयनित"
+
+msgid "Selection Rate"
+msgstr "चयन दर"
+
+msgid "Send"
+msgstr "भेजें"
+
+msgid "Send Communication"
+msgstr "संचार भेजें"
+
+msgid "Send OTP"
+msgstr "OTP भेजें"
+
+msgid "Sent"
+msgstr "भेजा गया"
+
+msgid "Signature"
+msgstr "हस्ताक्षर"
+
+msgid "Simulated OTP sent to email (console): %(otp)s"
+msgstr "ईमेल पर सिम्युलेटेड OTP भेजा गया (कंसोल): %(otp)s"
+
+msgid "Sitting Fee (₹ per member, optional)"
+msgstr "बैठक शुल्क (₹ प्रति सदस्य, वैकल्पिक)"
+
+msgid "Sitting Fee: ₹%(fee)s"
+msgstr "बैठक शुल्क: ₹%(fee)s"
+
+msgid "Skills"
+msgstr "कौशल"
+
+msgid "Skip to main content"
+msgstr "मुख्य सामग्री पर जाएं"
+
+msgid "Smart Shortlist"
+msgstr "स्मार्ट शॉर्टलिस्ट"
+
+msgid "Smart Shortlist — %(post_name)s"
+msgstr "स्मार्ट शॉर्टलिस्ट — %(post_name)s"
+
+msgid "Source"
+msgstr "स्रोत"
+
+msgid "Stage"
+msgstr "चरण"
+
+msgid "Start Date"
+msgstr "प्रारंभ तिथि"
+
+msgid "Statistical Parity"
+msgstr "सांख्यिकी समानता"
+
+msgid "Status"
+msgstr "स्थिति"
+
+msgid "Status Update"
+msgstr "स्थिति अपडेट"
+
+msgid "Status funnel chart showing application counts by stage"
+msgstr "चरण-वार आवेदन गणना दर्शाने वाला स्थिति फ़नल चार्ट"
+
+msgid "Stay"
+msgstr "स्टे"
+
+msgid "Stay Granted"
+msgstr "स्टे स्वीकृत"
+
+msgid "Stay Order"
+msgstr "स्टे ऑर्डर"
+
+msgid "Subject"
+msgstr "विषय"
+
+msgid "Submit Application"
+msgstr "आवेदन जमा करें"
+
+msgid "Submit Explanation"
+msgstr "स्पष्टीकरण जमा करें"
+
+msgid "Submit Score"
+msgstr "स्कोर जमा करें"
+
+msgid "Submit a new vacancy request for approval"
+msgstr "अनुमोदन के लिए नया रिक्ति अनुरोध जमा करें"
+
+msgid "Submit for Approval"
+msgstr "अनुमोदन के लिए जमा करें"
+
+msgid "Sync from Category Breakup"
+msgstr "श्रेणी विभाजन से सिंक करें"
+
+msgid "The candidate's progress tracker will show a red cross at this stage."
+msgstr "उम्मीदवार का प्रगति ट्रैकर इस चरण पर लाल क्रॉस दिखाएगा।"
+
+msgid "This application is affected by an active court stay."
+msgstr "यह आवेदन एक सक्रिय न्यायालय स्टे से प्रभावित है।"
+
+msgid "Title"
+msgstr "शीर्षक"
+
+msgid "Top Candidates by Resume Score"
+msgstr "रिज्यूमे स्कोर के अनुसार शीर्ष उम्मीदवार"
+
+msgid "Total"
+msgstr "कुल"
+
+msgid "Total Applicants"
+msgstr "कुल आवेदक"
+
+msgid "Total Applications"
+msgstr "कुल आवेदन"
+
+msgid "Total Collected"
+msgstr "कुल एकत्र"
+
+msgid "Total applications: %(total)s"
+msgstr "कुल आवेदन: %(total)s"
+
+msgid "Track probation periods and confirm employees"
+msgstr "प्रोबेशन अवधि ट्रैक करें और कर्मचारियों की पुष्टि करें"
+
+msgid "Type"
+msgstr "प्रकार"
+
+msgid "UR"
+msgstr "UR"
+
+msgid "Unassigned"
+msgstr "असौंपा गया"
+
+msgid "University"
+msgstr "विश्वविद्यालय"
+
+msgid "Unverified"
+msgstr "असत्यापित"
+
+msgid "Update"
+msgstr "अपडेट"
+
+msgid "Update Status"
+msgstr "स्थिति अपडेट करें"
+
+msgid "Update police verification status for %(district)s"
+msgstr "%(district)s के लिए पुलिस सत्यापन स्थिति अपडेट करें"
+
+msgid "Update status for case %(case_num)s"
+msgstr "मामला %(case_num)s की स्थिति अपडेट करें"
+
+msgid "Update status for grievance %(gpk)s"
+msgstr "शिकायत %(gpk)s की स्थिति अपडेट करें"
+
+msgid "Upload"
+msgstr "अपलोड करें"
+
+msgid "Upload Resume"
+msgstr "बायोडाटा अपलोड करें"
+
+msgid "Upload police report"
+msgstr "पुलिस रिपोर्ट अपलोड करें"
+
+msgid "Vacancies"
+msgstr "रिक्तियां"
+
+msgid "Vacancy Requisitions"
+msgstr "रिक्ति अनुरोध"
+
+msgid "Valid"
+msgstr "मान्य"
+
+msgid "Valid Until"
+msgstr "तक मान्य"
+
+msgid "Verdict:"
+msgstr "निर्णय:"
+
+msgid "Verification comments for %(name)s"
+msgstr "%(name)s के लिए सत्यापन टिप्पणियां"
+
+msgid "Verification session expired."
+msgstr "सत्यापन सत्र समाप्त हो गया।"
+
+msgid "Verified"
+msgstr "सत्यापित"
+
+msgid "Verified At"
+msgstr "सत्यापन तिथि"
+
+msgid "Verified documents: %(verified_count)s"
+msgstr "सत्यापित दस्तावेज़: %(verified_count)s"
+
+msgid "Verifier"
+msgstr "सत्यापनकर्ता"
+
+msgid "Verify"
+msgstr "सत्यापित करें"
+
+msgid "Verify Documents"
+msgstr "दस्तावेज़ सत्यापित करें"
+
+msgid "Verify OTP"
+msgstr "OTP सत्यापित करें"
+
+msgid "Verify document for %(name)s"
+msgstr "%(name)s के लिए दस्तावेज़ सत्यापित करें"
+
+msgid "Vertical"
+msgstr "लंबवत"
+
+msgid "Vertical Vacancies"
+msgstr "लंबवत रिक्तियां"
+
+msgid "View"
+msgstr "देखें"
+
+msgid "View &amp; Act"
+msgstr "देखें और कार्रवाई करें"
+
+msgid "View Report"
+msgstr "रिपोर्ट देखें"
+
+msgid "View and manage your data consent. You may revoke consent at any time."
+msgstr "अपनी डेटा सहमति देखें और प्रबंधित करें। आप किसी भी समय सहमति रद्द कर सकते हैं।"
+
+msgid "View →"
+msgstr "देखें →"
+
+msgid "Warning"
+msgstr "चेतावनी"
+
+msgid "Yes"
+msgstr "हां"
+
+msgid "Your Explanation (optional)"
+msgstr "आपका स्पष्टीकरण (वैकल्पिक)"
+
+msgid "by %(user)s"
+msgstr "द्वारा %(user)s"
+
+msgid "e.g. E-5"
+msgstr "उदा. E-5"
+
+msgid "e.g. Panel A"
+msgstr "उदा. पैनल A"
+
+msgid "e.g. TF20260001"
+msgstr "उदा. TF20260001"
+
+msgid "vacancies"
+msgstr "रिक्तियां"
+
+msgid "yrs"
+msgstr "वर्ष"
+
+msgid "— Add allocation —"
+msgstr "— आवंटन जोड़ें —"
+
+msgid "⚠ Adverse impact detected — the following categories fall below %(threshold)s (80 % of the highest rate):"
+msgstr "⚠ प्रतिकूल प्रभाव पाया गया — निम्नलिखित श्रेणियां %(threshold)s (अधिकतम दर का 80%) से नीचे हैं:"
+
+msgid "⚠ Concerns"
+msgstr "⚠ चिंताएं"
+
+msgid "⚠️ Active Stay Order"
+msgstr "⚠️ सक्रिय स्टे ऑर्डर"
+
+msgid "⚠️ Document Consistency Warning"
+msgstr "⚠️ दस्तावेज़ संगतता चेतावनी"
+
+msgid "⚡ Update Status"
+msgstr "⚡ स्थिति अपडेट करें"
+
+msgid "✓ Met"
+msgstr "✓ पूर्ण"
+
+msgid "✓ OK"
+msgstr "✓ ठीक है"
+
+msgid "✓ Positives"
+msgstr "✓ सकारात्मक"
+
+msgid "✓ Verify"
+msgstr "✓ सत्यापित करें"
+
+msgid "✗ FAIL"
+msgstr "✗ विफल"
+
+msgid "✗ Not Met (%(matched)s/%(total)s)"
+msgstr "✗ पूर्ण नहीं (%(matched)s/%(total)s)"
+
+msgid "✗ Reject"
+msgstr "✗ अस्वीकार करें"
+
+msgid "🎯 Category Mix (Allocations)"
+msgstr "🎯 श्रेणी मिश्रण (आवंटन)"
+
+msgid "🏷 Category Allocation / Roster"
+msgstr "🏷 श्रेणी आवंटन / रोस्टर"
+
+msgid "🏷 Resume Score Distribution"
+msgstr "🏷 रिज्यूमे स्कोर वितरण"
+
+msgid "💬 Interview Co-pilot Questions"
+msgstr "💬 साक्षात्कार सह-पायलट प्रश्न"
+
+msgid "💾 Save Progress"
+msgstr "💾 प्रगति सहेजें"
+
+msgid "📄 Parsed Resume"
+msgstr "📄 पार्स किया गया रिज्यूमे"
+
+msgid "📈 Conversion Rates"
+msgstr "📈 रूपांतरण दर"
+
+msgid "📊 Status Funnel"
+msgstr "📊 स्थिति फ़नल"
+
+msgid "📊 Verification by Post"
+msgstr "📊 पद-वार सत्यापन"
+
+msgid "🕐 Recent Activity"
+msgstr "🕐 हालिया गतिविधि"
+
+msgid "🗂 Applications per Post"
+msgstr "🗂 प्रति पद आवेदन"
+
+msgid "🛡 Background Facts Report"
+msgstr "🛡 पृष्ठभूमि तथ्य रिपोर्ट"
+
+msgid "🛡️ Initiate Police Verification"
+msgstr "🛡️ पुलिस सत्यापन आरंभ करें"
+
+msgid "🛡️ Police Verification"
+msgstr "🛡️ पुलिस सत्यापन"
+
+msgid "🧠 Resume Evaluation"
+msgstr "🧠 रिज्यूमे मूल्यांकन"
+
+msgid "🪪 DigiLocker / NAD Document Fetch"
+msgstr "🪪 DigiLocker / NAD दस्तावेज़ प्राप्ति"

@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Internal Postings{% endblock %}
-{% block page_title %}Internal Job Postings{% endblock %}
-{% block subtitle %}Opportunities for existing employees{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Internal Postings" %}{% endblock %}
+{% block page_title %}{% trans "Internal Job Postings" %}{% endblock %}
+{% block subtitle %}{% trans "Opportunities for existing employees" %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card">
     <table class="tf-table" id="postingTable">
-        <thead><tr><th>Title</th><th>Grade</th><th>Experience</th><th>Deputation</th><th>Priority</th><th>Open Until</th><th>Applications</th></tr></thead>
+        <thead><tr><th>{% trans "Title" %}</th><th>{% trans "Grade" %}</th><th>{% trans "Experience" %}</th><th>{% trans "Deputation" %}</th><th>{% trans "Priority" %}</th><th>{% trans "Open Until" %}</th><th>{% trans "Applications" %}</th></tr></thead>
         <tbody>
             {% for posting in postings %}
             <tr>
                 <td>{{ posting.title }}</td>
                 <td>{{ posting.grade|default:"—" }}</td>
-                <td>{{ posting.min_experience_years }} yrs</td>
-                <td>{{ posting.deputation_eligible|yesno:"Yes,No" }}</td>
+                <td>{{ posting.min_experience_years }} {% trans "yrs" %}</td>
+                <td>{% if posting.deputation_eligible %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
                 <td>
                     <span class="tf-badge {% if posting.priority_flag == 'critical' %}danger{% elif posting.priority_flag == 'high' %}warning{% else %}muted{% endif %}">
                         {{ posting.priority_flag|title }}
@@ -23,7 +24,7 @@
                 <td>{{ posting.applications.count }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" class="tf-empty">No internal postings.</td></tr>
+            <tr><td colspan="7" class="tf-empty">{% trans "No internal postings." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

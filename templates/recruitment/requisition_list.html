@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Requisitions{% endblock %}
-{% block page_title %}Vacancy Requisitions{% endblock %}
-{% block subtitle %}Manage vacancy requests and approval workflow{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Requisitions" %}{% endblock %}
+{% block page_title %}{% trans "Vacancy Requisitions" %}{% endblock %}
+{% block subtitle %}{% trans "Manage vacancy requests and approval workflow" %}{% endblock %}
 
 {% block content %}
 <div class="tf-flex mb-4">
-    <a href="{% url 'requisition_create' %}" class="tf-btn">+ Create Requisition</a>
+    <a href="{% url 'requisition_create' %}" class="tf-btn">{% trans "+ Create Requisition" %}</a>
 </div>
 
 <div class="tf-glass tf-card">
     <table class="tf-table">
-        <thead><tr><th>Post</th><th>Count</th><th>Grade</th><th>Status</th><th>Created By</th><th>Created</th></tr></thead>
+        <thead><tr><th>{% trans "Post" %}</th><th>{% trans "Count" %}</th><th>{% trans "Grade" %}</th><th>{% trans "Status" %}</th><th>{% trans "Created By" %}</th><th>{% trans "Created" %}</th></tr></thead>
         <tbody>
             {% for r in requisitions %}
-            <tr class="tf-rowlink" data-href="{% url 'requisition_detail' r.pk %}" role="link" tabindex="0" aria-label="Requisition: {{ r.post_name }} — {{ r.get_status_display }}">
+            <tr class="tf-rowlink" data-href="{% url 'requisition_detail' r.pk %}" role="link" tabindex="0" aria-label="{% blocktrans with name=r.post_name status=r.get_status_display %}Requisition: {{ name }} — {{ status }}{% endblocktrans %}">
                 <td>{{ r.post_name }}</td>
                 <td>{{ r.count }}</td>
                 <td>{{ r.grade }}</td>
@@ -26,7 +27,7 @@
                 <td>{{ r.created_at|date:"d-m-Y" }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="6" class="tf-empty">No requisitions yet. Create your first one!</td></tr>
+            <tr><td colspan="6" class="tf-empty">{% trans "No requisitions yet. Create your first one!" %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

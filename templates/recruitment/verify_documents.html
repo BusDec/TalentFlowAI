@@ -1,27 +1,28 @@
 {% extends 'base.html' %}
-{% block title %}Verify Documents{% endblock %}
-{% block page_title %}Document Verification{% endblock %}
-{% block subtitle %}Review and verify candidate-submitted documents{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Verify Documents" %}{% endblock %}
+{% block page_title %}{% trans "Document Verification" %}{% endblock %}
+{% block subtitle %}{% trans "Review and verify candidate-submitted documents" %}{% endblock %}
 
 {% block content %}
 <div class="tf-stats" style="margin-bottom:24px">
-    <a href="?status=pending" class="tf-stat" style="text-decoration:none;display:block" aria-label="Pending verifications: {{ pending_count }}">
-        <div class="label">Pending</div>
+    <a href="?status=pending" class="tf-stat" style="text-decoration:none;display:block" aria-label="{% blocktrans %}Pending verifications: {{ pending_count }}{% endblocktrans %}">
+        <div class="label">{% trans "Pending" %}</div>
         <div class="value">{{ pending_count }}</div>
         <div class="icon" aria-hidden="true">⏳</div>
     </a>
-    <a href="?status=verified" class="tf-stat" style="text-decoration:none;display:block" aria-label="Verified documents: {{ verified_count }}">
-        <div class="label">Verified</div>
+    <a href="?status=verified" class="tf-stat" style="text-decoration:none;display:block" aria-label="{% blocktrans %}Verified documents: {{ verified_count }}{% endblocktrans %}">
+        <div class="label">{% trans "Verified" %}</div>
         <div class="value">{{ verified_count }}</div>
         <div class="icon" aria-hidden="true">✓</div>
     </a>
-    <a href="?status=rejected" class="tf-stat" style="text-decoration:none;display:block" aria-label="Rejected documents: {{ rejected_count }}">
-        <div class="label">Rejected</div>
+    <a href="?status=rejected" class="tf-stat" style="text-decoration:none;display:block" aria-label="{% blocktrans %}Rejected documents: {{ rejected_count }}{% endblocktrans %}">
+        <div class="label">{% trans "Rejected" %}</div>
         <div class="value">{{ rejected_count }}</div>
         <div class="icon" aria-hidden="true">✗</div>
     </a>
-    <a href="?status=all" class="tf-stat" style="text-decoration:none;display:block" aria-label="All documents: {{ total_count }}">
-        <div class="label">Total</div>
+    <a href="?status=all" class="tf-stat" style="text-decoration:none;display:block" aria-label="{% blocktrans %}All documents: {{ total_count }}{% endblocktrans %}">
+        <div class="label">{% trans "Total" %}</div>
         <div class="value">{{ total_count }}</div>
         <div class="icon" aria-hidden="true">📄</div>
     </a>
@@ -31,14 +32,14 @@
     <table class="tf-table" id="verifyTable">
         <thead>
             <tr>
-                <th>Candidate</th>
-                <th>Application</th>
-                <th>Doc Type</th>
-                <th>Status</th>
-                <th>Verifier</th>
-                <th>Comments</th>
-                <th>Verified At</th>
-                <th>Actions</th>
+                <th>{% trans "Candidate" %}</th>
+                <th>{% trans "Application" %}</th>
+                <th>{% trans "Doc Type" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Verifier" %}</th>
+                <th>{% trans "Comments" %}</th>
+                <th>{% trans "Verified At" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -60,9 +61,9 @@
                     <form method="post" class="tf-flex" style="gap:4px">
                         {% csrf_token %}
                         <input type="hidden" name="verification_id" value="{{ dv.id }}">
-                        <input type="text" name="comments" placeholder="Comments..." class="tf-input" style="width:120px;padding:4px 8px;font-size:12px" aria-label="Verification comments for {{ dv.document.application.candidate }}">
-                        <button name="action" value="verified" class="tf-btn small" style="background:#22c55e;color:#fff" aria-label="Verify document for {{ dv.document.application.candidate }}">✓ Verify</button>
-                        <button name="action" value="rejected" class="tf-btn small" style="background:#ef4444;color:#fff" aria-label="Reject document for {{ dv.document.application.candidate }}">✗ Reject</button>
+                        <input type="text" name="comments" placeholder="{% trans "Comments..." %}" class="tf-input" style="width:120px;padding:4px 8px;font-size:12px" aria-label="{% blocktrans with name=dv.document.application.candidate %}Verification comments for {{ name }}{% endblocktrans %}">
+                        <button name="action" value="verified" class="tf-btn small" style="background:#22c55e;color:#fff" aria-label="{% blocktrans with name=dv.document.application.candidate %}Verify document for {{ name }}{% endblocktrans %}">{% trans "✓ Verify" %}</button>
+                        <button name="action" value="rejected" class="tf-btn small" style="background:#ef4444;color:#fff" aria-label="{% blocktrans with name=dv.document.application.candidate %}Reject document for {{ name }}{% endblocktrans %}">{% trans "✗ Reject" %}</button>
                     </form>
                     {% else %}
                     <span class="tf-muted">—</span>
@@ -70,7 +71,7 @@
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="8" class="tf-empty">No documents match the current filter.</td></tr>
+            <tr><td colspan="8" class="tf-empty">{% trans "No documents match the current filter." %}</td></tr>
             {% endfor %}
         </tbody>
     </table>

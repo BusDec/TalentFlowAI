@@ -1,35 +1,36 @@
 {% extends 'base.html' %}
-{% block title %}Grievances{% endblock %}
-{% block page_title %}Grievances &amp; Appeals{% endblock %}
-{% block subtitle %}Candidate grievance management{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Grievances" %}{% endblock %}
+{% block page_title %}{% trans "Grievances &amp; Appeals" %}{% endblock %}
+{% block subtitle %}{% trans "Candidate grievance management" %}{% endblock %}
 
 {% block content %}
 <div class="tf-glass tf-card">
-    <div class="tf-section-title">📋 Grievance Queue</div>
+    <div class="tf-section-title">📋 {% trans "Grievance Queue" %}</div>
 
-    <form method="get" style="margin-bottom:16px" aria-label="Filter grievances by status">
-        <label for="status-filter" class="tf-label">Filter by status:</label>
+    <form method="get" style="margin-bottom:16px" aria-label="{% trans 'Filter grievances by status' %}">
+        <label for="status-filter" class="tf-label">{% trans "Filter by status:" %}</label>
         <select name="status" id="status-filter" class="tf-select" style="max-width:200px;display:inline-block" onchange="this.form.submit()">
-            <option value="">All</option>
+            <option value="">{% trans "All" %}</option>
             {% for value, label in status_choices %}
             <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-        <noscript><button class="tf-btn small" type="submit">Filter</button></noscript>
+        <noscript><button class="tf-btn small" type="submit">{% trans "Filter" %}</button></noscript>
     </form>
 
     {% if grievances %}
     <table class="tf-table">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Subject</th>
-                <th>Candidate</th>
-                <th>Application</th>
-                <th>Status</th>
-                <th>Assigned To</th>
-                <th>Filed On</th>
-                <th>Actions</th>
+                <th>{% trans "ID" %}</th>
+                <th>{% trans "Subject" %}</th>
+                <th>{% trans "Candidate" %}</th>
+                <th>{% trans "Application" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Assigned To" %}</th>
+                <th>{% trans "Filed On" %}</th>
+                <th>{% trans "Actions" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -44,36 +45,36 @@
                         {{ g.get_status_display }}
                     </span>
                 </td>
-                <td>{% if g.assigned_to %}{{ g.assigned_to }}{% else %}<span class="tf-muted">Unassigned</span>{% endif %}</td>
+                <td>{% if g.assigned_to %}{{ g.assigned_to }}{% else %}<span class="tf-muted">{% trans "Unassigned" %}</span>{% endif %}</td>
                 <td>{{ g.created_at|date:"d M Y" }}</td>
                 <td>
                     <details>
-                        <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">View &amp; Act</summary>
+                        <summary class="tf-btn small ghost" style="cursor:pointer;display:inline-block">{% trans "View &amp; Act" %}</summary>
                         <div style="margin-top:8px;max-width:400px">
-                            <p style="margin-bottom:8px"><strong>Description:</strong><br>{{ g.description|linebreaksbr }}</p>
+                            <p style="margin-bottom:8px"><strong>{% trans "Description:" %}</strong><br>{{ g.description|linebreaksbr }}</p>
                             {% if g.resolution_notes %}
-                            <p style="margin-bottom:8px"><strong>Resolution Notes:</strong><br>{{ g.resolution_notes|linebreaksbr }}</p>
+                            <p style="margin-bottom:8px"><strong>{% trans "Resolution Notes:" %}</strong><br>{{ g.resolution_notes|linebreaksbr }}</p>
                             {% endif %}
 
                             {% if g.status != 'resolved' %}
-                            <form method="post" action="{% url 'grievance_assign' g.pk %}" style="display:inline;margin-right:8px" aria-label="Assign grievance {{ g.pk }}">
+                            <form method="post" action="{% url 'grievance_assign' g.pk %}" style="display:inline;margin-right:8px" aria-label="{% blocktrans with gpk=g.pk %}Assign grievance {{ gpk }}{% endblocktrans %}">
                                 {% csrf_token %}
-                                <button class="tf-btn small" type="submit" aria-label="Assign grievance {{ g.pk }} to yourself">Assign to Me</button>
+                                <button class="tf-btn small" type="submit" aria-label="{% blocktrans with gpk=g.pk %}Assign grievance {{ gpk }} to yourself{% endblocktrans %}">{% trans "Assign to Me" %}</button>
                             </form>
 
-                            <form method="post" action="{% url 'grievance_update_status' g.pk %}" style="margin-top:8px" aria-label="Update status for grievance {{ g.pk }}">
+                            <form method="post" action="{% url 'grievance_update_status' g.pk %}" style="margin-top:8px" aria-label="{% blocktrans with gpk=g.pk %}Update status for grievance {{ gpk }}{% endblocktrans %}">
                                 {% csrf_token %}
                                 <div class="tf-field" style="margin-bottom:6px">
-                                    <select name="status" class="tf-select" style="max-width:200px" aria-label="New status">
+                                    <select name="status" class="tf-select" style="max-width:200px" aria-label="{% trans 'New status' %}">
                                         {% for value, label in status_choices %}
                                         <option value="{{ value }}" {% if g.status == value %}selected{% endif %}>{{ label }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="tf-field" style="margin-bottom:6px">
-                                    <textarea name="resolution_notes" class="tf-textarea" rows="2" placeholder="Resolution notes…" aria-label="Resolution notes">{{ g.resolution_notes }}</textarea>
+                                    <textarea name="resolution_notes" class="tf-textarea" rows="2" placeholder="{% trans 'Resolution notes…' %}" aria-label="{% trans 'Resolution notes' %}">{{ g.resolution_notes }}</textarea>
                                 </div>
-                                <button class="tf-btn small" type="submit" aria-label="Update status for grievance {{ g.pk }}">Update Status</button>
+                                <button class="tf-btn small" type="submit" aria-label="{% blocktrans with gpk=g.pk %}Update status for grievance {{ gpk }}{% endblocktrans %}">{% trans "Update Status" %}</button>
                             </form>
                             {% endif %}
                         </div>
@@ -84,7 +85,7 @@
         </tbody>
     </table>
     {% else %}
-    <div class="tf-muted">No grievances found.</div>
+    <div class="tf-muted">{% trans "No grievances found." %}</div>
     {% endif %}
 </div>
 {% endblock %}

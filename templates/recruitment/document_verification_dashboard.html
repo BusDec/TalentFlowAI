@@ -1,27 +1,28 @@
 {% extends 'base.html' %}
-{% block title %}Document Verification Dashboard{% endblock %}
-{% block page_title %}Document Verification Dashboard{% endblock %}
-{% block subtitle %}Overview of document verification progress{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Document Verification Dashboard" %}{% endblock %}
+{% block page_title %}{% trans "Document Verification Dashboard" %}{% endblock %}
+{% block subtitle %}{% trans "Overview of document verification progress" %}{% endblock %}
 
 {% block content %}
 <div class="tf-stats" style="margin-bottom:24px">
-    <div class="tf-stat" role="group" aria-label="Document verification totals">
-        <div class="label">Total</div>
+    <div class="tf-stat" role="group" aria-label="{% trans "Document verification totals" %}">
+        <div class="label">{% trans "Total" %}</div>
         <div class="value">{{ total }}</div>
         <div class="icon" aria-hidden="true">📄</div>
     </div>
-    <div class="tf-stat" role="group" aria-label="Pending verifications: {{ pending_count }}">
-        <div class="label">Pending</div>
+    <div class="tf-stat" role="group" aria-label="{% blocktrans %}Pending verifications: {{ pending_count }}{% endblocktrans %}">
+        <div class="label">{% trans "Pending" %}</div>
         <div class="value">{{ pending_count }}</div>
         <div class="icon" aria-hidden="true">⏳</div>
     </div>
-    <div class="tf-stat" role="group" aria-label="Verified documents: {{ verified_count }}">
-        <div class="label">Verified</div>
+    <div class="tf-stat" role="group" aria-label="{% blocktrans %}Verified documents: {{ verified_count }}{% endblocktrans %}">
+        <div class="label">{% trans "Verified" %}</div>
         <div class="value">{{ verified_count }}</div>
         <div class="icon" aria-hidden="true">✓</div>
     </div>
-    <div class="tf-stat" role="group" aria-label="Rejected documents: {{ rejected_count }}">
-        <div class="label">Rejected</div>
+    <div class="tf-stat" role="group" aria-label="{% blocktrans %}Rejected documents: {{ rejected_count }}{% endblocktrans %}">
+        <div class="label">{% trans "Rejected" %}</div>
         <div class="value">{{ rejected_count }}</div>
         <div class="icon" aria-hidden="true">✗</div>
     </div>
@@ -29,9 +30,9 @@
 
 <div class="tf-grid-3 mb-4">
     <div class="tf-glass tf-card" style="grid-column:span 2">
-        <div class="tf-section-title">📊 Verification by Post</div>
+        <div class="tf-section-title">{% trans "📊 Verification by Post" %}</div>
         <table class="tf-table" id="perPostTable">
-            <thead><tr><th>Post</th><th>Total</th><th>Pending</th><th>Verified</th><th>Rejected</th></tr></thead>
+            <thead><tr><th>{% trans "Post" %}</th><th>{% trans "Total" %}</th><th>{% trans "Pending" %}</th><th>{% trans "Verified" %}</th><th>{% trans "Rejected" %}</th></tr></thead>
             <tbody>
                 {% for row in per_post %}
                 <tr>
@@ -42,14 +43,14 @@
                     <td><span class="tf-badge danger">{{ row.rejected }}</span></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="tf-empty">No verification data yet.</td></tr>
+                <tr><td colspan="5" class="tf-empty">{% trans "No verification data yet." %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
     <div class="tf-glass tf-card">
-        <div class="tf-section-title">🕐 Recent Activity</div>
+        <div class="tf-section-title">{% trans "🕐 Recent Activity" %}</div>
         {% for dv in recent %}
         <div class="tf-kv" style="margin-bottom:8px">
             <span class="k">{{ dv.document.application.candidate }}</span>
@@ -60,12 +61,12 @@
             </span>
         </div>
         {% empty %}
-        <p class="tf-empty">No completed verifications yet.</p>
+        <p class="tf-empty">{% trans "No completed verifications yet." %}</p>
         {% endfor %}
     </div>
 </div>
 
 <div class="tf-flex" style="gap:12px;margin-top:16px">
-    <a href="{% url 'verify_documents' %}" class="tf-btn">Go to Verification Queue →</a>
+    <a href="{% url 'verify_documents' %}" class="tf-btn">{% trans "Go to Verification Queue →" %}</a>
 </div>
 {% endblock %}

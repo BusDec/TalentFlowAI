@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}Generated Advertisement{% endblock %}
-{% block page_title %}{{ advt.advt_number }} — Generated Advertisement{% endblock %}
-{% block subtitle %}Ready to copy into your notice{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Generated Advertisement" %}{% endblock %}
+{% block page_title %}{% blocktrans with advt_number=advt.advt_number %}{{ advt_number }} — Generated Advertisement{% endblocktrans %}{% endblock %}
+{% block subtitle %}{% trans "Ready to copy into your notice" %}{% endblock %}
 
 {% block content %}
 <div class="tf-flex mb-4">
-    <a href="{% url 'advertisement_detail' advt.id %}" class="tf-btn small ghost">Back to Details</a>
-    <button class="tf-btn small" onclick="navigator.clipboard.writeText(document.getElementById('advtText').textContent)" aria-label="Copy advertisement text to clipboard">Copy to Clipboard</button>
-    <button class="tf-btn small ghost" onclick="window.print()" aria-label="Print or save as PDF">Print / Save PDF</button>
+    <a href="{% url 'advertisement_detail' advt.id %}" class="tf-btn small ghost">{% trans "Back to Details" %}</a>
+    <button class="tf-btn small" onclick="navigator.clipboard.writeText(document.getElementById('advtText').textContent)" aria-label="{% trans "Copy advertisement text to clipboard" %}">{% trans "Copy to Clipboard" %}</button>
+    <button class="tf-btn small ghost" onclick="window.print()" aria-label="{% trans "Print or save as PDF" %}">{% trans "Print / Save PDF" %}</button>
 </div>
 
 <div class="tf-glass tf-card" style="line-height:1.7">
