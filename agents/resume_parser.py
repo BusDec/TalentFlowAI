@@ -39,21 +39,6 @@ for _tessdata in (
         break
 
 
-def _pdf_to_images(path):
-    """Render PDF pages to PIL images using PyMuPDF."""
-    try:
-        import fitz  # PyMuPDF
-    except ImportError:
-        return []
-    images = []
-    with fitz.open(path) as doc:
-        for page in doc:
-            pix = page.get_pixmap(dpi=200)
-            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-            images.append(img)
-    return images
-
-
 SYSTEM_PROMPT = (
     "You extract structured information from an Indian job candidate's resume. "
     "Return ONLY a JSON object with keys: full_name, email, phone, date_of_birth, "
@@ -64,18 +49,15 @@ SYSTEM_PROMPT = (
 
 
 def extract_text(path):
-    """OCR a PDF or image file into plain text using local Tesseract."""
-    if not OCR_AVAILABLE:
-        return ""
-    try:
-        if path.lower().endswith(".pdf"):
-            parts = []
-            for img in _pdf_to_images(path):
-                parts.append(pytesseract.image_to_string(img))
-            return "\n".join(parts)
-        return pytesseract.image_to_string(Image.open(path))
-    except Exception:
-        return ""
+    """Extract plain text from a resume PDF/image/text file (text-first).
+
+    Delegates to doc_intel, which pulls the PDF text layer first and only
+    OCRs when it is empty. Kept as its own function so callers and tests
+    keep a stable module-level entry point.
+    """
+    from . import doc_intel
+
+    return doc_intel.extract_text(path)
 
 
 _NAME_LABEL = re.compile(

@@ -61,3 +61,17 @@ def test_extract_document_shape():
     from agents import doc_intel
     r = doc_intel.extract_document("missing.pdf")
     assert "doc_type" in r and "fields" in r and "confidence" in r and "validations" in r
+
+
+def test_resume_parser_delegates_text_first():
+    from agents import resume_parser, doc_intel
+    assert resume_parser.extract_text.__module__ != doc_intel.__name__  # still its own function
+    # smoke: parse_resume on a text/plain file keeps working
+    import os, tempfile, pathlib
+    fd, name = tempfile.mkstemp(suffix=".txt")
+    os.close(fd)  # mkstemp leaves the handle open; release it so unlink works on Windows
+    p = pathlib.Path(name)
+    p.write_text("Name: Aarav Sharma\nEmail: a@b.com\nB.Tech", encoding="utf-8")
+    parsed, confidence, method = resume_parser.parse_resume(str(p))
+    assert isinstance(parsed, dict) and parsed.get("email") == "a@b.com"
+    p.unlink()
