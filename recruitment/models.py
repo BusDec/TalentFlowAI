@@ -908,3 +908,135 @@ class DocumentVerification(models.Model):
 
     def __str__(self):
         return f"Verification({self.document.doc_type}) — {self.get_status_display()}"
+
+
+# ── Phase 3: Interview ───────────────────────────────────────────────────────
+
+
+class InterviewPanel(models.Model):
+    """A panel convened to interview candidates for a post."""
+
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="interview_panels",
+        help_text="Post this panel interviews for.",
+    )
+    name = models.CharField(
+        max_length=200,
+        help_text="Panel identifier (e.g. 'Panel A').",
+    )
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        blank=True,
+        related_name="interview_panels",
+        help_text="Staff users serving on this panel.",
+    )
+    external_members = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="External panel members as list of dicts (name, org, etc.).",
+    )
+    sitting_fee = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Sitting fee per member (null if not applicable).",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Interview Panel"
+        verbose_name_plural = "Interview Panels"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Panel: {self.name} ({self.post.post_code})"
+
+
+class InterviewSlot(models.Model):
+    """A scheduled interview slot for one candidate, assigned to a panel."""
+
+    STATUS_CHOICES = [
+        ("scheduled", "Scheduled"),
+        ("in_progress", "In Progress"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    panel = models.ForeignKey(
+        InterviewPanel,
+        on_delete=models.CASCADE,
+        related_name="slots",
+        help_text="Panel conducting the interview.",
+    )
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="interview_slots",
+        help_text="Application being interviewed.",
+    )
+    datetime = models.DateTimeField(
+        help_text="Scheduled date and time of the interview.",
+    )
+    duration_minutes = models.PositiveIntegerField(
+        default=30,
+        help_text="Duration of the interview in minutes.",
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=STATUS_CHOICES,
+        default="scheduled",
+        help_text="Current status of the slot.",
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Scheduling or logistics notes.",
+    )
+
+    class Meta:
+        verbose_name = "Interview Slot"
+        verbose_name_plural = "Interview Slots"
+        ordering = ["datetime"]
+
+    def __str__(self):
+        return f"Slot({self.application.application_id}) — {self.get_status_display()}"
+
+
+class InterviewScore(models.Model):
+    """A score awarded by a panel member for an interview slot."""
+
+    slot = models.ForeignKey(
+        InterviewSlot,
+        on_delete=models.CASCADE,
+        related_name="scores",
+        help_text="Interview slot this score belongs to.",
+    )
+    panel_member = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="interview_scores",
+        help_text="Panel member who gave the score (null for anonymous/external).",
+    )
+    score = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        help_text="Score awarded (e.g. 7.5).",
+    )
+    comments = models.TextField(
+        blank=True,
+        help_text="Panel member's comments or justification.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Interview Score"
+        verbose_name_plural = "Interview Scores"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        member = self.panel_member or "External"
+        return f"Score {self.score} by {member} ({self.slot.application.application_id})"
