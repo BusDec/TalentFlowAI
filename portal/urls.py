@@ -19,6 +19,11 @@ urlpatterns = [
         views.withdraw_application,
         name="portal_application_withdraw",
     ),
+    path(
+        "portal/applications/<str:application_id>/slip/",
+        views.application_slip,
+        name="portal_application_slip",
+    ),
     path("portal/consents/", views.consent_list, name="portal_consents"),
     path("portal/profile/", views.profile_view, name="portal_profile"),
     path("portal/consents/<int:consent_id>/revoke/", views.consent_revoke, name="portal_consent_revoke"),

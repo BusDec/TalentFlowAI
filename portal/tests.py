@@ -163,3 +163,41 @@ def test_profile_save_with_filled_exam_fields(api_client, candidate_portal_user)
     assert exam.marks_out_100 == Decimal("67.5")
     assert exam.air == 42
     assert exam.ese_total_score == Decimal("111.25")
+
+
+def test_slip_pdf_download(api_client, candidate_portal_user, application):
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    r = api_client.get(reverse("portal_application_slip", args=[application.application_id]))
+    assert r.status_code == 200
+    assert r["Content-Type"].startswith("application/pdf")
+    assert r.content.startswith(b"%PDF")
+
+
+def test_slip_contains_application_data(api_client, candidate_portal_user, application):
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    import io
+    from django.test import Client
+    from agents import doc_intel
+    r = api_client.get(reverse("portal_application_slip", args=[application.application_id]))
+    p = io.BytesIO(r.content)
+    # write to temp for doc_intel (needs a path); mkstemp's fd must be closed
+    # or Windows keeps the file locked and unlink() fails (WinError 32).
+    import tempfile, pathlib, os
+    fd, tmp = tempfile.mkstemp(suffix=".pdf")
+    os.close(fd)
+    path = pathlib.Path(tmp); path.write_bytes(r.content)
+    text = doc_intel.extract_text(str(path)); path.unlink()
+    assert application.application_id in text
+    assert "no document is required to be sent by post" in text.lower()
+
+
+def test_slip_owner_only(api_client, tenant, application):
+    from portal.models import CandidatePortalUser
+    other = CandidatePortalUser.objects.create(email="other@example.com", otp_verified=True)
+    api_client.force_login(other, backend=PORTAL_BACKEND)
+    r = api_client.get(reverse("portal_application_slip", args=[application.application_id]))
+    assert r.status_code in (302, 403)

@@ -11,6 +11,7 @@ from pathlib import Path
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import logout as auth_logout
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -341,6 +342,23 @@ def application_detail(request, application_id):
             in ("received", "document_verification", "shortlisted", "interview"),
         },
     )
+
+
+@require_portal_user
+@require_http_methods(["GET"])
+def application_slip(request, application_id):
+    """Serve the downloadable PDF application slip for the candidate's own application."""
+    application = get_object_or_404(Application, application_id=application_id)
+    if application.candidate.portal_user != request.user:
+        messages.error(request, _("You can only download the slip for your own application."))
+        return redirect("portal_application_detail", application_id=application_id)
+
+    from recruitment.slip_pdf import ApplicationSlipPDF
+
+    payload = ApplicationSlipPDF(application).generate()
+    response = HttpResponse(payload, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="slip-{application.application_id}.pdf"'
+    return response
 
 
 @require_portal_user
