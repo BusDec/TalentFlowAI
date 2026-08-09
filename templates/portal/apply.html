@@ -116,7 +116,7 @@
             <div class="tf-field">
                 <label class="tf-label">{% trans "Aadhaar" %}</label>
                 <div style="display:flex;align-items:center">
-                    <input type="text" class="tf-input" value="{{ prefill.aadhaar|default:'' }}" readonly style="flex:1">
+                    <input type="text" class="tf-input" value="{{ prefill.aadhaar_masked|default:'' }}" readonly style="flex:1">
                     {% if sources.aadhaar %}<span class="tf-autofill">✓ auto-filled (from {{ sources.aadhaar }})</span>{% endif %}
                 </div>
             </div>

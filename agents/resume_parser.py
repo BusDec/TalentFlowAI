@@ -103,6 +103,14 @@ def _extract_name(text):
         cleaned = _clean_name(label.group(1))
         if cleaned and not any(b in cleaned.lower() for b in _NAME_BLOCKING):
             return cleaned
+        # The label group's character class includes \s, so it can swallow the
+        # following line ("Name: Aarav Sharma\nEmail: …" → "Aarav Sharma Email: …"),
+        # which then trips the blocklist. Preserve the matched line itself and
+        # give it the clean-name path.
+        first_line = label.group(1).splitlines()[0]
+        cleaned = _clean_name(first_line)
+        if cleaned and not any(b in cleaned.lower() for b in _NAME_BLOCKING):
+            return cleaned
     for line in text.splitlines()[:10]:
         line = line.strip()
         if not line:

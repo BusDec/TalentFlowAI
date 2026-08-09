@@ -28,7 +28,7 @@ MARGIN = 18
 # application fee. No payment gateway exists yet, so the status is computed
 # deterministically from the candidate profile.
 EXEMPT_CATEGORIES = {"sc", "st"}
-FEE_EXEMPT_TEXT = "Exempted (SC/ST/PwBD/ESM/Female)"
+FEE_EXEMPT_TEXT = "Exempted (SC/ST/PwBD/Female)"
 FEE_PAYABLE_TEXT = "To be paid - Rs 500/- (online)"
 
 FOOTER_TEXT = "No document is required to be sent by post."

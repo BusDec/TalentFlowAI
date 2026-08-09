@@ -272,10 +272,14 @@ def _build_prefill(files, user):
                 )
                 fill("education", education or None, label)
 
-        # Registered-profile fallbacks for fields no document carried.
-        fill("name", user.full_name, "your profile")
-        fill("email", user.email, "your profile")
-        fill("phone", user.phone, "your profile")
+        # Registered-profile fallbacks for fields no document carried. These
+        # carry no ``sources`` entry so the UI never badges them as auto-filled.
+        if prefill["name"] is None:
+            prefill["name"] = user.full_name
+        if prefill["email"] is None:
+            prefill["email"] = user.email
+        if prefill["phone"] is None:
+            prefill["phone"] = user.phone
 
         # Cross-document consistency (the resume exposes its name as full_name).
         normalized = []
@@ -293,6 +297,10 @@ def _build_prefill(files, user):
             for issue in doc_intel.check_consistency(normalized)
             if issue.get("detail")
         ]
+        # Display-only masked Aadhaar (never render the raw number).
+        prefill["aadhaar_masked"] = (
+            "XXXX-XXXX-" + prefill["aadhaar"][-4:] if prefill["aadhaar"] else None
+        )
         prefill["sources"] = sources
         return prefill
     finally:

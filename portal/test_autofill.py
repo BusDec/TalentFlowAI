@@ -83,3 +83,31 @@ def test_confirm_checkbox_rendered_with_prefill(api_client, candidate_portal_use
     )
     r = api_client.get(reverse("portal_apply", args=[advertisement.id]))
     assert "confirm" in r.content.decode().lower()
+
+
+def test_apply_phase2_creates_application(api_client, candidate_portal_user, advertisement):
+    """Confirming a phase-1 prefill creates the application and consumes the prefill."""
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    session_key = f"apply_prefill_{advertisement.id}"
+    api_client.post(
+        reverse("portal_apply", args=[advertisement.id]),
+        {
+            "post": advertisement.posts.first().id,
+            "resume": SimpleUploadedFile("r.txt", RESUME_TEXT, content_type="text/plain"),
+        },
+    )
+    r = api_client.post(
+        reverse("portal_apply", args=[advertisement.id]),
+        {
+            "post": advertisement.posts.first().id,
+            "declare": "on",
+            "confirm": "on",
+            "resume": SimpleUploadedFile("r.txt", RESUME_TEXT, content_type="text/plain"),
+        },
+    )
+    assert r.status_code == 302
+    from recruitment.models import Application
+
+    assert Application.objects.filter(candidate__portal_user=candidate_portal_user).exists()
+    # The prefill session key is consumed by a successful submission.
+    assert session_key not in api_client.session
