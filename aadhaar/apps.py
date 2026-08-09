@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class AadhaarConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "aadhaar"
+    verbose_name = "Aadhaar e-KYC"

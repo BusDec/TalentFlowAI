@@ -180,6 +180,21 @@ LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", "60"))
 # DigiLocker (mock during Phase I dev)
 # ---------------------------------------------------------------------------
 DIGILOCKER_MOCK = os.getenv("DIGILOCKER_MOCK", "True").lower() in ("true", "1", "yes")
+DIGILOCKER_API_KEY = os.getenv("DIGILOCKER_API_KEY", "")
+
+# ---------------------------------------------------------------------------
+# Aadhaar e-KYC (mock until UIDAI AUA/KUA registration is approved)
+# ---------------------------------------------------------------------------
+AADHAAR_MOCK = os.getenv("AADHAAR_MOCK", "True").lower() in ("true", "1", "yes")
+AADHAAR_AUA_ID = os.getenv("AADHAAR_AUA_ID", "")
+AADHAAR_KUA_ID = os.getenv("AADHAAR_KUA_ID", "")
+
+# ---------------------------------------------------------------------------
+# NCS / Employment Exchange feed (env-gated mock)
+# ---------------------------------------------------------------------------
+NCS_MOCK = os.getenv("NCS_MOCK", "True").lower() in ("true", "1", "yes")
+NCS_API_BASE = os.getenv("NCS_API_BASE", "")
+NCS_API_KEY = os.getenv("NCS_API_KEY", "")
 
 # ---------------------------------------------------------------------------
 # Phase 1: PII encryption (Fernet key for profiles.fields.EncryptedTextField)
