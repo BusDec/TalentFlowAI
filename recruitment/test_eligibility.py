@@ -64,3 +64,11 @@ def test_override_writes_audit(api_client, tenant, application, recruiter_user):
     o = EligibilityOverride.objects.get(application=application)
     assert o.verdict is True and o.overridden_by == recruiter_user
     assert AuditEvent.objects.filter(application=application, field_name="eligibility_override").exists()
+
+
+def test_eligibility_page_renders_verdict_card(api_client, tenant, application, recruiter_user):
+    api_client.force_login(recruiter_user)
+    r = api_client.get(f"/applications/{application.application_id}/eligibility/")
+    assert r.status_code == 200
+    body = r.content.decode()
+    assert "verdict" in body.lower() or "eligible" in body.lower()

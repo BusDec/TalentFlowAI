@@ -4,8 +4,25 @@
 {% block subtitle %}{{ verdict.application_id }} · {{ verdict.post }} · Cut-off {{ verdict.cutoff }}{% endblock %}
 
 {% block content %}
-<div class="tf-alert {% if verdict.eligible %}success{% else %}warning{% endif %}">
-    <strong>Verdict:</strong> {{ verdict.verdict }}
+{% if override %}
+<div class="tf-alert warning">
+    <span class="tf-badge warning">Overridden</span>
+    <strong>Override:</strong> {{ override.verdict|yesno:"Eligible,Not Eligible" }}
+    {% if override.reason %} — {{ override.reason }}{% endif %}
+    {% if override.overridden_by %} · by {{ override.overridden_by }}{% endif %}
+    · {{ override.created_at|date:"d-m-Y H:i" }}
+</div>
+{% endif %}
+
+{% if override_error %}
+<div class="tf-alert danger">{{ override_error }}</div>
+{% endif %}
+
+<div class="tf-alert {% if verdict.verdict == 'not_eligible' %}danger{% elif verdict.verdict == 'eligible' %}success{% else %}warning{% endif %}">
+    <strong>Verdict:</strong>
+    {% if verdict.verdict == 'not_eligible' %}Not Eligible
+    {% elif verdict.verdict == 'manual_review' %}Manual Review Required
+    {% else %}Eligible{% endif %}
 </div>
 
 <div class="tf-glass tf-card">
@@ -16,14 +33,34 @@
             <tr>
                 <td>{{ key|title }}</td>
                 <td>
-                    {% if val.ok is True %}<span class="tf-badge success">OK</span>
-                    {% elif val.ok is False %}<span class="tf-badge danger">FAIL</span>
-                    {% else %}<span class="tf-badge muted">Pending</span>{% endif %}
+                    {% if val.ok is True %}<span class="tf-badge success">✓ OK</span>
+                    {% elif val.ok is False %}<span class="tf-badge danger">✗ FAIL</span>
+                    {% elif val.ok is None %}<span class="tf-badge muted">Pending</span>
+                    {% else %}<span class="tf-badge muted">Info</span>{% endif %}
                 </td>
-                <td>{{ val.detail|default:"" }}</td>
+                <td>
+                    {% if val.detail %}{{ val.detail }}
+                    {% elif key == 'digilocker' %}Fetched {{ val.documents|length }} document(s){% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">Human Override</div>
+    <form method="post" action="{% url 'run_eligibility' application_id=verdict.application_id %}">
+        {% csrf_token %}
+        <label class="tf-flex" style="gap:10px;align-items:flex-start;cursor:pointer;margin-bottom:14px">
+            <input type="checkbox" name="override_verdict" value="on" class="tf-input" style="width:18px;height:18px;margin-top:2px" {% if override and override.verdict %}checked{% endif %}>
+            <span style="font-size:0.85rem;line-height:1.5;color:rgba(233,234,244,0.85)">Mark candidate <strong>Eligible</strong> (uncheck to mark <strong>Not Eligible</strong>)</span>
+        </label>
+        <div class="tf-field">
+            <label class="tf-label">Reason</label>
+            <textarea name="override_reason" class="tf-textarea" rows="3" required placeholder="Justification for overriding the automated verdict">{{ override.reason|default:"" }}</textarea>
+        </div>
+        <button class="tf-btn" type="submit">Save Override</button>
+    </form>
 </div>
 {% endblock %}
