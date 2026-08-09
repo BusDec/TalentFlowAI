@@ -1144,3 +1144,301 @@ class LitigationCase(models.Model):
             }
         ]
         self.save(update_fields=["interim_orders"])
+
+
+# ── Phase 4: Joining Report ──────────────────────────────────────────────────
+
+
+class JoiningReport(models.Model):
+    """Candidate-submitted joining report after accepting an offer.
+
+    Captures the formal joining details: date, designation, pay fixation,
+    reporting officer, and whether all required documents have been submitted.
+    One-to-one with Application (a candidate submits at most one joining report
+    per application).
+    """
+
+    application = models.OneToOneField(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="joining_report",
+        help_text="The application this joining report belongs to.",
+    )
+    joining_date = models.DateField(
+        help_text="Date the candidate reported for duty.",
+    )
+    designation = models.CharField(
+        max_length=200,
+        help_text="Designation at the time of joining (e.g. Assistant Engineer).",
+    )
+    pay_fixation = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        help_text="Pay fixation details (e.g. Level-7, ₹44,900/- in Pay Matrix).",
+    )
+    reported_to = models.CharField(
+        max_length=200,
+        help_text="Name and/or designation of the officer reported to.",
+    )
+    documents_submitted = models.BooleanField(
+        default=False,
+        help_text="Whether all required documents have been submitted at joining.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Joining Report"
+        verbose_name_plural = "Joining Reports"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"JoiningReport({self.application.application_id}) — {self.joining_date}"
+
+
+# ── Phase 4: Probation & Bond ────────────────────────────────────────────────
+
+
+class ProbationRecord(models.Model):
+    """Tracks probation period and bond obligation for a joined candidate."""
+
+    application = models.OneToOneField(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="probation_record",
+        help_text="The application this probation record belongs to.",
+    )
+    start_date = models.DateField(
+        help_text="Date the probation period begins.",
+    )
+    end_date = models.DateField(
+        help_text="Date the probation period ends.",
+    )
+    confirmed_on = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date the employee was confirmed (null if still on probation).",
+    )
+    bond_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Bond amount in INR, if applicable.",
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Free-text notes about the probation or bond.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Probation Record"
+        verbose_name_plural = "Probation Records"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        status = "Confirmed" if self.confirmed_on else "On Probation"
+        return f"{self.application.application_id} — {status}"
+
+    @property
+    def is_confirmed(self):
+        """True if the employee has been confirmed."""
+        return self.confirmed_on is not None
+
+    @property
+    def is_expired(self):
+        """True if the probation end_date has passed without confirmation."""
+        from datetime import date as _date
+
+        return not self.is_confirmed and self.end_date < _date.today()
+
+
+# ── Phase 4: Grievance / Appeal ─────────────────────────────────────────────
+
+GRIEVANCE_STATUS_CHOICES = [
+    ("filed", "Filed"),
+    ("acknowledged", "Acknowledged"),
+    ("investigating", "Investigating"),
+    ("resolved", "Resolved"),
+]
+
+
+class Grievance(models.Model):
+    """A candidate grievance/appeal filed through the portal.
+
+    Workflow: filed → acknowledged → investigating → resolved.
+    Staff assign and resolve; candidate is notified on acknowledgement.
+    """
+
+    candidate = models.ForeignKey(
+        Candidate,
+        on_delete=models.CASCADE,
+        related_name="grievances",
+        help_text="Candidate who filed the grievance.",
+    )
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="grievances",
+        help_text="Related application (optional).",
+    )
+    subject = models.CharField(
+        max_length=300,
+        help_text="Brief subject of the grievance.",
+    )
+    description = models.TextField(
+        help_text="Detailed description of the grievance.",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=GRIEVANCE_STATUS_CHOICES,
+        default="filed",
+        help_text="Current workflow status.",
+    )
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_grievances",
+        help_text="Staff member assigned to handle this grievance.",
+    )
+    resolution_notes = models.TextField(
+        blank=True,
+        help_text="Notes on the resolution outcome.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Grievance"
+        verbose_name_plural = "Grievances"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Grievance({self.candidate}) — {self.subject}"
+
+
+# ── Phase 4: Police Verification ─────────────────────────────────────────────
+
+POLICE_VERIFICATION_STATUS_CHOICES = [
+    ("initiated", "Initiated"),
+    ("in_progress", "In Progress"),
+    ("cleared", "Cleared"),
+    ("not_cleared", "Not Cleared"),
+]
+
+
+class PoliceVerification(models.Model):
+    """Police verification record for an application.
+
+    Tracks the lifecycle: initiated → in_progress → cleared / not_cleared.
+    The report_file field holds the scanned police clearance certificate
+    once received.  Every status transition writes an AuditEvent against
+    the linked application.
+    """
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="police_verifications",
+        help_text="Application under police verification.",
+    )
+    district = models.CharField(
+        max_length=200,
+        help_text="Police district responsible for the verification (e.g. 'East Khasi Hills').",
+    )
+    status = models.CharField(
+        max_length=15,
+        choices=POLICE_VERIFICATION_STATUS_CHOICES,
+        default="initiated",
+        help_text="Current verification status.",
+    )
+    report_file = models.FileField(
+        upload_to="police_reports/",
+        blank=True,
+        help_text="Scanned police clearance report (PDF/image).",
+    )
+    initiated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="initiated_police_verifications",
+        help_text="Staff member who initiated the verification.",
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Additional notes or remarks.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Police Verification"
+        verbose_name_plural = "Police Verifications"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"PoliceVerification({self.application.application_id}) — {self.district} — {self.get_status_display()}"
+
+
+# ── Phase 4: Medical Examination ────────────────────────────────────────────
+
+MEDICAL_FITNESS_CHOICES = [
+    ("pending", "Pending"),
+    ("fit", "Fit"),
+    ("unfit", "Unfit"),
+]
+
+
+class MedicalExam(models.Model):
+    """Medical examination record for a candidate's application.
+
+    Workflow:
+      1. HR schedules the exam (hospital, date).
+      2. Recruiter uploads the medical report file.
+      3. HR certifies fitness (fit/unfit).
+    Status changes are audited via AuditEvent.
+    """
+
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="medical_exams",
+        help_text="The application this medical exam is for.",
+    )
+    hospital = models.CharField(
+        max_length=300,
+        help_text="Hospital or medical facility name.",
+    )
+    exam_date = models.DateField(
+        help_text="Scheduled or actual date of the medical examination.",
+    )
+    report_file = models.FileField(
+        upload_to="medical_reports/%Y/%m/",
+        blank=True,
+        help_text="Uploaded medical report (PDF/image).",
+    )
+    fitness_status = models.CharField(
+        max_length=10,
+        choices=MEDICAL_FITNESS_CHOICES,
+        default="pending",
+        help_text="Fitness certification outcome.",
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Additional notes or remarks about the medical exam.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Medical Exam"
+        verbose_name_plural = "Medical Exams"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Medical({self.application.application_id}) — {self.get_fitness_status_display()}"

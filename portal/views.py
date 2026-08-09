@@ -37,6 +37,8 @@ from recruitment.models import (
     Candidate,
     CategoryAllocation,
     Document,
+    Grievance,
+    JoiningReport,
     Resume,
 )
 from recruitment.tasks import parse_document_task
@@ -862,3 +864,110 @@ def consent_revoke(request, consent_id):
         )
         messages.success(request, _("Consent revoked. We will stop processing your data for this purpose."))
     return redirect("portal_consents")
+
+
+# ── Grievance / Appeal ──────────────────────────────────────────────────────
+
+
+@require_portal_user
+def my_grievances(request):
+    """List grievances filed by the authenticated candidate."""
+    candidate = Candidate.objects.filter(portal_user=request.user).first()
+    if not candidate:
+        messages.error(request, _("No candidate profile found."))
+        return redirect("portal_dashboard")
+    grievances = Grievance.objects.filter(candidate=candidate)
+    return render(request, "portal/my_grievances.html", {"grievances": grievances})
+
+
+@require_portal_user
+def file_grievance(request):
+    """File a new grievance/appeal. GET shows form, POST creates."""
+    candidate = Candidate.objects.filter(portal_user=request.user).first()
+    if not candidate:
+        messages.error(request, _("No candidate profile found."))
+        return redirect("portal_dashboard")
+
+    applications = Application.objects.filter(candidate=candidate)
+
+    if request.method == "POST":
+        subject = (request.POST.get("subject") or "").strip()
+        description = (request.POST.get("description") or "").strip()
+        application_id = _clean_optional(request.POST.get("application_id"))
+
+        if not subject or not description:
+            messages.error(request, _("Subject and description are required."))
+        else:
+            application = None
+            if application_id:
+                application = applications.filter(application_id=application_id).first()
+
+            Grievance.objects.create(
+                candidate=candidate,
+                application=application,
+                subject=subject,
+                description=description,
+            )
+            messages.success(request, _("Grievance filed successfully. Our team will review it shortly."))
+            return redirect("portal_my_grievances")
+
+    return render(request, "portal/file_grievance.html", {"applications": applications})
+
+
+@require_portal_user
+@require_http_methods(["GET", "POST"])
+def submit_joining_report(request, application_id):
+    """Candidate submits a joining report for an application in 'joined' status.
+
+    GET renders the form; POST validates and creates the JoiningReport.
+    Redirects to the application detail page on success.
+    """
+    application = get_object_or_404(
+        Application,
+        application_id=application_id,
+        candidate__portal_user=request.user,
+    )
+
+    if application.status != "joined":
+        messages.error(request, _("You can only submit a joining report for applications in 'Joined' status."))
+        return redirect("portal_application_detail", application_id=application_id)
+
+    if hasattr(application, "joining_report"):
+        messages.info(request, _("You have already submitted a joining report for this application."))
+        return redirect("portal_application_detail", application_id=application_id)
+
+    if request.method == "POST":
+        joining_date = request.POST.get("joining_date")
+        designation = (request.POST.get("designation") or "").strip()
+        pay_fixation = (request.POST.get("pay_fixation") or "").strip()
+        reported_to = (request.POST.get("reported_to") or "").strip()
+        documents_submitted = request.POST.get("documents_submitted") == "on"
+
+        errors = []
+        if not joining_date:
+            errors.append(_("Joining date is required."))
+        if not designation:
+            errors.append(_("Designation is required."))
+        if not reported_to:
+            errors.append(_("Reported-to officer is required."))
+
+        if errors:
+            for err in errors:
+                messages.error(request, err)
+        else:
+            JoiningReport.objects.create(
+                application=application,
+                joining_date=joining_date,
+                designation=designation,
+                pay_fixation=pay_fixation,
+                reported_to=reported_to,
+                documents_submitted=documents_submitted,
+            )
+            messages.success(request, _("Joining report submitted successfully."))
+            return redirect("portal_application_detail", application_id=application_id)
+
+    return render(
+        request,
+        "portal/joining_report.html",
+        {"application": application},
+    )

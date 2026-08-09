@@ -37,4 +37,13 @@ urlpatterns = [
     path("portal/consents/", views.consent_list, name="portal_consents"),
     path("portal/profile/", views.profile_view, name="portal_profile"),
     path("portal/consents/<int:consent_id>/revoke/", views.consent_revoke, name="portal_consent_revoke"),
+    # Grievance / Appeal
+    path("portal/grievances/", views.my_grievances, name="portal_my_grievances"),
+    path("portal/grievances/file/", views.file_grievance, name="portal_file_grievance"),
+    # Joining Report
+    path(
+        "portal/applications/<str:application_id>/joining-report/",
+        views.submit_joining_report,
+        name="portal_submit_joining_report",
+    ),
 ]

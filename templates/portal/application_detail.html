@@ -117,6 +117,30 @@
 </div>
 {% endif %}
 
+{% if application.status == 'joined' %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">{% trans "Joining Report" %}</div>
+    {% if application.joining_report %}
+    <p style="margin-bottom:4px"><strong class="tf-muted">{% trans "Joining Date" %}:</strong> {{ application.joining_report.joining_date }}</p>
+    <p style="margin-bottom:4px"><strong class="tf-muted">{% trans "Designation" %}:</strong> {{ application.joining_report.designation }}</p>
+    {% if application.joining_report.pay_fixation %}
+    <p style="margin-bottom:4px"><strong class="tf-muted">{% trans "Pay Fixation" %}:</strong> {{ application.joining_report.pay_fixation }}</p>
+    {% endif %}
+    <p style="margin-bottom:4px"><strong class="tf-muted">{% trans "Reported To" %}:</strong> {{ application.joining_report.reported_to }}</p>
+    <p style="margin-bottom:0"><strong class="tf-muted">{% trans "Documents Submitted" %}:</strong>
+        {% if application.joining_report.documents_submitted %}
+        <span class="tf-badge success">{% trans "Yes" %}</span>
+        {% else %}
+        <span class="tf-badge muted">{% trans "No" %}</span>
+        {% endif %}
+    </p>
+    {% else %}
+    <p class="tf-muted" style="font-size:0.85rem;margin-bottom:14px">{% trans "You have not yet submitted a joining report. Please submit it to complete your onboarding." %}</p>
+    <a class="tf-btn success" href="{% url 'portal_submit_joining_report' application.application_id %}">{% trans "Submit Joining Report" %}</a>
+    {% endif %}
+</div>
+{% endif %}
+
 {% if background_report and background_report.facts.rows %}
 <div class="tf-glass tf-card mb-4">
     <div class="tf-section-title">{% trans "Background Verification — Facts for Your Explanation" %}</div>

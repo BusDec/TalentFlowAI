@@ -19,7 +19,12 @@ from .models import (
     DuplicateFlag,
     CommunicationLog,
     AuditEvent,
+    Grievance,
+    MedicalExam,
     OrgProfile,
+    JoiningReport,
+    PoliceVerification,
+    ProbationRecord,
 )
 
 
@@ -182,3 +187,43 @@ class OrgProfileAdmin(admin.ModelAdmin):
         if obj.logo:
             return mark_safe(f'<img src="{escape(obj.logo.url)}" height="48">')
         return "—"
+
+
+@admin.register(Grievance)
+class GrievanceAdmin(admin.ModelAdmin):
+    list_display = ("subject", "candidate", "status", "assigned_to", "created_at")
+    list_filter = ("status",)
+    search_fields = ("subject", "candidate__first_name", "candidate__last_name")
+    readonly_fields = ("created_at",)
+
+
+@admin.register(PoliceVerification)
+class PoliceVerificationAdmin(admin.ModelAdmin):
+    list_display = ("application", "district", "status", "initiated_by", "created_at")
+    list_filter = ("status",)
+    search_fields = ("application__application_id", "district")
+    readonly_fields = ("created_at",)
+
+
+@admin.register(ProbationRecord)
+class ProbationRecordAdmin(admin.ModelAdmin):
+    list_display = ("application", "start_date", "end_date", "confirmed_on", "bond_amount", "created_at")
+    list_filter = ("confirmed_on",)
+    search_fields = ("application__application_id", "application__candidate__first_name", "application__candidate__last_name")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(JoiningReport)
+class JoiningReportAdmin(admin.ModelAdmin):
+    list_display = ("application", "joining_date", "designation", "reported_to", "documents_submitted", "created_at")
+    list_filter = ("documents_submitted",)
+    search_fields = ("application__application_id", "application__candidate__first_name", "application__candidate__last_name", "designation", "reported_to")
+    readonly_fields = ("created_at",)
+
+
+@admin.register(MedicalExam)
+class MedicalExamAdmin(admin.ModelAdmin):
+    list_display = ("application", "hospital", "exam_date", "fitness_status", "created_at")
+    list_filter = ("fitness_status",)
+    search_fields = ("application__application_id", "application__candidate__first_name", "application__candidate__last_name", "hospital")
+    readonly_fields = ("created_at", "updated_at")

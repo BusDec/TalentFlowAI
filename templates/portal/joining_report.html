@@ -1,0 +1,62 @@
+{% extends 'portal/base_portal.html' %}
+{% load i18n %}
+{% block title %}{% trans "Submit Joining Report" %}{% endblock %}
+
+{% block content %}
+<div class="tf-flex" style="justify-content:space-between;margin-bottom:22px">
+    <h2 style="color:#fff;font-weight:800;margin:0">{% trans "Joining Report" %} — {{ application.application_id }}</h2>
+</div>
+
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">{% trans "Application Details" %}</div>
+    <p style="margin-bottom:4px"><strong class="tf-muted">{% trans "Post" %}:</strong> {{ application.post.name }} ({{ application.post.post_code }})</p>
+    <p style="margin-bottom:4px"><strong class="tf-muted">{% trans "Advertisement" %}:</strong> {{ application.post.advertisement.advt_number }}</p>
+    <p style="margin-bottom:0"><strong class="tf-muted">{% trans "Status" %}:</strong> <span class="tf-badge success">{{ application.get_status_display }}</span></p>
+    {% if application.employee_number %}
+    <p style="margin-bottom:0;margin-top:4px"><strong class="tf-muted">{% trans "Employee Number" %}:</strong> <span class="tf-badge success">{{ application.employee_number }}</span></p>
+    {% endif %}
+</div>
+
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">{% trans "Joining Details" %}</div>
+    <p class="tf-muted" style="font-size:0.82rem;margin-bottom:18px">{% trans "Please fill in your joining details below. All fields marked with * are required." %}</p>
+
+    <form method="post" aria-label="{% trans 'Joining report form' %}">
+        {% csrf_token %}
+
+        <div class="tf-field">
+            <label class="tf-label" for="joining_date">{% trans "Date of Joining" %} *</label>
+            <input type="date" id="joining_date" name="joining_date" class="tf-input" required>
+        </div>
+
+        <div class="tf-field">
+            <label class="tf-label" for="designation">{% trans "Designation" %} *</label>
+            <input type="text" id="designation" name="designation" class="tf-input" placeholder="{% trans 'e.g. Assistant Engineer' %}" required maxlength="200">
+        </div>
+
+        <div class="tf-field">
+            <label class="tf-label" for="pay_fixation">{% trans "Pay Fixation" %}</label>
+            <input type="text" id="pay_fixation" name="pay_fixation" class="tf-input" placeholder="{% trans 'e.g. Level-7, ₹44,900/- in Pay Matrix' %}" maxlength="200">
+        </div>
+
+        <div class="tf-field">
+            <label class="tf-label" for="reported_to">{% trans "Reported To" %} *</label>
+            <input type="text" id="reported_to" name="reported_to" class="tf-input" placeholder="{% trans 'e.g. Shri R. Kumar, General Manager (HR)' %}" required maxlength="200">
+        </div>
+
+        <div class="tf-field" style="margin-top:14px">
+            <label class="tf-flex" style="gap:10px;align-items:flex-start;cursor:pointer">
+                <input type="checkbox" name="documents_submitted" value="on" class="tf-input" style="width:auto;margin-top:2px">
+                <span style="font-size:0.85rem;line-height:1.5;color:rgba(233,234,244,0.85)">
+                    {% trans "I confirm that all required documents have been submitted at the time of joining." %}
+                </span>
+            </label>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:12px;align-items:center">
+            <button class="tf-btn success" type="submit">{% trans "Submit Joining Report" %}</button>
+            <a class="tf-btn small" href="{% url 'portal_application_detail' application.application_id %}">{% trans "Cancel" %}</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
