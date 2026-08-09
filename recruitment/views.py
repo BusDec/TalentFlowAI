@@ -748,18 +748,17 @@ def analytics_view(request):
 @login_required
 @require_role("recruiter", "org_admin")
 def offer_letter(request, application_id):
-    """Generate an offer letter for a candidate (text preview; PDF via print)."""
+    """Stream the offer letter as a PDF download (text via generate_offer_text stays for email)."""
     if request.method == "POST":
         check_role(request, "org_admin")
     application = get_object_or_404(Application, application_id=application_id)
     if application.status not in ("offered", "joined"):
         messages.warning(request, "Set the application status to 'Offered' first.")
-    offer_text = generate_offer_text(application)
-    return render(
-        request,
-        "recruitment/offer_letter.html",
-        {"application": application, "offer_text": offer_text},
-    )
+    from .offer_pdf import OfferPDF
+
+    response = HttpResponse(OfferPDF(application).generate(), content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="offer-{application.application_id}.pdf"'
+    return response
 
 
 def generate_offer_text(app):
