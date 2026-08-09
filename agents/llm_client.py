@@ -36,7 +36,15 @@ class LLMClient:
         if OpenAI is None:
             raise LLMClientError("openai package not installed.")
 
-        self.client = OpenAI(api_key=self.api_key, base_url=self.base_url, timeout=self.timeout)
+        # (connect, read) timeout tuple: unreachable endpoints (bad base URL,
+        # dead provider) fail fast at connect so agents fall back to the
+        # deterministic path quickly instead of hanging the full read budget.
+        connect_timeout = min(10, self.timeout)
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=self.base_url,
+            timeout=(connect_timeout, self.timeout),
+        )
 
     def _check_ready(self):
         if not self.api_key:
