@@ -46,6 +46,37 @@ class Post(models.Model):
         blank=True,
         help_text="Certificates applicants must upload (e.g. SAP, Primavera, GATE scorecard).",
     )
+    EDUCATION_LEVEL_CHOICES = (
+        ("x", "Class X"),
+        ("xii", "Class XII"),
+        ("diploma", "Diploma"),
+        ("graduate", "Graduate"),
+        ("pg", "Post Graduate"),
+        ("phd", "PhD"),
+    )
+    min_education_level = models.CharField(
+        max_length=20,
+        choices=EDUCATION_LEVEL_CHOICES,
+        blank=True,
+        help_text="Minimum education level required for the post.",
+    )
+    min_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Minimum aggregate percentage required (e.g. 60.00).",
+    )
+    experience_years = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Minimum years of relevant experience required.",
+    )
+    age_cutoff_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Reference date against which age limits are computed (e.g. advertisement closing date).",
+    )
 
     class Meta:
         ordering = ["name"]
@@ -526,3 +557,34 @@ class OrgProfile(models.Model):
 
     def __str__(self):
         return self.name_en
+
+
+class EligibilityOverride(models.Model):
+    """Manual override of the automated eligibility verdict for an application.
+
+    One optional override per application: when present, its verdict takes
+    precedence over the Eligibility Engine's computed result.
+    """
+
+    application = models.OneToOneField(
+        Application,
+        on_delete=models.CASCADE,
+        related_name="eligibility_override",
+    )
+    verdict = models.BooleanField(help_text="Final eligibility verdict after human review (True = eligible).")
+    reason = models.TextField(help_text="Justification recorded by the overrider.")
+    overridden_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text="User who recorded the override.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Eligibility Override"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Override {self.application.application_id}: {self.verdict}"
