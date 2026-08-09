@@ -24,6 +24,7 @@ urlpatterns = [
     path("duplicates/", views.duplicates_queue, name="duplicates_queue"),
     path("duplicates/<int:flag_id>/resolve/", views.duplicates_resolve, name="duplicates_resolve"),
     path("analytics/", views.analytics_view, name="analytics"),
+    path("fee-reconciliation/", views.fee_reconciliation, name="fee_reconciliation"),
     path("audit/consents/", views.consent_ledger, name="consent_ledger"),
     path("audit/consents/export/", views.consent_ledger_export, name="consent_ledger_export"),
 ]

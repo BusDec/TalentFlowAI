@@ -143,3 +143,44 @@ def test_payment_model_exemption(tenant, application):
     )
     assert p.exempt is True
     assert "SC" in p.exempt_reason
+
+
+# ── Fee T5: payment wiring + reconciliation tests ────────────────────────────
+
+PORTAL_BACKEND = "portal.backends.CandidatePortalBackend"
+
+
+def test_pay_fee_candidate(tenant, candidate_portal_user, application, api_client):
+    """Candidate pay → 302 + Payment status completed + AuditEvent exists."""
+    from recruitment.models import AuditEvent, Payment
+
+    # Ensure the candidate's portal_user matches the application's candidate.
+    application.candidate.portal_user = candidate_portal_user
+    application.candidate.save()
+
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    url = f"/portal/applications/{application.application_id}/pay/"
+    response = api_client.post(url)
+    assert response.status_code == 302, f"Expected 302, got {response.status_code}"
+
+    # Payment created with status completed and paid_at set.
+    payment = Payment.objects.get(application=application)
+    assert payment.status == "completed"
+    assert payment.paid_at is not None
+    assert payment.amount > 0
+
+    # AuditEvent recorded.
+    audit = AuditEvent.objects.filter(
+        application=application, field_name="payment"
+    ).first()
+    assert audit is not None, "AuditEvent for payment should exist"
+
+
+def test_fee_reconciliation_staff(tenant, viewer_user, api_client):
+    """Staff reconciliation GET 200 contains status text."""
+    api_client.force_login(viewer_user)
+    response = api_client.get("/fee-reconciliation/")
+    assert response.status_code == 200
+    # Page should show payment status breakdown.
+    content = response.content.decode().lower()
+    assert "paid" in content or "completed" in content or "pending" in content

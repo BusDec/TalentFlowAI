@@ -29,6 +29,11 @@ urlpatterns = [
         views.application_slip,
         name="portal_application_slip",
     ),
+    path(
+        "portal/applications/<str:application_id>/pay/",
+        views.pay_fee,
+        name="portal_pay_fee",
+    ),
     path("portal/consents/", views.consent_list, name="portal_consents"),
     path("portal/profile/", views.profile_view, name="portal_profile"),
     path("portal/consents/<int:consent_id>/revoke/", views.consent_revoke, name="portal_consent_revoke"),

@@ -59,8 +59,30 @@
         </form>
     </div>
     {% endif %}
-    <div class="mt-4" style="display:flex;align-items:center;gap:12px">
+    <div class="mt-4" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <a class="tf-btn small" href="{% url 'portal_application_slip' application.application_id %}">{% trans "Download Application Slip" %}</a>
+        {% if application.payment %}
+            {% if application.payment.status == 'completed' %}
+                <span class="tf-badge success">{% trans "Fee Paid" %} — ₹{{ application.payment.amount }}</span>
+            {% elif application.payment.exempt %}
+                <span class="tf-badge success">{% trans "Fee Exempt" %}</span>
+            {% elif application.payment.status == 'failed' %}
+                <form method="post" action="{% url 'portal_pay_fee' application.application_id %}" style="display:inline">
+                    {% csrf_token %}
+                    <button class="tf-btn small danger" type="submit">{% trans "Retry Payment" %}</button>
+                </form>
+            {% else %}
+                <form method="post" action="{% url 'portal_pay_fee' application.application_id %}" style="display:inline">
+                    {% csrf_token %}
+                    <button class="tf-btn small" type="submit">{% trans "Pay Fee" %} — ₹{{ application.payment.amount }}</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <form method="post" action="{% url 'portal_pay_fee' application.application_id %}" style="display:inline">
+                {% csrf_token %}
+                <button class="tf-btn small" type="submit">{% trans "Pay Fee" %}</button>
+            </form>
+        {% endif %}
     </div>
 </div>
 

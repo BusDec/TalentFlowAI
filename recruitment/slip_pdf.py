@@ -55,12 +55,29 @@ def _fmt_date(value):
 
 
 def _fee_status(application):
-    """Deterministic fee status for an application (never raises).
+    """Fee status for an application (never raises).
 
-    Exempt when the candidate profile lists SC/ST category, marks the
-    candidate PwBD, or the candidate is female. A missing profile (or missing
-    category/gender) never exempts, so the default is fee payable.
+    Consults the Payment row if one exists — returns the actual payment
+    status (paid / exempt / failed / pending).  Falls back to deterministic
+    profile-based check when no Payment record is present.
     """
+    # Prefer Payment row when it exists.
+    try:
+        payment = application.payment
+    except Exception:
+        payment = None
+
+    if payment is not None:
+        if payment.exempt:
+            return FEE_EXEMPT_TEXT
+        if payment.status == "completed":
+            return f"Paid — Rs {payment.amount:.0f}/-"
+        if payment.status == "failed":
+            return "Payment failed — please retry"
+        # pending
+        return FEE_PAYABLE_TEXT
+
+    # Fallback: deterministic profile-based check.
     profile = getattr(application.candidate, "profile", None)
     if profile is not None:
         if (

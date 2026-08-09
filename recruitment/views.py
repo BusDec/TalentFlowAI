@@ -22,12 +22,14 @@ from .models import (
     Application,
     BackgroundReport,
     CategoryAllocation,
+    CommunicationLog,
     DuplicateFlag,
     EligibilityOverride,
     FetchedDocument,
     InternalApplication,
     InternalJobPosting,
     PanelList,
+    Payment,
     Post,
     PostBasedRoster,
     RosterMatrix,
@@ -896,3 +898,63 @@ def consent_ledger_export(request):
             ]
         )
     return response
+
+
+@login_required
+@require_role("viewer")
+def fee_reconciliation(request):
+    """Fee reconciliation dashboard — counts by status and exemption, with CSV export."""
+    from django.db.models import Count, Sum
+
+    payments = Payment.objects.select_related(
+        "application", "application__candidate", "application__post"
+    )
+
+    # Aggregate counts by status.
+    status_counts = dict(
+        payments.values_list("status").annotate(count=Count("id")).values_list("status", "count")
+    )
+
+    # Aggregate counts by exemption.
+    exempt_count = payments.filter(exempt=True).count()
+    non_exempt_count = payments.filter(exempt=False).count()
+
+    # Total collected from paid (non-exempt) payments.
+    total_collected = (
+        payments.filter(status="completed", exempt=False).aggregate(total=Sum("amount"))["total"]
+        or 0
+    )
+
+    # CSV export.
+    if request.GET.get("format") == "csv":
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="fee_reconciliation.csv"'
+        writer = csv.writer(response)
+        writer.writerow([
+            "Application ID", "Candidate", "Post", "Amount", "Status",
+            "Exempt", "Exempt Reason", "Gateway", "Gateway Ref", "Paid At", "Created At",
+        ])
+        for p in payments:
+            writer.writerow([
+                p.application.application_id,
+                str(p.application.candidate),
+                str(p.application.post),
+                p.amount,
+                p.status,
+                p.exempt,
+                p.exempt_reason,
+                p.gateway,
+                p.gateway_ref,
+                p.paid_at,
+                p.created_at,
+            ])
+        return response
+
+    context = {
+        "payments": payments[:200],
+        "status_counts": status_counts,
+        "exempt_count": exempt_count,
+        "non_exempt_count": non_exempt_count,
+        "total_collected": total_collected,
+    }
+    return render(request, "recruitment/fee_reconciliation.html", context)

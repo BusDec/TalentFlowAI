@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Fee Reconciliation" %}{% endblock %}
+{% block page_title %}{% trans "Fee Reconciliation" %}{% endblock %}
+{% block subtitle %}{% trans "Payment status breakdown and reconciliation report" %}{% endblock %}
+
+{% block content %}
+<div class="tf-stats mb-4">
+    <div class="tf-stat">
+        <div class="label">{% trans "Pending" %}</div>
+        <div class="value">{{ status_counts.pending|default:0 }}</div>
+    </div>
+    <div class="tf-stat">
+        <div class="label">{% trans "Paid" %}</div>
+        <div class="value">{{ status_counts.completed|default:0 }}</div>
+    </div>
+    <div class="tf-stat">
+        <div class="label">{% trans "Failed" %}</div>
+        <div class="value">{{ status_counts.failed|default:0 }}</div>
+    </div>
+    <div class="tf-stat">
+        <div class="label">{% trans "Refunded" %}</div>
+        <div class="value">{{ status_counts.refunded|default:0 }}</div>
+    </div>
+</div>
+
+<div class="tf-grid-3 mb-4">
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">{% trans "Exempt vs Non-Exempt" %}</div>
+        <div class="tf-kv">
+            <span class="k">{% trans "Exempt" %}</span>
+            <span class="v"><span class="tf-badge success">{{ exempt_count }}</span></span>
+            <span class="k">{% trans "Non-Exempt" %}</span>
+            <span class="v"><span class="tf-badge primary">{{ non_exempt_count }}</span></span>
+        </div>
+    </div>
+    <div class="tf-glass tf-card">
+        <div class="tf-section-title">{% trans "Total Collected" %}</div>
+        <div class="value" style="font-size:1.8rem;color:var(--accent)">₹{{ total_collected }}</div>
+        <p class="tf-muted" style="font-size:0.82rem">{% trans "From paid, non-exempt payments" %}</p>
+    </div>
+    <div class="tf-glass tf-card" style="display:flex;align-items:center;justify-content:center">
+        <a class="tf-btn" href="?format=csv">{% trans "Export CSV" %}</a>
+    </div>
+</div>
+
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">{% trans "Recent Payments" %}</div>
+    <table class="tf-table">
+        <thead>
+            <tr>
+                <th>{% trans "Application" %}</th>
+                <th>{% trans "Candidate" %}</th>
+                <th>{% trans "Post" %}</th>
+                <th>{% trans "Amount" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Exempt" %}</th>
+                <th>{% trans "Paid At" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in payments %}
+            <tr>
+                <td>{{ p.application.application_id }}</td>
+                <td>{{ p.application.candidate }}</td>
+                <td>{{ p.application.post }}</td>
+                <td>₹{{ p.amount }}</td>
+                <td>
+                    <span class="tf-badge {% if p.status == 'completed' %}success{% elif p.status == 'failed' %}danger{% elif p.status == 'refunded' %}warning{% else %}muted{% endif %}">
+                        {% if p.status == 'completed' %}{% trans "Paid" %}{% else %}{{ p.get_status_display }}{% endif %}
+                    </span>
+                </td>
+                <td>
+                    {% if p.exempt %}
+                    <span class="tf-badge success">{% trans "Yes" %}</span>
+                    {% else %}
+                    <span class="tf-badge muted">{% trans "No" %}</span>
+                    {% endif %}
+                </td>
+                <td>{{ p.paid_at|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="tf-muted">{% trans "No payments recorded yet." %}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
