@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Probation Records{% endblock %}
+{% block page_title %}Probation &amp; Bond{% endblock %}
+{% block subtitle %}Track probation periods and confirm employees{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">📋 Probation Records</div>
+    {% if records %}
+    <table class="tf-table">
+        <thead>
+            <tr>
+                <th>Application ID</th>
+                <th>Candidate</th>
+                <th>Post</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Status</th>
+                <th>Confirmed On</th>
+                <th>Bond (₹)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in records %}
+            <tr>
+                <td><strong>{{ rec.application.application_id }}</strong></td>
+                <td>{{ rec.application.candidate }}</td>
+                <td>{{ rec.application.post }}</td>
+                <td>{{ rec.start_date }}</td>
+                <td>{{ rec.end_date }}</td>
+                <td>
+                    {% if rec.is_confirmed %}
+                        <span class="tf-badge success">Confirmed</span>
+                    {% elif rec.is_expired %}
+                        <span class="tf-badge warning">Expired</span>
+                    {% else %}
+                        <span class="tf-badge primary">On Probation</span>
+                    {% endif %}
+                </td>
+                <td>{{ rec.confirmed_on|default:"—" }}</td>
+                <td>{{ rec.bond_amount|default:"—" }}</td>
+                <td>
+                    {% if not rec.is_confirmed %}
+                    <form method="post" action="{% url 'probation_confirm' rec.pk %}" style="display:inline" aria-label="Confirm {{ rec.application.application_id }}">
+                        {% csrf_token %}
+                        <button class="tf-btn small" type="submit" aria-label="Confirm employee {{ rec.application.application_id }}">Confirm</button>
+                    </form>
+                    {% else %}
+                    <span class="tf-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="tf-muted">No probation records found.</div>
+    {% endif %}
+</div>
+{% endblock %}

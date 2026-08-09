@@ -22,6 +22,7 @@ from notifications import notify as send_notification
 from .audit import log_audit
 from .digilocker.client import DigiLockerError, fetch_documents, verify_signature
 from .models import (
+    MEDICAL_FITNESS_CHOICES,
     Advertisement,
     Application,
     BackgroundReport,
@@ -31,16 +32,21 @@ from .models import (
     DuplicateFlag,
     EligibilityOverride,
     FetchedDocument,
+    GRIEVANCE_STATUS_CHOICES,
+    Grievance,
     InternalApplication,
     InternalJobPosting,
     InterviewPanel,
     InterviewScore,
     InterviewSlot,
     LitigationCase,
+    MedicalExam,
     PanelList,
     Payment,
+    PoliceVerification,
     Post,
     PostBasedRoster,
+    ProbationRecord,
     RequisitionApproval,
     RosterMatrix,
     VacancyRequisition,
@@ -562,6 +568,7 @@ def application_detail(request, application_id):
             c for c in application.litigation_cases.all() if c.has_active_stay
         ],
         "consistency_warnings": consistency_warnings,
+        "police_verifications": application.police_verifications.select_related("initiated_by").all(),
     }
     portal_user = application.candidate.portal_user
     if portal_user:
@@ -1634,3 +1641,307 @@ def interview_results(request, post_id):
         "panels": panels,
         "slot_results": slot_results,
     })
+
+
+# ── Probation & Bond ─────────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("recruiter", "hr_manager")
+def probation_list(request):
+    """List all probation records with status indicators."""
+    records = ProbationRecord.objects.select_related(
+        "application", "application__candidate", "application__post",
+    ).all()
+    return render(request, "recruitment/probation_list.html", {"records": records})
+
+
+@login_required
+@require_role("hr_manager")
+@require_POST
+def probation_confirm(request, record_id):
+    """Confirm an employee — sets confirmed_on to today."""
+    from datetime import date as _date
+
+    record = get_object_or_404(ProbationRecord, pk=record_id)
+    if record.is_confirmed:
+        messages.info(request, "Employee is already confirmed.")
+        return redirect("probation_list")
+    record.confirmed_on = _date.today()
+    record.save(update_fields=["confirmed_on", "updated_at"])
+    messages.success(
+        request,
+        f"{record.application.application_id} confirmed successfully.",
+    )
+    return redirect("probation_list")
+
+
+# ── Grievance / Appeal ─────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("recruiter", "hr_manager")
+def grievance_list(request):
+    """List all grievances with filtering by status."""
+    status_filter = request.GET.get("status", "")
+    grievances = Grievance.objects.select_related(
+        "candidate", "application", "assigned_to",
+    ).all()
+    if status_filter:
+        grievances = grievances.filter(status=status_filter)
+    return render(request, "recruitment/grievance_list.html", {
+        "grievances": grievances,
+        "status_filter": status_filter,
+        "status_choices": Grievance._meta.get_field("status").choices,
+    })
+
+
+@login_required
+@require_role("recruiter", "hr_manager")
+@require_POST
+def grievance_update_status(request, grievance_id):
+    """Update grievance status. Acknowledging sends a notification to the candidate."""
+    grievance = get_object_or_404(Grievance, id=grievance_id)
+    new_status = request.POST.get("status", "").strip()
+    valid_statuses = [c[0] for c in GRIEVANCE_STATUS_CHOICES]
+    if new_status not in valid_statuses:
+        messages.error(request, "Invalid status.")
+        return redirect("grievance_list")
+
+    old_status = grievance.status
+    resolution_notes = request.POST.get("resolution_notes", "").strip()
+
+    grievance.status = new_status
+    if resolution_notes:
+        grievance.resolution_notes = resolution_notes
+    if new_status == "resolved" and not grievance.assigned_to:
+        grievance.assigned_to = request.user
+    grievance.save()
+
+    # Notify candidate on acknowledgement
+    if new_status == "acknowledged" and old_status == "filed":
+        candidate = grievance.candidate
+        to = candidate.email or candidate.mobile
+        if to:
+            channel = "email" if "@" in to else "sms"
+            send_notification(
+                channel=channel,
+                to=to,
+                subject=f"Grievance Acknowledged — {grievance.subject}",
+                body=(
+                    f"Dear {candidate},\n\n"
+                    f"Your grievance \"{grievance.subject}\" has been acknowledged "
+                    f"and is being reviewed by our team.\n\n"
+                    f"Reference ID: {grievance.pk}\n\n"
+                    f"Regards,\nRecruitment Cell"
+                ),
+            )
+
+    messages.success(request, f"Grievance status updated to '{new_status}'.")
+    return redirect("grievance_list")
+
+
+@login_required
+@require_role("recruiter", "hr_manager")
+@require_POST
+def grievance_assign(request, grievance_id):
+    """Assign a grievance to a staff member."""
+    grievance = get_object_or_404(Grievance, id=grievance_id)
+    grievance.assigned_to = request.user
+    if grievance.status == "filed":
+        grievance.status = "acknowledged"
+    grievance.save()
+    messages.success(request, f"Grievance assigned to {request.user}.")
+    return redirect("grievance_list")
+
+
+# ── Medical Examination ──────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("hr_manager")
+def medical_schedule(request, application_id):
+    """Schedule a medical exam for an application. GET shows form, POST creates."""
+    application = get_object_or_404(Application, application_id=application_id)
+
+    if request.method == "POST":
+        hospital = request.POST.get("hospital", "").strip()
+        exam_date = request.POST.get("exam_date", "").strip()
+        notes = request.POST.get("notes", "").strip()
+
+        if not hospital or not exam_date:
+            messages.error(request, "Hospital and exam date are required.")
+            return render(request, "recruitment/medical_exam.html", {
+                "application": application,
+                "hospital": hospital,
+                "exam_date": exam_date,
+                "notes": notes,
+                "mode": "schedule",
+            })
+
+        exam = MedicalExam.objects.create(
+            application=application,
+            hospital=hospital,
+            exam_date=exam_date,
+            notes=notes,
+        )
+        messages.success(
+            request,
+            f"Medical exam scheduled at {exam.hospital} on {exam.exam_date} for {application.application_id}.",
+        )
+        return redirect("application_detail", application_id=application.application_id)
+
+    return render(request, "recruitment/medical_exam.html", {
+        "application": application,
+        "mode": "schedule",
+    })
+
+
+@login_required
+@require_role("recruiter")
+@require_POST
+def medical_upload_report(request, exam_id):
+    """Upload a medical report file for an exam."""
+    exam = get_object_or_404(MedicalExam, pk=exam_id)
+    report_file = request.FILES.get("report_file")
+    notes = request.POST.get("notes", "").strip()
+
+    if not report_file:
+        messages.error(request, "A report file is required.")
+        return redirect("application_detail", application_id=exam.application.application_id)
+
+    exam.report_file = report_file
+    if notes:
+        exam.notes = notes
+    exam.save(update_fields=["report_file", "notes", "updated_at"])
+    messages.success(
+        request,
+        f"Medical report uploaded for {exam.application.application_id}.",
+    )
+    return redirect("application_detail", application_id=exam.application.application_id)
+
+
+@login_required
+@require_role("hr_manager")
+@require_POST
+def medical_certify(request, exam_id):
+    """Certify fitness status (fit/unfit) for a medical exam. Audits the change."""
+    exam = get_object_or_404(MedicalExam, pk=exam_id)
+    old_status = exam.fitness_status
+    new_status = request.POST.get("fitness_status", "").strip()
+    notes = request.POST.get("notes", "").strip()
+
+    valid_statuses = dict(MEDICAL_FITNESS_CHOICES)
+    if new_status not in valid_statuses:
+        messages.error(request, "Invalid fitness status.")
+        return redirect("application_detail", application_id=exam.application.application_id)
+
+    exam.fitness_status = new_status
+    if notes:
+        exam.notes = notes
+    exam.save(update_fields=["fitness_status", "notes", "updated_at"])
+
+    # Audit trail on fitness status change.
+    if old_status != new_status:
+        log_audit(
+            actor=request.user,
+            application=exam.application,
+            field_name="medical_fitness",
+            old_value=old_status,
+            new_value=new_status,
+            reason=f"Medical exam at {exam.hospital} certified as {valid_statuses[new_status]}.",
+        )
+
+    messages.success(
+        request,
+        f"Medical fitness for {exam.application.application_id} updated to {valid_statuses[new_status]}.",
+    )
+    return redirect("application_detail", application_id=exam.application.application_id)
+
+
+# ── Police Verification ──────────────────────────────────────────────────────
+
+
+@login_required
+@require_role("hr_manager")
+@require_POST
+def police_verification_initiate(request, application_id):
+    """Initiate a police verification for an application. HR manager only."""
+    application = get_object_or_404(Application, application_id=application_id)
+    district = request.POST.get("district", "").strip()
+    notes = request.POST.get("notes", "").strip()
+
+    if not district:
+        messages.error(request, "District is required to initiate police verification.")
+        return redirect("application_detail", application_id=application_id)
+
+    verification = PoliceVerification.objects.create(
+        application=application,
+        district=district,
+        status="initiated",
+        initiated_by=request.user,
+        notes=notes,
+    )
+
+    # Audit: log initiation against the application.
+    log_audit(
+        actor=request.user,
+        application=application,
+        field_name="police_verification",
+        old_value="",
+        new_value="initiated",
+        reason=f"Police verification initiated for district: {district}.",
+    )
+
+    messages.success(
+        request,
+        f"Police verification initiated for {application.application_id} (district: {district}).",
+    )
+    return redirect("application_detail", application_id=application_id)
+
+
+@login_required
+@require_role("recruiter")
+@require_POST
+def police_verification_update_status(request, verification_id):
+    """Update the status of a police verification. Recruiter only."""
+    from .models import POLICE_VERIFICATION_STATUS_CHOICES
+
+    verification = get_object_or_404(
+        PoliceVerification.objects.select_related("application"),
+        pk=verification_id,
+    )
+    old_status = verification.status
+    new_status = request.POST.get("status", "").strip()
+    notes = request.POST.get("notes", "").strip()
+    report_file = request.FILES.get("report_file")
+
+    valid_statuses = dict(POLICE_VERIFICATION_STATUS_CHOICES)
+    if new_status not in valid_statuses:
+        messages.error(request, "Invalid police verification status.")
+        return redirect("application_detail", application_id=verification.application.application_id)
+
+    # Update fields.
+    verification.status = new_status
+    if notes:
+        verification.notes = notes
+    if report_file:
+        verification.report_file = report_file
+    verification.save()
+
+    # Audit trail — log status change against the linked application.
+    if old_status != new_status:
+        log_audit(
+            actor=request.user,
+            application=verification.application,
+            field_name="police_verification_status",
+            old_value=old_status,
+            new_value=new_status,
+            reason=f"Police verification for {verification.district} updated to {valid_statuses[new_status]}.",
+        )
+
+    messages.success(
+        request,
+        f"Police verification for {verification.application.application_id} updated to {valid_statuses[new_status]}.",
+    )
+    return redirect("application_detail", application_id=verification.application.application_id)

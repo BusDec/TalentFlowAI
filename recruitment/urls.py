@@ -47,4 +47,18 @@ urlpatterns = [
     path("interview/panel/<int:panel_id>/schedule/", views.interview_schedule, name="interview_schedule"),
     path("interview/slot/<int:slot_id>/score/", views.interview_score, name="interview_score"),
     path("posts/<int:post_id>/interview/results/", views.interview_results, name="interview_results"),
+    # Probation & Bond
+    path("probation/", views.probation_list, name="probation_list"),
+    path("probation/<int:record_id>/confirm/", views.probation_confirm, name="probation_confirm"),
+    # Grievance / Appeal
+    path("grievances/", views.grievance_list, name="grievance_list"),
+    path("grievances/<int:grievance_id>/update-status/", views.grievance_update_status, name="grievance_update_status"),
+    path("grievances/<int:grievance_id>/assign/", views.grievance_assign, name="grievance_assign"),
+    # Medical Examination
+    path("applications/<str:application_id>/medical/schedule/", views.medical_schedule, name="medical_schedule"),
+    path("medical/<int:exam_id>/upload-report/", views.medical_upload_report, name="medical_upload_report"),
+    path("medical/<int:exam_id>/certify/", views.medical_certify, name="medical_certify"),
+    # Police Verification
+    path("applications/<str:application_id>/police-verification/initiate/", views.police_verification_initiate, name="police_verification_initiate"),
+    path("police-verification/<int:verification_id>/update-status/", views.police_verification_update_status, name="police_verification_update_status"),
 ]
