@@ -20,6 +20,11 @@ urlpatterns = [
         name="portal_application_withdraw",
     ),
     path(
+        "portal/applications/<str:application_id>/accept/",
+        views.accept_offer,
+        name="portal_accept_offer",
+    ),
+    path(
         "portal/applications/<str:application_id>/slip/",
         views.application_slip,
         name="portal_application_slip",

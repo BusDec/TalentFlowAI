@@ -300,6 +300,35 @@ STAGES = [
 ]
 
 
+def _application_detail_context(application):
+    """Shared template context for the application detail page.
+
+    Used by ``application_detail`` and reused by ``accept_offer`` when it
+    re-renders the page (e.g. consent checkbox missing) so the stepper,
+    withdraw button and employee-number badge stay intact.
+    """
+    background_report = getattr(application, "background_report", None)
+    stage_names = [s[0] for s in STAGES]
+    stage_index = stage_names.index(application.status) if application.status in stage_names else len(stage_names)
+    is_terminal = application.status in ("rejected", "withdrawn")
+    terminal_index = None
+    if is_terminal:
+        rejected_stage = application.rejected_at_stage or "offered"
+        terminal_index = stage_names.index(rejected_stage) if rejected_stage in stage_names else stage_names.index("offered")
+
+    return {
+        "application": application,
+        "background_report": background_report,
+        "resumes": application.candidate.resumes.all(),
+        "stage_labels": STAGES,
+        "stage_index": stage_index,
+        "is_terminal": is_terminal,
+        "terminal_index": terminal_index,
+        "can_withdraw": application.status
+        in ("received", "document_verification", "shortlisted", "interview"),
+    }
+
+
 @require_portal_user
 def application_detail(request, application_id):
     application = get_object_or_404(
@@ -319,29 +348,50 @@ def application_detail(request, application_id):
             messages.success(request, _("Explanation submitted."))
         return redirect("portal_application_detail", application_id=application_id)
 
-    stage_names = [s[0] for s in STAGES]
-    stage_index = stage_names.index(application.status) if application.status in stage_names else len(stage_names)
-    is_terminal = application.status in ("rejected", "withdrawn")
-    terminal_index = None
-    if is_terminal:
-        rejected_stage = application.rejected_at_stage or "offered"
-        terminal_index = stage_names.index(rejected_stage) if rejected_stage in stage_names else stage_names.index("offered")
-
     return render(
         request,
         "portal/application_detail.html",
-        {
-            "application": application,
-            "background_report": background_report,
-            "resumes": application.candidate.resumes.all(),
-            "stage_labels": STAGES,
-            "stage_index": stage_index,
-            "is_terminal": is_terminal,
-            "terminal_index": terminal_index,
-            "can_withdraw": application.status
-            in ("received", "document_verification", "shortlisted", "interview"),
-        },
+        _application_detail_context(application),
     )
+
+
+@require_portal_user
+def accept_offer(request, application_id):
+    """Candidate accepts an offered appointment.
+
+    GET renders the offer text (via ``generate_offer_text``) with the consent
+    form. POST requires the ``consent`` checkbox; on acceptance the application
+    moves to ``joined``, an employee number is assigned and the change is
+    audited. Re-renders the detail page with ``accept_error`` when consent is
+    missing so no state change occurs.
+    """
+    application = get_object_or_404(
+        Application,
+        application_id=application_id,
+        candidate__portal_user=request.user,
+    )
+    from recruitment.audit import log_audit
+    from recruitment.views import generate_offer_text
+
+    context = _application_detail_context(application)
+    context["offer_text"] = generate_offer_text(application)
+
+    if request.method == "POST":
+        if request.POST.get("consent") != "on":
+            context["accept_error"] = "You must accept the offer to proceed."
+            return render(request, "portal/application_detail.html", context)
+        application.employee_number = (
+            f"{application.post.advertisement.advt_number[:6]}-"
+            f"{application.post.post_code}-"
+            f"{Application.objects.filter(post=application.post, status='joined').count() + 1:04d}"
+        )
+        application.status = "joined"
+        application.save()  # model save audits the status change
+        log_audit(None, application, "status", "offered", "joined", reason="candidate accepted offer")
+        messages.success(request, _("Offer accepted. Welcome aboard!"))
+        return redirect("portal_application_detail", application_id=application.application_id)
+
+    return render(request, "portal/application_detail.html", context)
 
 
 @require_portal_user

@@ -201,3 +201,32 @@ def test_slip_owner_only(api_client, tenant, application):
     api_client.force_login(other, backend=PORTAL_BACKEND)
     r = api_client.get(reverse("portal_application_slip", args=[application.application_id]))
     assert r.status_code in (302, 403)
+
+
+def test_accept_requires_consent(api_client, candidate_portal_user, application):
+    application.candidate.portal_user = candidate_portal_user; application.candidate.save()
+    application.status = "offered"; application.save()
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    r = api_client.post(reverse("portal_accept_offer", args=[application.application_id]), {})
+    assert r.status_code == 200  # re-render with error, no state change
+    application.refresh_from_db(); assert application.status == "offered"
+
+
+def test_accept_moves_to_joined(api_client, candidate_portal_user, application):
+    application.candidate.portal_user = candidate_portal_user; application.candidate.save()
+    application.status = "offered"; application.save()
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    r = api_client.post(reverse("portal_accept_offer", args=[application.application_id]), {"consent": "on"})
+    assert r.status_code == 302
+    application.refresh_from_db()
+    assert application.status == "joined"
+    assert application.employee_number
+
+
+def test_accept_writes_audit(api_client, candidate_portal_user, application):
+    from recruitment.models import AuditEvent
+    application.candidate.portal_user = candidate_portal_user; application.candidate.save()
+    application.status = "offered"; application.save()
+    api_client.force_login(candidate_portal_user, backend=PORTAL_BACKEND)
+    api_client.post(reverse("portal_accept_offer", args=[application.application_id]), {"consent": "on"})
+    assert AuditEvent.objects.filter(application=application, field_name="status", new_value="joined").exists()
