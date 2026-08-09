@@ -40,3 +40,27 @@ def test_missing_required_certificate_false(tenant, application):
     v = verify_application(application)
     assert v["flags"]["certificates"]["ok"] is False
     assert "GATE scorecard" in v["flags"]["certificates"]["detail"]
+
+
+def test_override_requires_reason(api_client, tenant, application, recruiter_user):
+    api_client.force_login(recruiter_user)
+    r = api_client.post(
+        f"/applications/{application.application_id}/eligibility/",
+        {"override_verdict": "on", "override_reason": ""},
+    )
+    assert r.status_code == 200  # re-render with error, not 302
+    from recruitment.models import EligibilityOverride
+    assert not EligibilityOverride.objects.filter(application=application).exists()
+
+
+def test_override_writes_audit(api_client, tenant, application, recruiter_user):
+    api_client.force_login(recruiter_user)
+    r = api_client.post(
+        f"/applications/{application.application_id}/eligibility/",
+        {"override_verdict": "on", "override_reason": "documents verified"},
+    )
+    assert r.status_code == 302
+    from recruitment.models import AuditEvent, EligibilityOverride
+    o = EligibilityOverride.objects.get(application=application)
+    assert o.verdict is True and o.overridden_by == recruiter_user
+    assert AuditEvent.objects.filter(application=application, field_name="eligibility_override").exists()

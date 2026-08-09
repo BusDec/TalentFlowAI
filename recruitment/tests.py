@@ -93,14 +93,13 @@ def test_eligibility_verdict(application):
     } <= set(verdict)
     assert verdict["application_id"] == application.application_id
     flags = verdict["flags"]
-    assert "age" in flags
-    assert "qualification" in flags
-    # The fixture post has no max_age, so the age check passes trivially.
+    for f in ("age", "education", "percentage", "experience", "certificates", "category"):
+        assert f in flags and "ok" in flags[f] and "detail" in flags[f]
+    # The fixture post has no constraints and the candidate no profile, so
+    # every check passes trivially.
     assert flags["age"]["ok"] is True
-    # Qualification is a placeholder awaiting manual review.
-    assert flags["qualification"]["ok"] is None
     assert isinstance(verdict["eligible"], bool)
-    assert verdict["verdict"] in ("Proceed", "Review required")
+    assert verdict["verdict"] in ("eligible", "not_eligible", "manual_review")
 
 
 def test_offer_text_generation(application):

@@ -15,6 +15,7 @@ from accounts.decorators import check_role, require_role
 from agents import eligibility_verifier, interview_copilot, roster_compliance
 from agents.shortlist import build_shortlist
 from consent.models import Consent, ConsentEvent
+from .audit import log_audit
 from .digilocker.client import DigiLockerError, fetch_documents, verify_signature
 from .models import (
     Advertisement,
@@ -22,6 +23,7 @@ from .models import (
     BackgroundReport,
     CategoryAllocation,
     DuplicateFlag,
+    EligibilityOverride,
     FetchedDocument,
     InternalApplication,
     InternalJobPosting,
@@ -508,12 +510,59 @@ def digilocker_fetch(request, application_id):
 @require_role("recruiter")
 def run_eligibility(request, application_id):
     application = get_object_or_404(Application, application_id=application_id)
+    override = getattr(application, "eligibility_override", None)
+
+    if request.method == "POST":
+        override_verdict = request.POST.get("override_verdict", "")
+        override_reason = request.POST.get("override_reason", "").strip()
+
+        if not override_reason:
+            verdict = eligibility_verifier.verify_application(
+                application,
+                dob=application.candidate.date_of_birth,
+                digilocker_consent="mock-consent-ref",
+            )
+            return render(
+                request,
+                "recruitment/eligibility_result.html",
+                {
+                    "verdict": verdict,
+                    "override": override,
+                    "override_error": "Reason is required.",
+                },
+            )
+
+        verdict = override_verdict.lower() in ("on", "1", "true")
+        previous = override.verdict if override is not None else None
+        EligibilityOverride.objects.update_or_create(
+            application=application,
+            defaults={
+                "verdict": verdict,
+                "reason": override_reason,
+                "overridden_by": request.user,
+            },
+        )
+        log_audit(
+            request.user,
+            application,
+            "eligibility_override",
+            previous,
+            verdict,
+            reason=override_reason,
+        )
+        messages.success(request, "Eligibility override recorded.")
+        return redirect("run_eligibility", application_id=application.application_id)
+
     verdict = eligibility_verifier.verify_application(
         application,
         dob=application.candidate.date_of_birth,
         digilocker_consent="mock-consent-ref",
     )
-    return render(request, "recruitment/eligibility_result.html", {"verdict": verdict})
+    return render(
+        request,
+        "recruitment/eligibility_result.html",
+        {"verdict": verdict, "override": override},
+    )
 
 
 @login_required
