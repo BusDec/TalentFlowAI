@@ -75,3 +75,25 @@ def test_resume_parser_delegates_text_first():
     parsed, confidence, method = resume_parser.parse_resume(str(p))
     assert isinstance(parsed, dict) and parsed.get("email") == "a@b.com"
     p.unlink()
+
+
+def test_consistency_matches_and_mismatches():
+    from agents import doc_intel
+    docs = [
+        {"doc_type": "pan", "fields": {"name": "Ram Kumar"}},
+        {"doc_type": "aadhaar", "fields": {"name": "Ram Kumar"}},
+    ]
+    assert doc_intel.check_consistency(docs) == []
+    docs[1]["fields"]["name"] = "Shyam Kumar"
+    out = doc_intel.check_consistency(docs)
+    assert len(out) == 1 and out[0]["consistent"] is False
+
+
+def test_consistency_normalizes_names_and_skips_missing():
+    from agents import doc_intel
+    docs = [
+        {"doc_type": "pan", "fields": {"name": "Ram  Kumar."}},
+        {"doc_type": "aadhaar", "fields": {"name": "RAM KUMAR"}},
+        {"doc_type": "resume", "fields": {}},  # no name field: not compared
+    ]
+    assert doc_intel.check_consistency(docs) == []

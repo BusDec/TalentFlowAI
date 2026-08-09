@@ -550,3 +550,52 @@ def extract_document(path):
         "validations": validations,
         "extracted_text_length": len(text),
     }
+
+
+# ---------------------------------------------------------------------------
+# Cross-document consistency
+# ---------------------------------------------------------------------------
+
+def check_consistency(documents):
+    """Compare shared fields across extracted documents.
+
+    Currently only the applicant's ``name`` field is compared across the
+    documents that carry one. Names are normalised (lowercased, whitespace
+    collapsed, non-alphanumerics stripped) via ``duplicate_detection._norm_name``
+    before comparison, so "RAM KUMAR", "Ram Kumar" and "Ram  Kumar." all agree.
+
+    Returns one entry per conflicting pair of documents, each shaped as
+    ``{"field": "name", "docs": [doc_type, ...], "consistent": False,
+    "detail": str}``. Documents that agree, documents without a ``name`` field,
+    and fewer than two name-bearing documents produce no entries.
+    """
+    from agents.duplicate_detection import _norm_name
+
+    named = [
+        (i, doc.get("doc_type"), fields)
+        for i, doc in enumerate(documents)
+        if isinstance((fields := doc.get("fields")), dict)
+        and isinstance(fields.get("name"), str)
+        and fields["name"].strip()
+    ]
+
+    issues = []
+    for a in range(len(named)):
+        for b in range(a + 1, len(named)):
+            _ia, type_a, fields_a = named[a]
+            _ib, type_b, fields_b = named[b]
+            name_a, name_b = fields_a["name"], fields_b["name"]
+            if _norm_name(name_a) == _norm_name(name_b):
+                continue
+            label_a = type_a or f"document {_ia + 1}"
+            label_b = type_b or f"document {_ib + 1}"
+            issues.append({
+                "field": "name",
+                "docs": [type_a, type_b],
+                "consistent": False,
+                "detail": (
+                    f"{label_a} name {name_a!r} does not match "
+                    f"{label_b} name {name_b!r}"
+                ),
+            })
+    return issues
