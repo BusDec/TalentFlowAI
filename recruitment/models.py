@@ -707,3 +707,107 @@ class Payment(models.Model):
     def __str__(self):
         status = "EXEMPT" if self.exempt else self.status
         return f"Payment {self.application.application_id}: ₹{self.amount} ({status})"
+
+
+# ── Phase 3: Requisition ─────────────────────────────────────────────────────
+
+
+class VacancyRequisition(models.Model):
+    """A request to create a new vacancy, routed through approval stages."""
+
+    STATUS_CHOICES = [
+        ("draft", "Draft"),
+        ("pending", "Pending Approval"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    post_name = models.CharField(
+        max_length=200,
+        help_text="Name of the post being requested.",
+    )
+    count = models.PositiveIntegerField(
+        help_text="Number of positions requested.",
+    )
+    grade = models.CharField(
+        max_length=20,
+        help_text="Pay grade (e.g. E-5).",
+    )
+    justification = models.TextField(
+        help_text="Business justification for the requisition.",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="draft",
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="requisitions",
+        help_text="Staff user who raised this requisition.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Vacancy Requisition"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.post_name} x{self.count} ({self.get_status_display()})"
+
+
+class RequisitionApproval(models.Model):
+    """One approval step in the requisition workflow."""
+
+    STAGE_CHOICES = [
+        ("hod", "Head of Department"),
+        ("hr", "HR Review"),
+        ("finance", "Finance"),
+        ("final", "Final Approval"),
+    ]
+    DECISION_CHOICES = [
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    requisition = models.ForeignKey(
+        VacancyRequisition,
+        on_delete=models.CASCADE,
+        related_name="approvals",
+        help_text="Requisition being approved.",
+    )
+    stage = models.CharField(
+        max_length=20,
+        choices=STAGE_CHOICES,
+        help_text="Approval stage (hod, hr, finance, final).",
+    )
+    approver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="requisition_approvals",
+        help_text="Staff user who made the decision.",
+    )
+    decision = models.CharField(
+        max_length=20,
+        choices=DECISION_CHOICES,
+        default="pending",
+    )
+    comments = models.TextField(
+        blank=True,
+        help_text="Approver's comments.",
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Requisition Approval"
+        ordering = ["timestamp"]
+        unique_together = [("requisition", "stage")]
+
+    def __str__(self):
+        return f"{self.requisition.post_name} — {self.get_stage_display()}: {self.get_decision_display()}"
