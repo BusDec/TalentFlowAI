@@ -811,3 +811,41 @@ class RequisitionApproval(models.Model):
 
     def __str__(self):
         return f"{self.requisition.post_name} — {self.get_stage_display()}: {self.get_decision_display()}"
+
+
+class Corrigendum(models.Model):
+    """A published correction / addendum to an advertisement.
+
+    Each corrigendum increments the version counter per advertisement.
+    Applicants are notified automatically on creation (via the view).
+    """
+
+    advertisement = models.ForeignKey(
+        Advertisement,
+        on_delete=models.CASCADE,
+        related_name="corrigenda",
+        help_text="Advertisement this corrigendum corrects.",
+    )
+    version = models.PositiveIntegerField(
+        help_text="Sequential version number within the advertisement.",
+    )
+    changes_text = models.TextField(
+        help_text="Description of what changed.",
+    )
+    published_date = models.DateField(
+        help_text="Date the corrigendum was published.",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Uncheck to soft-hide without deleting.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Corrigendum"
+        verbose_name_plural = "Corrigenda"
+        ordering = ["-published_date"]
+        unique_together = [("advertisement", "version")]
+
+    def __str__(self):
+        return f"Corrigendum v{self.version} — {self.advertisement.advt_number}"

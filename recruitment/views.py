@@ -15,6 +15,7 @@ from accounts.decorators import check_role, require_role
 from agents import eligibility_verifier, interview_copilot, roster_compliance
 from agents.shortlist import build_shortlist
 from consent.models import Consent, ConsentEvent
+from notifications import notify as send_notification
 from .audit import log_audit
 from .digilocker.client import DigiLockerError, fetch_documents, verify_signature
 from .models import (
@@ -23,6 +24,7 @@ from .models import (
     BackgroundReport,
     CategoryAllocation,
     CommunicationLog,
+    Corrigendum,
     DuplicateFlag,
     EligibilityOverride,
     FetchedDocument,
@@ -235,7 +237,73 @@ def generate_advt_text(advt):
 @require_role("viewer")
 def advertisement_detail(request, advt_id):
     advt = get_object_or_404(Advertisement, id=advt_id)
-    return render(request, "recruitment/advertisement_detail.html", {"advt": advt})
+    corrigenda = advt.corrigenda.filter(is_active=True)
+    is_hr = False
+    try:
+        check_role(request, "hr_manager")
+        is_hr = True
+    except Exception:
+        pass
+    return render(
+        request,
+        "recruitment/advertisement_detail.html",
+        {"advt": advt, "corrigenda": corrigenda, "is_hr_manager": is_hr},
+    )
+
+
+@login_required
+@require_role("hr_manager")
+@require_POST
+def corrigendum_create(request, advt_id):
+    """Create a corrigendum for an advertisement; auto-bumps version and notifies applicants."""
+    advt = get_object_or_404(Advertisement, id=advt_id)
+    changes_text = request.POST.get("changes_text", "").strip()
+    if not changes_text:
+        messages.error(request, "Changes text is required.")
+        return redirect("advertisement_detail", advt_id=advt_id)
+
+    next_version = (
+        Corrigendum.objects.filter(advertisement=advt).count() + 1
+    )
+    corrigendum = Corrigendum.objects.create(
+        advertisement=advt,
+        version=next_version,
+        changes_text=changes_text,
+        published_date=timezone.now().date(),
+    )
+
+    # Notify all applicants for posts under this advertisement.
+    applicants = (
+        Application.objects.filter(post__advertisement=advt)
+        .select_related("candidate")
+        .distinct()
+    )
+    notified = 0
+    for app in applicants:
+        to = app.candidate.email or app.candidate.mobile or ""
+        if not to:
+            continue
+        channel = "email" if "@" in to else "sms"
+        ok, _ = send_notification(
+            channel=channel,
+            to=to,
+            subject=f"Corrigendum v{corrigendum.version} — {advt.advt_number}",
+            body=(
+                f"Dear {app.candidate.first_name},\n\n"
+                f"A corrigendum (v{corrigendum.version}) has been published for "
+                f"advertisement {advt.advt_number} ({advt.title}).\n\n"
+                f"Changes:\n{changes_text}\n\n"
+                f"Please review the updated advertisement."
+            ),
+        )
+        if ok:
+            notified += 1
+
+    messages.success(
+        request,
+        f"Corrigendum v{corrigendum.version} published. {notified} applicant(s) notified.",
+    )
+    return redirect("advertisement_detail", advt_id=advt_id)
 
 
 _QUAL_STOPWORDS = {

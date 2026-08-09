@@ -9,6 +9,34 @@
     <p style="margin:0;color:rgba(233,234,244,0.85)">{{ advt.description|default:"No description provided." }}</p>
 </div>
 
+{% if corrigenda %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">Corrigenda ({{ corrigenda|length }})</div>
+    {% for c in corrigenda %}
+    <div style="padding:0.75rem 0;{% if not forloop.last %}border-bottom:1px solid rgba(255,255,255,0.08);{% endif %}">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.25rem;">
+            <strong style="color:var(--tf-accent,#6ee7b7);">v{{ c.version }}</strong>
+            <span style="font-size:0.85rem;color:rgba(233,234,244,0.55);">{{ c.published_date|date:"d-m-Y" }}</span>
+        </div>
+        <p style="margin:0;color:rgba(233,234,244,0.85);white-space:pre-wrap;">{{ c.changes_text }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if is_hr_manager %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-section-title">Add Corrigendum</div>
+    <form method="post" action="{% url 'corrigendum_create' advt.id %}">
+        {% csrf_token %}
+        <textarea name="changes_text" rows="3" placeholder="Describe the changes…" required
+            style="width:100%;padding:0.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+            background:rgba(0,0,0,0.25);color:rgba(233,234,244,0.9);resize:vertical;margin-bottom:0.5rem;"></textarea>
+        <button type="submit" class="tf-btn small">Publish Corrigendum</button>
+    </form>
+</div>
+{% endif %}
+
 <div class="tf-glass tf-card">
     <div class="tf-flex" style="justify-content:space-between">
         <div class="tf-section-title">Posts ({{ advt.posts.count }})</div>
