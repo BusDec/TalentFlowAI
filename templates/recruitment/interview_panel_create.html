@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Create Interview Panel{% endblock %}
+{% block page_title %}Create Interview Panel{% endblock %}
+{% block subtitle %}For {{ post.name }} ({{ post.post_code }}){% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card" style="max-width:640px">
+    <div class="tf-section-title">New Interview Panel</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Panel Name</label>
+            <input type="text" name="name" class="tf-input" value="{{ name|default:'' }}" placeholder="e.g. Panel A" required>
+        </div>
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Sitting Fee (₹ per member, optional)</label>
+            <input type="number" name="sitting_fee" class="tf-input" value="{{ sitting_fee|default:'' }}" step="0.01" min="0" placeholder="2000.00">
+        </div>
+        {% if staff_users %}
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Panel Members</label>
+            <select name="member_ids" class="tf-input" multiple style="height:120px">
+                {% for u in staff_users %}
+                <option value="{{ u.pk }}">{{ u.get_full_name|default:u.username }} ({{ u.email }})</option>
+                {% endfor %}
+            </select>
+            <p class="tf-muted" style="font-size:0.78rem;margin:6px 0 0">Hold Ctrl/Cmd to select multiple members.</p>
+        </div>
+        {% endif %}
+        <div class="tf-flex" style="gap:12px;margin-top:16px">
+            <a href="{% url 'interview_results' post.pk %}" class="tf-btn ghost">Cancel</a>
+            <button type="submit" class="tf-btn">Create Panel</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

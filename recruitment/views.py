@@ -1488,8 +1488,8 @@ def interview_panel_create(request, post_id):
 
     from accounts.models import User
     staff_users = User.objects.filter(
-        memberships__tenant=request.tenant,
-        memberships__is_active=True,
+        tenant_memberships__tenant=request.tenant,
+        tenant_memberships__is_active=True,
     ).distinct()
 
     return render(request, "recruitment/interview_panel_create.html", {

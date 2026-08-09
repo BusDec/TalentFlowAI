@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Schedule Interview Slot{% endblock %}
+{% block page_title %}Schedule Interview Slot{% endblock %}
+{% block subtitle %}{{ panel.name }} — {{ panel.post.name }}{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card" style="max-width:640px">
+    <div class="tf-section-title">Schedule a Slot</div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Application ID</label>
+            <input type="text" name="application_id" class="tf-input" value="{{ application_id|default:'' }}" placeholder="e.g. TF20260001" required>
+        </div>
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Date &amp; Time</label>
+            <input type="datetime-local" name="datetime" class="tf-input" value="{{ datetime|default:'' }}" required>
+        </div>
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Duration (minutes)</label>
+            <input type="number" name="duration_minutes" class="tf-input" value="{{ duration_minutes|default:'30' }}" min="5" max="180">
+        </div>
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Notes (optional)</label>
+            <textarea name="notes" class="tf-textarea" rows="2">{{ notes|default:'' }}</textarea>
+        </div>
+        <div class="tf-flex" style="gap:12px;margin-top:16px">
+            <a href="{% url 'interview_results' panel.post.pk %}" class="tf-btn ghost">Cancel</a>
+            <button type="submit" class="tf-btn">Schedule Slot</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

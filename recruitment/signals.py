@@ -1,5 +1,7 @@
 """Signals for recruitment app — automated orchestration of Phase I agents."""
 
+from datetime import timedelta
+
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -62,6 +64,23 @@ def application_post_save(sender, instance, created, **kwargs):
             if roster is not None:
                 roster.current_position += 1
                 roster.save(update_fields=["current_position"])
+
+    # Auto-schedule: when an application moves to 'interview', create a slot
+    # on the first available panel for that post (if any).
+    old_status = getattr(instance, "_pre_save_status", None)
+    if instance.status == "interview" and old_status != "interview":
+        from .models import InterviewPanel, InterviewSlot
+
+        panel = InterviewPanel.objects.filter(post=instance.post).first()
+        if panel:
+            InterviewSlot.objects.get_or_create(
+                panel=panel,
+                application=instance,
+                defaults={
+                    "datetime": timezone.now() + timedelta(days=7),
+                    "duration_minutes": 30,
+                },
+            )
 
 
 @receiver(post_save, sender=BackgroundReport)

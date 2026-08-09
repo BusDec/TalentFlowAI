@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Enter Interview Score{% endblock %}
+{% block page_title %}Enter Interview Score{% endblock %}
+{% block subtitle %}{{ slot.application.application_id }} — {{ slot.application.candidate }}{% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card" style="max-width:640px">
+    <div class="tf-section-title">Score for {{ slot.application.candidate }}</div>
+    <div class="tf-kv" style="margin-bottom:16px">
+        <span class="k">Panel</span><span class="v">{{ slot.panel.name }}</span>
+        <span class="k">Date</span><span class="v">{{ slot.datetime|date:"d M Y H:i" }}</span>
+        <span class="k">Application</span><span class="v">{{ slot.application.application_id }}</span>
+    </div>
+
+    {% if slot.scores.exists %}
+    <div class="tf-section-title" style="font-size:0.95rem;margin-bottom:8px">Existing Scores</div>
+    <table class="tf-table" style="margin-bottom:16px">
+        <thead><tr><th>Member</th><th>Score</th><th>Comments</th></tr></thead>
+        <tbody>
+            {% for s in slot.scores.all %}
+            <tr>
+                <td>{{ s.panel_member|default:"External" }}</td>
+                <td><span class="tf-score mid">{{ s.score }}</span></td>
+                <td>{{ s.comments|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Score (0.0 – 10.0)</label>
+            <input type="number" name="score" class="tf-input" value="{{ score|default:'' }}" step="0.5" min="0" max="10" required>
+        </div>
+        <div class="tf-field" style="margin-bottom:12px">
+            <label class="tf-label">Comments (optional)</label>
+            <textarea name="comments" class="tf-textarea" rows="3">{{ comments|default:'' }}</textarea>
+        </div>
+        <div class="tf-flex" style="gap:12px;margin-top:16px">
+            <a href="{% url 'interview_results' slot.panel.post.pk %}" class="tf-btn ghost">Cancel</a>
+            <button type="submit" class="tf-btn">Submit Score</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

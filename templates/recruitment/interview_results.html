@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Interview Results — {{ post.name }}{% endblock %}
+{% block page_title %}Interview Results{% endblock %}
+{% block subtitle %}{{ post.name }} ({{ post.post_code }}){% endblock %}
+
+{% block content %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-flex" style="justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div class="tf-section-title">Panels &amp; Slots</div>
+        <div class="tf-flex" style="gap:8px">
+            <a href="{% url 'interview_panel_create' post.pk %}" class="tf-btn small">+ New Panel</a>
+        </div>
+    </div>
+</div>
+
+{% for panel in panels %}
+<div class="tf-glass tf-card mb-4">
+    <div class="tf-flex" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div class="tf-section-title">{{ panel.name }}</div>
+        <a href="{% url 'interview_schedule' panel.pk %}" class="tf-btn small ghost">+ Schedule Slot</a>
+    </div>
+    <div class="tf-muted" style="margin:4px 0 12px">
+        Members: {% for m in panel.members.all %}{{ m.get_full_name|default:m.username }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+        {% if panel.sitting_fee %} · Sitting Fee: ₹{{ panel.sitting_fee }}{% endif %}
+    </div>
+
+    <table class="tf-table">
+        <thead><tr><th>Candidate</th><th>Application</th><th>Date</th><th>Status</th><th>Scores</th><th>Avg</th><th></th></tr></thead>
+        <tbody>
+            {% for item in slot_results %}
+            {% if item.panel == panel %}
+            <tr>
+                <td>{{ item.slot.application.candidate }}</td>
+                <td>{{ item.slot.application.application_id }}</td>
+                <td>{{ item.slot.datetime|date:"d M Y H:i" }}</td>
+                <td><span class="tf-badge {% if item.slot.status == 'completed' %}success{% elif item.slot.status == 'cancelled' %}danger{% else %}primary{% endif %}">{{ item.slot.get_status_display }}</span></td>
+                <td>{{ item.count }}</td>
+                <td>
+                    {% if item.avg %}
+                    <span class="tf-score {% if item.avg >= 7 %}high{% elif item.avg >= 5 %}mid{% else %}low{% endif %}">{{ item.avg|floatformat:1 }}</span>
+                    {% else %}—{% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'interview_score' item.slot.pk %}" class="tf-btn small ghost">Score</a>
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% empty %}
+<div class="tf-glass tf-card">
+    <div class="tf-muted">No interview panels created for this post yet.</div>
+    <a href="{% url 'interview_panel_create' post.pk %}" class="tf-btn small" style="margin-top:12px">Create First Panel</a>
+</div>
+{% endfor %}
+
+{% if slot_results %}
+<div class="tf-glass tf-card">
+    <div class="tf-section-title">Score Summary</div>
+    <table class="tf-table">
+        <thead><tr><th>Rank</th><th>Candidate</th><th>Application</th><th>Avg Score</th><th>Scores</th></tr></thead>
+        <tbody>
+            {% for item in slot_results %}
+            {% if item.avg %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.slot.application.candidate }}</td>
+                <td>{{ item.slot.application.application_id }}</td>
+                <td><span class="tf-score {% if item.avg >= 7 %}high{% elif item.avg >= 5 %}mid{% else %}low{% endif %}">{{ item.avg|floatformat:1 }}</span></td>
+                <td>
+                    {% for s in item.scores %}
+                    <span class="tf-badge primary" style="margin:2px">{{ s.score }}</span>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}
