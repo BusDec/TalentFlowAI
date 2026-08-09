@@ -739,7 +739,7 @@ class VacancyRequisition(models.Model):
         help_text="Business justification for the requisition.",
     )
     status = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=STATUS_CHOICES,
         default="draft",
     )
