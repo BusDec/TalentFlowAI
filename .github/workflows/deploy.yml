@@ -1,5 +1,5 @@
 # GitHub Actions CI/CD for TalentFlowAI
-# Deploys to Azure App Service (Windows F1) using Python
+# Deploys to Azure App Service (Linux) using Python
 
 name: Deploy to Azure
 
@@ -10,19 +10,18 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: tf-neepco-prod
-  PYTHON_VERSION: "3.12"
 
 jobs:
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: "3.12"
 
       - name: Install dependencies
         run: |
@@ -37,7 +36,7 @@ jobs:
           DJANGO_DEBUG: "False"
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v4
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
