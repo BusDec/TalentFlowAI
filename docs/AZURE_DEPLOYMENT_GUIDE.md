@@ -110,51 +110,33 @@ DB_SSLMODE=require
 
 ## Part 4: Create Azure Cache for Redis
 
-### Step 0: Install Azure CLI Extension (if prompted)
+### Step 1: Use PostgreSQL as Celery Broker (No Redis Required)
+
+Azure Cache for Redis is retiring in Central India. Use PostgreSQL as the Celery broker instead:
 
 ```bash
-az extension add --name redisenterprise
-```
-
-### Step 1: Create Azure Managed Redis
-
-```bash
-az redisenterprise create \
-  --resource-group tf-neepco-rg \
-  --name tf-neepco-redis \
-  --location centralindia \
-  --sku Enterprise_E5
+# No additional Azure resources needed — uses your existing PostgreSQL server
+# The connection string will be configured in the environment variables later
 ```
 
 **Settings explained:**
 | Setting | Value | Why |
 |---|---|---|
-| `sku` | `Enterprise_E5` | 16 GB, production-ready, managed by Azure |
+| Broker | PostgreSQL | No Redis required, uses existing database |
+| Backend | PostgreSQL | Stores task results in the same database |
 
-### Step 2: Get Redis Connection String
+### Step 2: Get PostgreSQL Connection String for Celery
 
-```bash
-az redisenterprise show \
-  --resource-group tf-neepco-rg \
-  --name tf-neepco-redis \
-  --query "hostName" -o tsv
+Your PostgreSQL server is already created. Use this connection string format:
 
-az redisenterprise list-keys \
-  --resource-group tf-neepco-rg \
-  --name tf-neepco-redis \
-  --query "primaryKey" -o tsv
+```
+db+postgresql://talentflowadmin:MyPassword123@tf-neepco-db.postgres.database.azure.com:5432/talentflow
 ```
 
-**Save these values:**
+**Update your .env file:**
 ```
-REDIS_HOST=tf-neepco-redis.eastus.redisenterprise.cache.azure.net
-REDIS_KEY=your-primary-key-here
-```
-
-**Full connection string (for .env):**
-```
-CELERY_BROKER_URL=rediss://:your-primary-key-here@tf-neepco-redis.eastus.redisenterprise.cache.azure.net:6380/0?ssl_cert_reqs=required
-CELERY_RESULT_BACKEND=rediss://:your-primary-key-here@tf-neepco-redis.eastus.redisenterprise.cache.azure.net:6380/0?ssl_cert_reqs=required
+CELERY_BROKER_URL=db+postgresql://talentflowadmin:MyPassword123@tf-neepco-db.postgres.database.azure.com:5432/talentflow
+CELERY_RESULT_BACKEND=db+postgresql://talentflowadmin:MyPassword123@tf-neepco-db.postgres.database.azure.com:5432/talentflow
 ```
 
 ---

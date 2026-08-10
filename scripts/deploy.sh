@@ -56,14 +56,9 @@ az postgres flexible-server db create \
   --name "$DB_NAME" \
   --output none
 
-# 4. Azure Managed Redis
-echo "[4/8] Creating Azure Managed Redis..."
-az redisenterprise create \
-  --resource-group "$RESOURCE_GROUP" \
-  --name "$REDIS_NAME" \
-  --location "$LOCATION" \
-  --sku Enterprise_E5 \
-  --output none
+# 4. PostgreSQL as Celery Broker (no Redis needed)
+echo "[4/8] Using PostgreSQL as Celery broker..."
+echo "  Celery will use PostgreSQL at $DB_SERVER.postgres.database.azure.com"
 
 # 5. Storage Account + Blob Container
 echo "[5/8] Creating Storage Account..."
