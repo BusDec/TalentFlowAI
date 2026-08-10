@@ -84,7 +84,7 @@ az postgres flexible-server create \
 az postgres flexible-server db create \
   --resource-group tf-neepco-rg \
   --server-name tf-neepco-db \
-  --database-name talentflow
+  --name talentflow
 ```
 
 ### Step 3: Note Connection Details

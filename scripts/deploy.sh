@@ -53,7 +53,7 @@ az postgres flexible-server create \
 az postgres flexible-server db create \
   --resource-group "$RESOURCE_GROUP" \
   --server-name "$DB_SERVER" \
-  --database-name "$DB_NAME" \
+  --name "$DB_NAME" \
   --output none
 
 # 4. Azure Cache for Redis
