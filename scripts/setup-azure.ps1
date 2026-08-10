@@ -42,7 +42,7 @@ if ($existingAcr -eq "tfneepcoacr") {
 # Step 9: App Service Plan (skip if already exists)
 Write-Host "[9/10] Creating App Service Plan..." -ForegroundColor Yellow
 $existingPlan = az appservice plan show --resource-group tf-neepco-rg --name tf-neepco-plan --query "name" -o tsv 2>$null
-if ($existingPlan -eq "tf-neepco-plan") {
+if ($LASTEXITCODE -eq 0 -and $existingPlan -eq "tf-neepco-plan") {
     Write-Host "  App Service Plan already exists (skipping)" -ForegroundColor Green
 } else {
     az appservice plan create --resource-group tf-neepco-rg --name tf-neepco-plan --sku B1 --is-linux --location eastus --output none
@@ -53,7 +53,7 @@ if ($existingPlan -eq "tf-neepco-plan") {
 # Step 10: Django Web App (skip if already exists)
 Write-Host "[10/10] Creating Django Web App..." -ForegroundColor Yellow
 $existingWebapp = az webapp show --resource-group tf-neepco-rg --name tf-neepco-prod --query "name" -o tsv 2>$null
-if ($existingWebapp -eq "tf-neepco-prod") {
+if ($LASTEXITCODE -eq 0 -and $existingWebapp -eq "tf-neepco-prod") {
     Write-Host "  Django Web App already exists (skipping)" -ForegroundColor Green
 } else {
     az webapp create --resource-group tf-neepco-rg --plan tf-neepco-plan --name tf-neepco-prod --deployment-container-image-name tfneepcoacr.azurecr.io/talentflow:latest --output none
