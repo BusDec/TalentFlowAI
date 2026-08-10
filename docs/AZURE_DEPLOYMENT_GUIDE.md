@@ -110,6 +110,12 @@ DB_SSLMODE=require
 
 ## Part 4: Create Azure Cache for Redis
 
+### Step 0: Install Azure CLI Extension (if prompted)
+
+```bash
+az extension add --name redisenterprise
+```
+
 ### Step 1: Create Azure Managed Redis
 
 ```bash
