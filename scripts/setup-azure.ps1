@@ -6,11 +6,16 @@ $ErrorActionPreference = "Stop"
 Write-Host "=== TalentFlowAI Azure Setup ===" -ForegroundColor Cyan
 Write-Host ""
 
-# Step 5: Storage Account
+# Step 5: Storage Account (skip if already exists)
 Write-Host "[5/10] Creating Storage Account..." -ForegroundColor Yellow
-az storage account create --resource-group tf-neepco-rg --name tfneepcostorage --location eastus --sku Standard_LRS --kind StorageV2 --output none
-if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: Storage Account" -ForegroundColor Red; exit 1 }
-Write-Host "  Storage Account created" -ForegroundColor Green
+$existingStorage = az storage account show --resource-group tf-neepco-rg --name tfneepcostorage --query "name" -o tsv 2>$null
+if ($existingStorage -eq "tfneepcostorage") {
+    Write-Host "  Storage Account already exists (skipping)" -ForegroundColor Green
+} else {
+    az storage account create --resource-group tf-neepco-rg --name tfneepcostorage --location eastus --sku Standard_LRS --kind StorageV2 --output none
+    if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: Storage Account" -ForegroundColor Red; exit 1 }
+    Write-Host "  Storage Account created" -ForegroundColor Green
+}
 
 # Step 6: Storage Container
 Write-Host "[6/10] Creating Storage Container..." -ForegroundColor Yellow
@@ -23,23 +28,38 @@ Write-Host "[7/10] Getting Storage Account Key..." -ForegroundColor Yellow
 $storageKey = az storage account keys list --resource-group tf-neepco-rg --account-name tfneepcostorage --query "[0].value" -o tsv
 Write-Host "  Storage Key: $storageKey" -ForegroundColor Green
 
-# Step 8: Container Registry
+# Step 8: Container Registry (skip if already exists)
 Write-Host "[8/10] Creating Container Registry..." -ForegroundColor Yellow
-az acr create --resource-group tf-neepco-rg --name tfneepcoacr --sku Basic --admin-enabled true --output none
-if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: Container Registry" -ForegroundColor Red; exit 1 }
-Write-Host "  Container Registry created" -ForegroundColor Green
+$existingAcr = az acr show --resource-group tf-neepco-rg --name tfneepcoacr --query "name" -o tsv 2>$null
+if ($existingAcr -eq "tfneepcoacr") {
+    Write-Host "  Container Registry already exists (skipping)" -ForegroundColor Green
+} else {
+    az acr create --resource-group tf-neepco-rg --name tfneepcoacr --sku Basic --admin-enabled true --output none
+    if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: Container Registry" -ForegroundColor Red; exit 1 }
+    Write-Host "  Container Registry created" -ForegroundColor Green
+}
 
-# Step 9: App Service Plan
+# Step 9: App Service Plan (skip if already exists)
 Write-Host "[9/10] Creating App Service Plan..." -ForegroundColor Yellow
-az appservice plan create --resource-group tf-neepco-rg --name tf-neepco-plan --sku B1 --is-linux --location eastus --output none
-if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: App Service Plan" -ForegroundColor Red; exit 1 }
-Write-Host "  App Service Plan created" -ForegroundColor Green
+$existingPlan = az appservice plan show --resource-group tf-neepco-rg --name tf-neepco-plan --query "name" -o tsv 2>$null
+if ($existingPlan -eq "tf-neepco-plan") {
+    Write-Host "  App Service Plan already exists (skipping)" -ForegroundColor Green
+} else {
+    az appservice plan create --resource-group tf-neepco-rg --name tf-neepco-plan --sku B1 --is-linux --location eastus --output none
+    if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: App Service Plan" -ForegroundColor Red; exit 1 }
+    Write-Host "  App Service Plan created" -ForegroundColor Green
+}
 
-# Step 10: Django Web App
+# Step 10: Django Web App (skip if already exists)
 Write-Host "[10/10] Creating Django Web App..." -ForegroundColor Yellow
-az webapp create --resource-group tf-neepco-rg --plan tf-neepco-plan --name tf-neepco-prod --deployment-container-image-name tfneepcoacr.azurecr.io/talentflow:latest --output none
-if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: Django Web App" -ForegroundColor Red; exit 1 }
-Write-Host "  Django Web App created" -ForegroundColor Green
+$existingWebapp = az webapp show --resource-group tf-neepco-rg --name tf-neepco-prod --query "name" -o tsv 2>$null
+if ($existingWebapp -eq "tf-neepco-prod") {
+    Write-Host "  Django Web App already exists (skipping)" -ForegroundColor Green
+} else {
+    az webapp create --resource-group tf-neepco-rg --plan tf-neepco-plan --name tf-neepco-prod --deployment-container-image-name tfneepcoacr.azurecr.io/talentflow:latest --output none
+    if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: Django Web App" -ForegroundColor Red; exit 1 }
+    Write-Host "  Django Web App created" -ForegroundColor Green
+}
 
 Write-Host ""
 Write-Host "=== All Azure Resources Created ===" -ForegroundColor Cyan
