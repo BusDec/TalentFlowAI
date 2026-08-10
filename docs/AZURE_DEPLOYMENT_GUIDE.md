@@ -651,15 +651,15 @@ az postgres flexible-server connect \
 ```bash
 az postgres flexible-server firewall-rule list \
   --resource-group tf-neepco-rg \
-  --name tf-neepco-db
+  --server-name tf-neepco-db
 ```
 
 **Add your IP:**
 ```bash
 az postgres flexible-server firewall-rule create \
   --resource-group tf-neepco-rg \
-  --name tf-neepco-db \
-  --rule-name allow-my-ip \
+  --server-name tf-neepco-db \
+  --name allow-my-ip \
   --start-ip-address YOUR_IP \
   --end-ip-address YOUR_IP
 ```
