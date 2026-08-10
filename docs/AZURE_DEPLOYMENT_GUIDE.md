@@ -40,7 +40,7 @@ A resource group is a container for all your Azure resources.
 
 ```bash
 az group create \
-  --name talentflow-rg \
+  --name tf-neepco-rg \
   --location centralindia
 ```
 
@@ -58,8 +58,8 @@ az group create \
 
 ```bash
 az postgres flexible-server create \
-  --resource-group talentflow-rg \
-  --name talentflow-db \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-db \
   --admin-user talentflowadmin \
   --admin-password "YourStrongPassword123!" \
   --sku-name Standard_B1ms \
@@ -82,8 +82,8 @@ az postgres flexible-server create \
 
 ```bash
 az postgres flexible-server db create \
-  --resource-group talentflow-rg \
-  --server-name talentflow-db \
+  --resource-group tf-neepco-rg \
+  --server-name tf-neepco-db \
   --database-name talentflow
 ```
 
@@ -91,14 +91,14 @@ az postgres flexible-server db create \
 
 ```bash
 az postgres flexible-server show \
-  --resource-group talentflow-rg \
-  --name talentflow-db \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-db \
   --query "fullyQualifiedDomainName" -o tsv
 ```
 
 **Save these values:**
 ```
-DB_HOST=talentflow-db.postgres.database.azure.com
+DB_HOST=tf-neepco-db.postgres.database.azure.com
 DB_USER=talentflowadmin
 DB_PASSWORD=YourStrongPassword123!
 DB_NAME=talentflow
@@ -114,8 +114,8 @@ DB_SSLMODE=require
 
 ```bash
 az redis create \
-  --resource-group talentflow-rg \
-  --name talentflow-redis \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-redis \
   --location centralindia \
   --sku Basic \
   --vm-size C0
@@ -131,26 +131,26 @@ az redis create \
 
 ```bash
 az redis show \
-  --resource-group talentflow-rg \
-  --name talentflow-redis \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-redis \
   --query "hostName" -o tsv
 
 az redis list-keys \
-  --resource-group talentflow-rg \
-  --name talentflow-redis \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-redis \
   --query "primaryKey" -o tsv
 ```
 
 **Save these values:**
 ```
-REDIS_HOST=talentflow-redis.redis.cache.windows.net
+REDIS_HOST=tf-neepco-redis.redis.cache.windows.net
 REDIS_KEY=your-primary-key-here
 ```
 
 **Full connection string (for .env):**
 ```
-CELERY_BROKER_URL=rediss://:your-primary-key-here@talentflow-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required
-CELERY_RESULT_BACKEND=rediss://:your-primary-key-here@talentflow-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required
+CELERY_BROKER_URL=rediss://:your-primary-key-here@tf-neepco-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required
+CELERY_RESULT_BACKEND=rediss://:your-primary-key-here@tf-neepco-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required
 ```
 
 ---
@@ -161,8 +161,8 @@ CELERY_RESULT_BACKEND=rediss://:your-primary-key-here@talentflow-redis.redis.cac
 
 ```bash
 az storage account create \
-  --resource-group talentflow-rg \
-  --name talentflowstorage \
+  --resource-group tf-neepco-rg \
+  --name tfneepcostorage \
   --location centralindia \
   --sku Standard_LRS \
   --kind StorageV2
@@ -178,7 +178,7 @@ az storage account create \
 
 ```bash
 az storage container create \
-  --account-name talentflowstorage \
+  --account-name tfneepcostorage \
   --name resumes \
   --public-access blob
 ```
@@ -187,14 +187,14 @@ az storage container create \
 
 ```bash
 az storage account keys list \
-  --resource-group talentflow-rg \
-  --account-name talentflowstorage \
+  --resource-group tf-neepco-rg \
+  --account-name tfneepcostorage \
   --query "[0].value" -o tsv
 ```
 
 **Save these values:**
 ```
-AZURE_STORAGE_ACCOUNT_NAME=talentflowstorage
+AZURE_STORAGE_ACCOUNT_NAME=tfneepcostorage
 AZURE_STORAGE_KEY=your-storage-key-here
 AZURE_STORAGE_CONTAINER=resumes
 ```
@@ -207,8 +207,8 @@ AZURE_STORAGE_CONTAINER=resumes
 
 ```bash
 az acr create \
-  --resource-group talentflow-rg \
-  --name talentflowacr \
+  --resource-group tf-neepco-rg \
+  --name tfneepcoacr \
   --sku Basic \
   --admin-enabled true
 ```
@@ -216,22 +216,22 @@ az acr create \
 ### Step 2: Login to ACR
 
 ```bash
-az acr login --name talentflowacr
+az acr login --name tfneepcoacr
 ```
 
 ### Step 3: Get ACR Login Server
 
 ```bash
 az acr show \
-  --resource-group talentflow-rg \
-  --name talentflowacr \
+  --resource-group tf-neepco-rg \
+  --name tfneepcoacr \
   --query "loginServer" -o tsv
 ```
 
 **Save this value:**
 ```
-ACR_NAME=talentflowacr
-ACR_LOGIN_SERVER=talentflowacr.azurecr.io
+ACR_NAME=tfneepcoacr
+ACR_LOGIN_SERVER=tfneepcoacr.azurecr.io
 ```
 
 ---
@@ -242,8 +242,8 @@ ACR_LOGIN_SERVER=talentflowacr.azurecr.io
 
 ```bash
 az appservice plan create \
-  --resource-group talentflow-rg \
-  --name talentflow-plan \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-plan \
   --sku B1 \
   --is-linux
 ```
@@ -260,20 +260,20 @@ az appservice plan create \
 
 ```bash
 az webapp create \
-  --resource-group talentflow-rg \
-  --plan talentflow-plan \
-  --name talentflow-prod \
-  --deployment-container-image-name talentflowacr.azurecr.io/talentflow:latest
+  --resource-group tf-neepco-rg \
+  --plan tf-neepco-plan \
+  --name tf-neepco-prod \
+  --deployment-container-image-name tfneepcoacr.azurecr.io/talentflow:latest
 ```
 
 ### Step 3: Create Web App for Celery Worker
 
 ```bash
 az webapp create \
-  --resource-group talentflow-rg \
-  --plan talentflow-plan \
-  --name talentflow-celery \
-  --deployment-container-image-name talentflowacr.azurecr.io/talentflow:latest
+  --resource-group tf-neepco-rg \
+  --plan tf-neepco-plan \
+  --name tf-neepco-celery \
+  --deployment-container-image-name tfneepcoacr.azurecr.io/talentflow:latest
 ```
 
 ---
@@ -283,7 +283,7 @@ az webapp create \
 ### Step 1: Open Azure Portal
 
 1. Go to [portal.azure.com](https://portal.azure.com)
-2. Navigate to **App Services** → **talentflow-prod**
+2. Navigate to **App Services** → **tf-neepco-prod**
 3. Click **Settings** → **Environment variables**
 
 ### Step 2: Add Application Settings
@@ -296,8 +296,8 @@ Click **"+ Add"** for each variable:
 | `DJANGO_SECRET_KEY` | Generate at [djecrety.ir](https://djecrety.ir/) |
 | `DJANGO_DEBUG` | `False` |
 | `DJANGO_SETTINGS_MODULE` | `config.settings` |
-| `DJANGO_ALLOWED_HOSTS` | `talentflow-prod.azurewebsites.net` |
-| `CSRF_TRUSTED_ORIGINS` | `https://talentflow-prod.azurewebsites.net` |
+| `DJANGO_ALLOWED_HOSTS` | `tf-neepco-prod.azurewebsites.net` |
+| `CSRF_TRUSTED_ORIGINS` | `https://tf-neepco-prod.azurewebsites.net` |
 
 #### Database
 | Name | Value |
@@ -305,22 +305,22 @@ Click **"+ Add"** for each variable:
 | `DB_NAME` | `talentflow` |
 | `DB_USER` | `talentflowadmin` |
 | `DB_PASSWORD` | `YourStrongPassword123!` |
-| `DB_HOST` | `talentflow-db.postgres.database.azure.com` |
+| `DB_HOST` | `tf-neepco-db.postgres.database.azure.com` |
 | `DB_PORT` | `5432` |
 | `DB_SSLMODE` | `require` |
 
 #### Azure Storage
 | Name | Value |
 |---|---|
-| `AZURE_STORAGE_ACCOUNT_NAME` | `talentflowstorage` |
+| `AZURE_STORAGE_ACCOUNT_NAME` | `tfneepcostorage` |
 | `AZURE_STORAGE_KEY` | (from Part 5, Step 3) |
 | `AZURE_STORAGE_CONTAINER` | `resumes` |
 
 #### Redis / Celery
 | Name | Value |
 |---|---|
-| `CELERY_BROKER_URL` | `rediss://:your-key@talentflow-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required` |
-| `CELERY_RESULT_BACKEND` | `rediss://:your-key@talentflow-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required` |
+| `CELERY_BROKER_URL` | `rediss://:your-key@tf-neepco-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required` |
+| `CELERY_RESULT_BACKEND` | `rediss://:your-key@tf-neepco-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required` |
 | `CELERY_TASK_ALWAYS_EAGER` | `False` |
 
 #### PII Encryption
@@ -355,7 +355,7 @@ Click **"+ Add"** for each variable:
 
 ### Step 1: Open Celery App
 
-1. Go to **App Services** → **talentflow-celery**
+1. Go to **App Services** → **tf-neepco-celery**
 2. Click **Settings** → **Environment variables**
 
 ### Step 2: Add Same Environment Variables
@@ -379,33 +379,33 @@ Copy ALL the same variables from Part 8, Step 2.
 
 ```bash
 # From the TalentFlowAI directory
-docker build -t talentflowacr.azurecr.io/talentflow:latest .
+docker build -t tfneepcoacr.azurecr.io/talentflow:latest .
 ```
 
 ### Step 2: Push to Azure Container Registry
 
 ```bash
-docker push talentflowacr.azurecr.io/talentflow:latest
+docker push tfneepcoacr.azurecr.io/talentflow:latest
 ```
 
 ### Step 3: Configure Web App to Use ACR Image
 
-**For Django app (talentflow-prod):**
+**For Django app (tf-neepco-prod):**
 ```bash
 az webapp config container set \
-  --resource-group talentflow-rg \
-  --name talentflow-prod \
-  --docker-custom-image-name talentflowacr.azurecr.io/talentflow:latest \
-  --docker-registry-server-url https://talentflowacr.azurecr.io
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-prod \
+  --docker-custom-image-name tfneepcoacr.azurecr.io/talentflow:latest \
+  --docker-registry-server-url https://tfneepcoacr.azurecr.io
 ```
 
-**For Celery app (talentflow-celery):**
+**For Celery app (tf-neepco-celery):**
 ```bash
 az webapp config container set \
-  --resource-group talentflow-rg \
-  --name talentflow-celery \
-  --docker-custom-image-name talentflowacr.azurecr.io/talentflow:latest \
-  --docker-registry-server-url https://talentflowacr.azurecr.io
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-celery \
+  --docker-custom-image-name tfneepcoacr.azurecr.io/talentflow:latest \
+  --docker-registry-server-url https://tfneepcoacr.azurecr.io
 ```
 
 ---
@@ -414,7 +414,7 @@ az webapp config container set \
 
 ### Option A: Via Azure Portal SSH
 
-1. Go to **App Services** → **talentflow-prod**
+1. Go to **App Services** → **tf-neepco-prod**
 2. Click **Development Tools** → **SSH**
 3. Run:
    ```bash
@@ -426,8 +426,8 @@ az webapp config container set \
 
 ```bash
 az webapp ssh \
-  --resource-group talentflow-rg \
-  --name talentflow-prod \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-prod \
   --command "python manage.py migrate_schemas"
 ```
 
@@ -439,8 +439,8 @@ az webapp ssh \
 
 ```bash
 az webapp ssh \
-  --resource-group talentflow-rg \
-  --name talentflow-prod
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-prod
 ```
 
 ### Step 2: Run Seed Commands
@@ -468,8 +468,8 @@ python manage.py populate_neepco_real
 
 ```bash
 az webapp config hostname add \
-  --resource-group talentflow-rg \
-  --webapp-name talentflow-prod \
+  --resource-group tf-neepco-rg \
+  --webapp-name tf-neepco-prod \
   --hostname yourdomain.com
 ```
 
@@ -479,22 +479,22 @@ In your domain registrar (GoDaddy, Namecheap, etc.):
 
 | Type | Name | Value |
 |---|---|---|
-| `CNAME` | `www` | `talentflow-prod.azurewebsites.net` |
+| `CNAME` | `www` | `tf-neepco-prod.azurewebsites.net` |
 | `TXT` | `asuid` | (verification ID from Azure) |
 
 ### Step 3: Enable SSL
 
 ```bash
 az webapp config hostname add \
-  --resource-group talentflow-rg \
-  --webapp-name talentflow-prod \
+  --resource-group tf-neepco-rg \
+  --webapp-name tf-neepco-prod \
   --hostname yourdomain.com \
   --ssl-state SniEnabled \
   --thumbprint (certificate thumbprint)
 ```
 
 **Or use Azure Managed Certificate (free):**
-1. Go to **App Services** → **talentflow-prod** → **Custom domains**
+1. Go to **App Services** → **tf-neepco-prod** → **Custom domains**
 2. Click **"+ Add custom domain"**
 3. Enter your domain
 4. Click **"Add binding"** → Select **"App Service Managed Certificate"**
@@ -508,7 +508,7 @@ az webapp config hostname add \
 
 ```bash
 az monitor app-insights component create \
-  --resource-group talentflow-rg \
+  --resource-group tf-neepco-rg \
   --app talentflow-insights \
   --location centralindia \
   --kind web
@@ -518,7 +518,7 @@ az monitor app-insights component create \
 
 ```bash
 az monitor app-insights component show \
-  --resource-group talentflow-rg \
+  --resource-group tf-neepco-rg \
   --app talentflow-insights \
   --query "instrumentationKey" -o tsv
 ```
@@ -534,8 +534,8 @@ az monitor app-insights component show \
 
 ```bash
 az webapp log config \
-  --resource-group talentflow-rg \
-  --name talentflow-prod \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-prod \
   --application-logging filesystem \
   --detailed-error-messages true \
   --failed-request-tracing true \
@@ -546,8 +546,8 @@ az webapp log config \
 
 ```bash
 az webapp log tail \
-  --resource-group talentflow-rg \
-  --name talentflow-prod
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-prod
 ```
 
 ---
@@ -558,10 +558,10 @@ az webapp log tail \
 
 ```bash
 az webapp config backup create \
-  --resource-group talentflow-rg \
-  --webapp-name talentflow-prod \
+  --resource-group tf-neepco-rg \
+  --webapp-name tf-neepco-prod \
   --backup-name talentflow-backup \
-  --storage-url https://talentflowstorage.blob.core.windows.net/backups \
+  --storage-url https://tfneepcostorage.blob.core.windows.net/backups \
   --frequency 1d \
   --retention 30d
 ```
@@ -576,9 +576,9 @@ Azure Database for PostgreSQL automatically creates:
 To restore:
 ```bash
 az postgres flexible-server restore \
-  --resource-group talentflow-rg \
-  --name talentflow-db-restored \
-  --source-server talentflow-db \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-db-restored \
+  --source-server tf-neepco-db \
   --restore-time "2026-08-09T00:00:00"
 ```
 
@@ -590,8 +590,8 @@ az postgres flexible-server restore \
 
 ```bash
 az appservice plan update \
-  --resource-group talentflow-rg \
-  --name talentflow-plan \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-plan \
   --sku B2
 ```
 
@@ -599,8 +599,8 @@ az appservice plan update \
 
 ```bash
 az webapp scale \
-  --resource-group talentflow-rg \
-  --name talentflow-prod \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-prod \
   --instance-count 2
 ```
 
@@ -608,8 +608,8 @@ az webapp scale \
 
 ```bash
 az monitor autoscale create \
-  --resource-group talentflow-rg \
-  --resource talentflow-plan \
+  --resource-group tf-neepco-rg \
+  --resource tf-neepco-plan \
   --resource-type Microsoft.Web/serverfarms \
   --name talentflow-autoscale \
   --min-count 1 \
@@ -626,8 +626,8 @@ az monitor autoscale create \
 **Check logs:**
 ```bash
 az webapp log tail \
-  --resource-group talentflow-rg \
-  --name talentflow-prod
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-prod
 ```
 
 **Common issues:**
@@ -641,8 +641,8 @@ az webapp log tail \
 **Test connection:**
 ```bash
 az postgres flexible-server connect \
-  --resource-group talentflow-rg \
-  --name talentflow-db \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-db \
   --admin-user talentflowadmin \
   --admin-password "YourStrongPassword123!"
 ```
@@ -650,15 +650,15 @@ az postgres flexible-server connect \
 **Check firewall:**
 ```bash
 az postgres flexible-server firewall-rule list \
-  --resource-group talentflow-rg \
-  --name talentflow-db
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-db
 ```
 
 **Add your IP:**
 ```bash
 az postgres flexible-server firewall-rule create \
-  --resource-group talentflow-rg \
-  --name talentflow-db \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-db \
   --rule-name allow-my-ip \
   --start-ip-address YOUR_IP \
   --end-ip-address YOUR_IP
@@ -669,16 +669,16 @@ az postgres flexible-server firewall-rule create \
 **Test connection:**
 ```bash
 az redis show \
-  --resource-group talentflow-rg \
-  --name talentflow-redis \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-redis \
   --query "hostName" -o tsv
 ```
 
 **Check if Redis is running:**
 ```bash
 az redis show \
-  --resource-group talentflow-rg \
-  --name talentflow-redis \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-redis \
   --query "provisioningState" -o tsv
 ```
 
@@ -687,15 +687,15 @@ az redis show \
 **Check worker logs:**
 ```bash
 az webapp log tail \
-  --resource-group talentflow-rg \
-  --name talentflow-celery
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-celery
 ```
 
 **Verify environment variables:**
 ```bash
 az webapp config appsettings list \
-  --resource-group talentflow-rg \
-  --name talentflow-celery \
+  --resource-group tf-neepco-rg \
+  --name tf-neepco-celery \
   --query "[?name=='CELERY_BROKER_URL'].value" -o tsv
 ```
 
@@ -725,7 +725,7 @@ az redis update --sku Standard --vm-size C1
 
 ```bash
 az monitor budget create \
-  --resource-group talentflow-rg \
+  --resource-group tf-neepco-rg \
   --amount 100 \
   --time-grain Monthly \
   --start-date 2026-08-01 \
@@ -751,22 +751,22 @@ az monitor budget create \
 
 ```bash
 # View all resources
-az resource list --resource-group talentflow-rg --output table
+az resource list --resource-group tf-neepco-rg --output table
 
 # Restart app
-az webapp restart --resource-group talentflow-rg --name talentflow-prod
+az webapp restart --resource-group tf-neepco-rg --name tf-neepco-prod
 
 # View logs
-az webapp log tail --resource-group talentflow-rg --name talentflow-prod
+az webapp log tail --resource-group tf-neepco-rg --name tf-neepco-prod
 
 # SSH into app
-az webapp ssh --resource-group talentflow-rg --name talentflow-prod
+az webapp ssh --resource-group tf-neepco-rg --name tf-neepco-prod
 
 # Scale up
-az appservice plan update --resource-group talentflow-rg --name talentflow-plan --sku B2
+az appservice plan update --resource-group tf-neepco-rg --name tf-neepco-plan --sku B2
 
 # Delete everything (CAREFUL!)
-az group delete --name talentflow-rg --yes --no-wait
+az group delete --name tf-neepco-rg --yes --no-wait
 ```
 
 ---

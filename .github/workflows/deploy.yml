@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: talentflow-prod
-  AZURE_ACR_NAME: talentflowacr
+  AZURE_WEBAPP_NAME: tf-neepco-prod
+  AZURE_ACR_NAME: tfneepcoacr
   DOCKER_IMAGE: talentflow
 
 jobs:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Run migrations
         run: |
-          az webapp ssh --resource-group talentflow-rg --name ${{ env.AZURE_WEBAPP_NAME }} \
+          az webapp ssh --resource-group tf-neepco-rg --name ${{ env.AZURE_WEBAPP_NAME }} \
             --command "python manage.py migrate_schemas"
 
       - name: Verify deployment

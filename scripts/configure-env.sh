@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-WEB_APP="${1:-talentflow-prod}"
-RESOURCE_GROUP="${2:-talentflow-rg}"
+WEB_APP="${1:-tf-neepco-prod}"
+RESOURCE_GROUP="${2:-tf-neepco-rg}"
 ENV_FILE="${3:-.env}"
 
 if [ ! -f "$ENV_FILE" ]; then

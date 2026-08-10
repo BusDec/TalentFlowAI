@@ -9,17 +9,17 @@
 
 set -euo pipefail
 
-RESOURCE_GROUP="${1:-talentflow-rg}"
+RESOURCE_GROUP="${1:-tf-neepco-rg}"
 LOCATION="${2:-centralindia}"
-ACR_NAME="talentflowacr"
-APP_SERVICE_PLAN="talentflow-plan"
-WEB_APP="talentflow-prod"
-CELERY_APP="talentflow-celery"
-DB_SERVER="talentflow-prod-db"
+ACR_NAME="tfneepcoacr"
+APP_SERVICE_PLAN="tf-neepco-plan"
+WEB_APP="tf-neepco-prod"
+CELERY_APP="tf-neepco-celery"
+DB_SERVER="tf-neepco-db"
 DB_NAME="talentflow"
 DB_ADMIN="talentflowadmin"
-REDIS_NAME="talentflow-prod-redis"
-STORAGE_ACCOUNT="talentflowprod"
+REDIS_NAME="tf-neepco-redis"
+STORAGE_ACCOUNT="tfneepcostorage"
 CONTAINER_NAME="resumes"
 
 echo "=== TalentFlowAI Azure Deployment ==="
@@ -27,7 +27,7 @@ echo "Resource Group: $RESOURCE_GROUP"
 echo "Location: $LOCATION"
 echo ""
 
-# 1. Resource Group
+  # 1. Resource Group
 echo "[1/8] Creating resource group..."
 az group create --name "$RESOURCE_GROUP" --location "$LOCATION" --output none
 
