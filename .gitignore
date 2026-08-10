@@ -91,3 +91,17 @@ htmlcov/
 
 # SDD per-plan scratch (ledger, briefs, review packages)
 .superpowers/
+
+# Azure deployment
+.env.production
+.env.local
+.env.staging
+
+# Docker
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

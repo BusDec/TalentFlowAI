@@ -27,3 +27,6 @@ pytest>=8.0
 pytest-django>=4.8
 pytest-cov>=5.0
 factory-boy>=3.3
+django-storages[azure]
+whitenoise>=6.5
+gunicorn>=21.2
