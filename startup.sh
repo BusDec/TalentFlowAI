@@ -1,21 +1,24 @@
 #!/bin/bash
+set -e
+
 echo "========================================"
-echo "TalentFlowAI Startup Script"
+echo "TalentFlowAI Starting..."
 echo "========================================"
 
-echo "[1/4] Installing Python dependencies..."
+# Install dependencies
+echo "[1/3] Installing dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-echo "[2/4] Running Django migrations..."
+# Run migrations
+echo "[2/3] Running migrations..."
 python manage.py migrate_schemas --noinput
 
-echo "[3/4] Collecting static files..."
-python manage.py collectstatic --noinput
-
-echo "[4/4] Starting Gunicorn..."
-gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120
-
-echo "========================================"
-echo "Startup complete"
-echo "========================================"
+# Start gunicorn
+echo "[3/3] Starting gunicorn..."
+exec gunicorn config.wsgi:application \
+    --bind 0.0.0.0:${PORT:-8000} \
+    --workers 2 \
+    --timeout 120 \
+    --access-logfile '-' \
+    --error-logfile '-'
