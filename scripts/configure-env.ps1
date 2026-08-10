@@ -5,11 +5,6 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "=== Configuring Environment Variables ===" -ForegroundColor Cyan
 
-# Get Redis connection details
-Write-Host "Getting Redis connection details..." -ForegroundColor Yellow
-$redisHost = az redisenterprise show --resource-group tf-neepco-rg --name tf-neepco-redis --query "hostName" -o tsv
-$redisKey = az redisenterprise list-keys --resource-group tf-neepco-rg --name tf-neepco-redis --query "primaryKey" -o tsv
-
 # Get ACR credentials
 Write-Host "Getting ACR credentials..." -ForegroundColor Yellow
 $acrServer = az acr show --resource-group tf-neepco-rg --name tfneepcoacr --query "loginServer" -o tsv
@@ -35,8 +30,8 @@ Write-Host "DB_SSLMODE=require" -ForegroundColor White
 Write-Host "AZURE_STORAGE_ACCOUNT_NAME=tfneepcostorage" -ForegroundColor White
 Write-Host "AZURE_STORAGE_KEY=$storageKey" -ForegroundColor White
 Write-Host "AZURE_STORAGE_CONTAINER=resumes" -ForegroundColor White
-Write-Host "CELERY_BROKER_URL=rediss://:${redisKey}@${redisHost}:6380/0?ssl_cert_reqs=required" -ForegroundColor White
-Write-Host "CELERY_RESULT_BACKEND=rediss://:${redisKey}@${redisHost}:6380/0?ssl_cert_reqs=required" -ForegroundColor White
+Write-Host "CELERY_BROKER_URL=db+postgresql://talentflowadmin:MyPassword123@tf-neepco-db.postgres.database.azure.com:5432/talentflow" -ForegroundColor White
+Write-Host "CELERY_RESULT_BACKEND=db+postgresql://talentflowadmin:MyPassword123@tf-neepco-db.postgres.database.azure.com:5432/talentflow" -ForegroundColor White
 Write-Host "CELERY_TASK_ALWAYS_EAGER=False" -ForegroundColor White
 Write-Host "DJANGO_ENCRYPTION_KEY=your-fernet-key-here" -ForegroundColor White
 Write-Host "LLM_PROVIDER=deepseek" -ForegroundColor White
