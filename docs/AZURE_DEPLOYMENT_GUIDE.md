@@ -110,32 +110,30 @@ DB_SSLMODE=require
 
 ## Part 4: Create Azure Cache for Redis
 
-### Step 1: Create Redis Cache
+### Step 1: Create Azure Managed Redis
 
 ```bash
-az redis create \
+az redisenterprise create \
   --resource-group tf-neepco-rg \
   --name tf-neepco-redis \
   --location centralindia \
-  --sku Basic \
-  --vm-size C0
+  --sku Enterprise_E5
 ```
 
 **Settings explained:**
 | Setting | Value | Why |
 |---|---|---|
-| `sku` | `Basic` | No replication, cheapest |
-| `vm-size` | `C0` | 250 MB, enough for Celery broker |
+| `sku` | `Enterprise_E5` | 16 GB, production-ready, managed by Azure |
 
 ### Step 2: Get Redis Connection String
 
 ```bash
-az redis show \
+az redisenterprise show \
   --resource-group tf-neepco-rg \
   --name tf-neepco-redis \
   --query "hostName" -o tsv
 
-az redis list-keys \
+az redisenterprise list-keys \
   --resource-group tf-neepco-rg \
   --name tf-neepco-redis \
   --query "primaryKey" -o tsv
@@ -143,14 +141,14 @@ az redis list-keys \
 
 **Save these values:**
 ```
-REDIS_HOST=tf-neepco-redis.redis.cache.windows.net
+REDIS_HOST=tf-neepco-redis.eastus.redisenterprise.cache.azure.net
 REDIS_KEY=your-primary-key-here
 ```
 
 **Full connection string (for .env):**
 ```
-CELERY_BROKER_URL=rediss://:your-primary-key-here@tf-neepco-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required
-CELERY_RESULT_BACKEND=rediss://:your-primary-key-here@tf-neepco-redis.redis.cache.windows.net:6380/0?ssl_cert_reqs=required
+CELERY_BROKER_URL=rediss://:your-primary-key-here@tf-neepco-redis.eastus.redisenterprise.cache.azure.net:6380/0?ssl_cert_reqs=required
+CELERY_RESULT_BACKEND=rediss://:your-primary-key-here@tf-neepco-redis.eastus.redisenterprise.cache.azure.net:6380/0?ssl_cert_reqs=required
 ```
 
 ---

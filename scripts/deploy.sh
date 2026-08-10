@@ -56,14 +56,13 @@ az postgres flexible-server db create \
   --name "$DB_NAME" \
   --output none
 
-# 4. Azure Cache for Redis
-echo "[4/8] Creating Azure Cache for Redis..."
-az redis create \
+# 4. Azure Managed Redis
+echo "[4/8] Creating Azure Managed Redis..."
+az redisenterprise create \
   --resource-group "$RESOURCE_GROUP" \
   --name "$REDIS_NAME" \
   --location "$LOCATION" \
-  --sku Basic \
-  --vm-size C0 \
+  --sku Enterprise_E5 \
   --output none
 
 # 5. Storage Account + Blob Container
