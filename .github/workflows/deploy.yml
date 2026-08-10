@@ -1,5 +1,5 @@
 # GitHub Actions CI/CD for TalentFlowAI
-# Triggers on push to main, builds Docker image, deploys to Azure App Service
+# Deploys to Azure App Service using Python (no Docker needed)
 
 name: Deploy to Azure
 
@@ -10,8 +10,7 @@ on:
 
 env:
   AZURE_WEBAPP_NAME: tf-neepco-prod
-  AZURE_ACR_NAME: tfneepcoacr
-  DOCKER_IMAGE: talentflow
+  PYTHON_VERSION: "3.12"
 
 jobs:
   test:
@@ -37,7 +36,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
         run: |
@@ -56,7 +55,7 @@ jobs:
         run: |
           python -m pytest -q --tb=short
 
-  build-and-deploy:
+  deploy:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
@@ -64,31 +63,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to Azure
-        uses: azure/login@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Login to ACR
-        run: az acr login --name ${{ env.AZURE_ACR_NAME }}
-
-      - name: Build and push Docker image
+      - name: Install dependencies
         run: |
-          docker build -t ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.DOCKER_IMAGE }}:${{ github.sha }} .
-          docker build -t ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.DOCKER_IMAGE }}:latest .
-          docker push ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-          docker push ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.DOCKER_IMAGE }}:latest
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Collect static files
+        run: |
+          python manage.py collectstatic --noinput
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings
+          DJANGO_DEBUG: "False"
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          images: ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-
-      - name: Run migrations
-        run: |
-          az webapp ssh --resource-group tf-neepco-rg --name ${{ env.AZURE_WEBAPP_NAME }} \
-            --command "python manage.py migrate_schemas"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
 
       - name: Verify deployment
         run: |
