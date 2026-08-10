@@ -10,7 +10,7 @@
 set -euo pipefail
 
 RESOURCE_GROUP="${1:-tf-neepco-rg}"
-LOCATION="${2:-centralindia}"
+LOCATION="${2:-eastus}"
 ACR_NAME="tfneepcoacr"
 APP_SERVICE_PLAN="tf-neepco-plan"
 WEB_APP="tf-neepco-prod"

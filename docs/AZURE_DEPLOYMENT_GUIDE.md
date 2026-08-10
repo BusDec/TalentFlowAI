@@ -41,11 +41,11 @@ A resource group is a container for all your Azure resources.
 ```bash
 az group create \
   --name tf-neepco-rg \
-  --location centralindia
+  --location eastus
 ```
 
 **Location options:**
-- `centralindia` — India (recommended for NEEPCO)
+- `eastus` — India (recommended for NEEPCO)
 - `eastus` — US East (cheapest)
 - `westeurope` — Europe
 - `southeastasia` — Singapore
@@ -149,7 +149,7 @@ CELERY_RESULT_BACKEND=db+postgresql://talentflowadmin:MyPassword123@tf-neepco-db
 az storage account create \
   --resource-group tf-neepco-rg \
   --name tfneepcostorage \
-  --location centralindia \
+  --location eastus \
   --sku Standard_LRS \
   --kind StorageV2
 ```
@@ -496,7 +496,7 @@ az webapp config hostname add \
 az monitor app-insights component create \
   --resource-group tf-neepco-rg \
   --app talentflow-insights \
-  --location centralindia \
+  --location eastus \
   --kind web
 ```
 
