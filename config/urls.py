@@ -9,6 +9,8 @@ from django.views.i18n import JavaScriptCatalog
 # Friendly access-denied page for PermissionDenied raised by @require_role.
 handler403 = "accounts.views.access_denied"
 
+from config.views import landing_page
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
@@ -16,6 +18,7 @@ urlpatterns = [
     path("", include("accounts.urls")),
     path("", include("portal.urls")),
     path("", include("profiles.urls")),
+    path("landing/", landing_page, name="landing"),
 ]
 
 if settings.DEBUG:

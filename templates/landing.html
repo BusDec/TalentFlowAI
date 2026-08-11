@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentFlow AI — Intelligent Recruitment Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tf-bg: #0f0b1e;
+            --tf-bg-2: #1a1035;
+            --tf-bg-3: #2d1b69;
+            --tf-accent: #4cc9f0;
+            --tf-accent-2: #7b61ff;
+            --tf-success: #06d6a0;
+            --tf-warning: #ffd166;
+            --tf-danger: #ef476f;
+            --tf-text: #eef;
+            --tf-muted: rgba(233,234,244,0.7);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--tf-bg);
+            color: var(--tf-text);
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--tf-bg) 0%, var(--tf-bg-2) 50%, var(--tf-bg-3) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(76,201,240,0.1) 0%, transparent 50%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 800px; }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--tf-muted);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            margin-top: 3rem;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--tf-accent);
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--tf-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Problem Section */
+        .problems {
+            padding: 5rem 2rem;
+            background: var(--tf-bg-2);
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            text-align: center;
+            color: var(--tf-muted);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .problem-card {
+            background: var(--tf-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .problem-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--tf-accent);
+        }
+        .problem-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .problem-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--tf-text);
+        }
+        .problem-card p {
+            color: var(--tf-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Solutions Section */
+        .solutions {
+            padding: 5rem 2rem;
+            background: var(--tf-bg);
+        }
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .solution-card {
+            background: linear-gradient(135deg, rgba(76,201,240,0.1), rgba(123,97,255,0.1));
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(76,201,240,0.2);
+        }
+        .solution-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--tf-accent);
+        }
+        .solution-card p {
+            color: var(--tf-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Tenants Section */
+        .tenants {
+            padding: 5rem 2rem;
+            background: var(--tf-bg-2);
+        }
+        .tenant-card {
+            background: var(--tf-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .tenant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .tenant-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .tenant-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+        .tenant-stat {
+            text-align: center;
+        }
+        .tenant-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--tf-accent);
+        }
+        .tenant-stat-label {
+            font-size: 0.75rem;
+            color: var(--tf-muted);
+            text-transform: uppercase;
+        }
+        .portal-link {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .portal-link:hover { opacity: 0.9; }
+
+        .advt-list {
+            margin-top: 1rem;
+        }
+        .advt-item {
+            background: var(--tf-bg-2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .advt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .advt-number {
+            font-weight: 700;
+            color: var(--tf-accent);
+        }
+        .advt-title {
+            color: var(--tf-text);
+        }
+        .advt-closing {
+            font-size: 0.85rem;
+            color: var(--tf-warning);
+        }
+        .post-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .post-chip {
+            background: rgba(76,201,240,0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .post-chip strong {
+            color: var(--tf-accent);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--tf-bg);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        footer p {
+            color: var(--tf-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { flex-direction: column; gap: 1.5rem; }
+            .tenant-header { flex-direction: column; text-align: center; }
+            .tenant-stats { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>TalentFlow AI</h1>
+            <p>Intelligent recruitment platform powering public sector hiring across India. AI-driven screening, transparent processes, government-compliant workflows.</p>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">{{ tenants|length }}</div>
+                    <div class="stat-label">Organizations</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{% for t in tenants %}{{ t.total_vacancies|add:0 }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</div>
+                    <div class="stat-label">Open Positions</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{% for t in tenants %}{{ t.total_applications|add:0 }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</div>
+                    <div class="stat-label">Applications Processed</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problems Section -->
+    <section class="problems">
+        <h2 class="section-title">The Recruitment Challenge</h2>
+        <p class="section-subtitle">Public sector recruitment faces unique challenges that traditional systems can't solve</p>
+        <div class="problems-grid">
+            <div class="problem-card">
+                <div class="problem-icon">📋</div>
+                <h3>Manual Document Verification</h3>
+                <p>Thousands of applications require manual verification of qualifications, experience, and identity documents — taking weeks of staff time.</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">🔍</div>
+                <h3>Eligibility Screening</h3>
+                <p>Complex eligibility criteria across age, education, experience, and category require careful manual review for each application.</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">📊</div>
+                <h3>Reservation Compliance</h3>
+                <p>DoPT roster requirements, category-wise vacancies, and PwBD horizontal reservations add layers of complexity to shortlisting.</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">⏱️</div>
+                <h3>Long Processing Times</h3>
+                <p>From advertisement to joining, government recruitment cycles take 6-12 months, losing top candidates to private sector.</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">🔒</div>
+                <h3>Data Security & Privacy</h3>
+                <p>Aadhaar, PAN, and personal documents require DPDP Act compliance with encryption at rest and access controls.</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-icon">📝</div>
+                <h3>Audit & Transparency</h3>
+                <p>RTI requirements demand complete audit trails for every decision — who changed what, when, and why.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solutions Section -->
+    <section class="solutions">
+        <h2 class="section-title">How TalentFlow Solves It</h2>
+        <p class="section-subtitle">AI-powered automation with human oversight at every step</p>
+        <div class="solutions-grid">
+            <div class="solution-card">
+                <h4>🤖 AI Document Parsing</h4>
+                <p>OCR + LLM extraction of qualifications, experience, and identity from uploaded documents with per-field confidence scores.</p>
+            </div>
+            <div class="solution-card">
+                <h4>✅ Automated Eligibility</h4>
+                <p>Rule-based screening against structured criteria — age, education, experience, certificates — with human override capability.</p>
+            </div>
+            <div class="solution-card">
+                <h4>📊 Roster Management</h4>
+                <p>DoPT 100-point roster tracking with category-wise vacancy allocation and automatic breach warnings.</p>
+            </div>
+            <div class="solution-card">
+                <h4>⚡ Async Processing</h4>
+                <p>Celery-powered background tasks for resume parsing, evaluation, and duplicate detection — instant application acknowledgment.</p>
+            </div>
+            <div class="solution-card">
+                <h4>🔐 PII Encryption</h4>
+                <p>Fernet encryption at rest for Aadhaar and sensitive data, masked display in admin, DPDP Act compliant.</p>
+            </div>
+            <div class="solution-card">
+                <h4>📝 Audit Trail</h4>
+                <p>Immutable AuditEvent model tracking every status change, score update, and override — exportable for RTI responses.</p>
+            </div>
+            <div class="solution-card">
+                <h4>🎯 Smart Shortlisting</h4>
+                <p>AI-powered candidate ranking with tie-breaking rules, category-aware allocation, and fairness metrics.</p>
+            </div>
+            <div class="solution-card">
+                <h4>📄 Govt-Format PDFs</h4>
+                <p>Publication-ready advertisement PDFs, application slips, and offer letters matching government notice formats.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tenants Section -->
+    <section class="tenants">
+        <h2 class="section-title">Our Partner Organizations</h2>
+        <p class="section-subtitle">Click on an organization to view their recruitment portal</p>
+
+        {% for tenant in tenants %}
+        <div class="tenant-card">
+            <div class="tenant-header">
+                <div>
+                    <div class="tenant-name">{{ tenant.name }}</div>
+                    <div class="tenant-stats">
+                        <div class="tenant-stat">
+                            <div class="tenant-stat-value">{{ tenant.total_vacancies }}</div>
+                            <div class="tenant-stat-label">Vacancies</div>
+                        </div>
+                        <div class="tenant-stat">
+                            <div class="tenant-stat-value">{{ tenant.total_applications }}</div>
+                            <div class="tenant-stat-label">Applications</div>
+                        </div>
+                        <div class="tenant-stat">
+                            <div class="tenant-stat-value">{{ tenant.offered_count }}</div>
+                            <div class="tenant-stat-label">Offers Made</div>
+                        </div>
+                        <div class="tenant-stat">
+                            <div class="tenant-stat-value">{{ tenant.joined_count }}</div>
+                            <div class="tenant-stat-label">Joined</div>
+                        </div>
+                    </div>
+                </div>
+                <a href="http://{{ tenant.portal_domain }}:8000/portal/" class="portal-link">Visit Portal →</a>
+            </div>
+
+            {% if tenant.advertisements %}
+            <div class="advt-list">
+                <h4 style="margin-bottom: 1rem; color: var(--tf-muted);">Active Advertisements</h4>
+                {% for advt in tenant.advertisements %}
+                <div class="advt-item">
+                    <div class="advt-header">
+                        <div>
+                            <span class="advt-number">{{ advt.number }}</span>
+                            <span class="advt-title"> — {{ advt.title }}</span>
+                        </div>
+                        <span class="advt-closing">Closes: {{ advt.closing_date|date:"d M Y" }}</span>
+                    </div>
+                    <div class="post-list">
+                        {% for post in advt.posts %}
+                        <div class="post-chip">
+                            <strong>{{ post.code }}</strong> {{ post.name }} — {{ post.vacancies }} vacancy{{ post.vacancies|pluralize }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--tf-success);">
+                        Total: {{ advt.total_vacancies }} position{{ advt.total_vacancies|pluralize }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--tf-muted); font-style: italic;">No active advertisements at this time.</p>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 3rem; color: var(--tf-muted);">
+            <p>No organizations are currently recruiting. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>TalentFlow AI — Intelligent Recruitment Platform</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem;">Built for the public sector. Transparent. Compliant. Efficient.</p>
+    </footer>
+</body>
+</html>
