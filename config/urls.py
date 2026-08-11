@@ -33,9 +33,15 @@ def _landing(request):
     return landing_page(request)
 
 
+def _onboarding(request):
+    from config.views import onboarding
+    return onboarding(request)
+
+
 urlpatterns = [
     path("health/", _health, name="health"),
     path("landing/", _landing, name="landing"),
+    path("onboarding/", _onboarding, name="onboarding"),
     path("admin/", admin.site.urls),
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
     path("", _root, name="root"),

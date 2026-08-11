@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentFlow AI — Onboard Your Organization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tf-bg: #0f0b1e;
+            --tf-bg-2: #1a1035;
+            --tf-bg-3: #2d1b69;
+            --tf-accent: #4cc9f0;
+            --tf-accent-2: #7b61ff;
+            --tf-success: #06d6a0;
+            --tf-warning: #ffd166;
+            --tf-danger: #ef476f;
+            --tf-text: #eef;
+            --tf-muted: rgba(233,234,244,0.7);
+            --tf-input-bg: rgba(255,255,255,0.06);
+            --tf-input-border: rgba(255,255,255,0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: var(--tf-bg);
+            color: var(--tf-text);
+            min-height: 100vh;
+        }
+        .wizard-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .wizard-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--tf-accent);
+            text-decoration: none;
+        }
+        .wizard-brand span { color: var(--tf-muted); font-weight: 400; font-size: 0.85rem; margin-left: 0.5rem; }
+        .wizard-back {
+            color: var(--tf-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .wizard-back:hover { color: var(--tf-accent); }
+
+        /* Stepper */
+        .stepper {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            padding: 2rem 1rem 0;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .stepper-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+        .stepper-item:last-child { flex: 0; }
+        .stepper-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border: 2px solid var(--tf-input-border);
+            color: var(--tf-muted);
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+        .stepper-item.active .stepper-dot {
+            border-color: var(--tf-accent);
+            color: var(--tf-accent);
+            box-shadow: 0 0 12px rgba(76,201,240,0.3);
+        }
+        .stepper-item.done .stepper-dot {
+            background: var(--tf-success);
+            border-color: var(--tf-success);
+            color: #fff;
+        }
+        .stepper-label {
+            font-size: 0.8rem;
+            color: var(--tf-muted);
+            white-space: nowrap;
+        }
+        .stepper-item.active .stepper-label { color: var(--tf-accent); font-weight: 600; }
+        .stepper-item.done .stepper-label { color: var(--tf-success); }
+        .stepper-line {
+            flex: 1;
+            height: 2px;
+            background: var(--tf-input-border);
+            margin: 0 0.75rem;
+            margin-bottom: 1.2rem;
+        }
+        .stepper-item.done .stepper-line { background: var(--tf-success); }
+
+        /* Form */
+        .wizard-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .step-panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .step-panel.visible { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .step-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .step-desc {
+            color: var(--tf-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--tf-muted);
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: var(--tf-input-bg);
+            border: 1px solid var(--tf-input-border);
+            border-radius: 10px;
+            color: var(--tf-text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--tf-accent);
+            box-shadow: 0 0 0 3px rgba(76,201,240,0.15);
+        }
+        .form-group input::placeholder { color: rgba(255,255,255,0.25); }
+        .form-group .hint {
+            font-size: 0.8rem;
+            color: var(--tf-muted);
+            margin-top: 0.3rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .color-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .color-picker-wrap input[type="color"] {
+            width: 48px;
+            height: 48px;
+            padding: 2px;
+            border-radius: 10px;
+            cursor: pointer;
+            background: var(--tf-input-bg);
+            border: 1px solid var(--tf-input-border);
+        }
+        .color-picker-wrap input[type="text"] {
+            flex: 1;
+        }
+
+        /* Errors */
+        .error-list {
+            background: rgba(239,71,111,0.12);
+            border: 1px solid rgba(239,71,111,0.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .error-list li {
+            color: var(--tf-danger);
+            font-size: 0.9rem;
+            margin-left: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+        .btn {
+            padding: 0.85rem 2rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
+            color: #fff;
+        }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-secondary {
+            background: var(--tf-input-bg);
+            color: var(--tf-text);
+            border: 1px solid var(--tf-input-border);
+        }
+        .btn-secondary:hover { border-color: var(--tf-accent); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Review summary */
+        .review-section {
+            background: var(--tf-bg-2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .review-section h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--tf-accent);
+            margin-bottom: 0.75rem;
+        }
+        .review-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .review-row:last-child { border-bottom: none; }
+        .review-label { color: var(--tf-muted); font-size: 0.9rem; }
+        .review-value { font-weight: 600; font-size: 0.9rem; }
+
+        /* Success */
+        .success-panel {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .success-panel h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--tf-success);
+        }
+        .success-panel p {
+            color: var(--tf-muted);
+            margin-bottom: 2rem;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .success-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .success-links a {
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .success-links a:hover { opacity: 0.85; }
+        .success-links .link-primary {
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
+            color: #fff;
+        }
+        .success-links .link-secondary {
+            background: var(--tf-input-bg);
+            color: var(--tf-text);
+            border: 1px solid var(--tf-input-border);
+        }
+
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .stepper-label { display: none; }
+            .wizard-container { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <header class="wizard-header">
+        <a href="/landing/" class="wizard-brand">TF <span>Onboarding</span></a>
+        <a href="/landing/" class="wizard-back">&larr; Back to Home</a>
+    </header>
+
+    {% if not success %}
+    <!-- Stepper -->
+    <div class="stepper">
+        {% for s in steps %}
+        <div class="stepper-item {% if forloop.counter == step %}active{% elif forloop.counter < step %}done{% endif %}">
+            <div class="stepper-dot">{% if forloop.counter < step %}&#10003;{% else %}{{ forloop.counter }}{% endif %}</div>
+            <span class="stepper-label">{{ s }}</span>
+        </div>
+        {% if not forloop.last %}<div class="stepper-line {% if forloop.counter < step %}done{% endif %}"></div>{% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="wizard-container">
+        {% if success %}
+        <!-- ── Success ──────────────────────────────────────────────── -->
+        <div class="success-panel step-panel visible">
+            <div class="success-icon">🎉</div>
+            <h2>{{ tenant.name }} is Live!</h2>
+            <p>Your organization has been onboarded. Schema <strong>{{ tenant.schema_name }}</strong> is ready, admin account created, and migrations applied.</p>
+            <div class="success-links">
+                <a href="{{ portal_url }}/login/" class="link-primary">Go to Staff Login →</a>
+                <a href="{{ portal_url }}/portal/" class="link-secondary">Candidate Portal</a>
+                <a href="/landing/" class="link-secondary">Back to Home</a>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- ── Errors ──────────────────────────────────────────────── -->
+        {% if errors %}
+        <ul class="error-list">
+            {% for e in errors %}<li>{{ e }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- ── Step 1: Organization ────────────────────────────────── -->
+        <div class="step-panel {% if step == 1 %}visible{% endif %}" id="step1">
+            <h2 class="step-title">Organization Details</h2>
+            <p class="step-desc">Tell us about your organization. This creates an isolated tenant schema.</p>
+            <form method="post" id="form1">{% csrf_token %}
+                <div class="form-group">
+                    <label>Organization Name</label>
+                    <input type="text" name="org_name" value="{{ form_data.org_name }}" placeholder="e.g. NTPC Limited" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Schema Name</label>
+                        <input type="text" name="schema_name" value="{{ form_data.schema_name }}" placeholder="e.g. ntpc" pattern="[a-z][a-z0-9_]{2,49}" required>
+                        <div class="hint">Lowercase, letters/digits/underscores. Becomes the DB schema.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Domain</label>
+                        <input type="text" name="domain_name" value="{{ form_data.domain_name }}" placeholder="e.g. ntpc.talentflow.in" required>
+                        <div class="hint">The hostname candidates and staff will use.</div>
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <span></span>
+                    <button type="submit" name="action" value="2" class="btn btn-primary">Next: Admin Account →</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ── Step 2: Admin Account ───────────────────────────────── -->
+        <div class="step-panel {% if step == 2 %}visible{% endif %}" id="step2">
+            <h2 class="step-title">Admin Account</h2>
+            <p class="step-desc">Create the first superuser for this organization.</p>
+            <form method="post" id="form2">{% csrf_token %}
+                <!-- Carry forward step 1 data -->
+                <input type="hidden" name="org_name" value="{{ form_data.org_name }}">
+                <input type="hidden" name="schema_name" value="{{ form_data.schema_name }}">
+                <input type="hidden" name="domain_name" value="{{ form_data.domain_name }}">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" name="admin_username" value="{{ form_data.admin_username }}" placeholder="e.g. admin" required minlength="3">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="admin_email" value="{{ form_data.admin_email }}" placeholder="admin@ntpc.co.in" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="admin_password" placeholder="Minimum 8 characters" required minlength="8">
+                    <div class="hint">Use a strong password. This account has full superuser access.</div>
+                </div>
+                <div class="btn-row">
+                    <button type="submit" name="action" value="1" class="btn btn-secondary">&larr; Back</button>
+                    <button type="submit" name="action" value="3" class="btn btn-primary">Next: Branding →</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ── Step 3: Branding ────────────────────────────────────── -->
+        <div class="step-panel {% if step == 3 %}visible{% endif %}" id="step3">
+            <h2 class="step-title">Branding</h2>
+            <p class="step-desc">Customize the look and feel of your recruitment portal.</p>
+            <form method="post" id="form3">{% csrf_token %}
+                <input type="hidden" name="org_name" value="{{ form_data.org_name }}">
+                <input type="hidden" name="schema_name" value="{{ form_data.schema_name }}">
+                <input type="hidden" name="domain_name" value="{{ form_data.domain_name }}">
+                <input type="hidden" name="admin_username" value="{{ form_data.admin_username }}">
+                <input type="hidden" name="admin_email" value="{{ form_data.admin_email }}">
+                <input type="hidden" name="admin_password" value="{{ form_data.admin_password }}">
+
+                <div class="form-group">
+                    <label>Tagline</label>
+                    <input type="text" name="tagline" value="{{ form_data.tagline }}" placeholder="e.g. Powering the Nation's Energy Future">
+                </div>
+                <div class="form-group">
+                    <label>Accent Color</label>
+                    <div class="color-picker-wrap">
+                        <input type="color" name="accent_color_picker" value="{{ form_data.accent_color|default:'#0b3d91' }}" id="colorPicker" onchange="document.getElementById('colorText').value = this.value">
+                        <input type="text" name="accent_color" id="colorText" value="{{ form_data.accent_color|default:'#0b3d91' }}" placeholder="#0b3d91" onchange="document.getElementById('colorPicker').value = this.value">
+                    </div>
+                    <div class="hint">Used for portal headers, buttons, and accent elements.</div>
+                </div>
+                <div class="btn-row">
+                    <button type="submit" name="action" value="2" class="btn btn-secondary">&larr; Back</button>
+                    <button type="submit" name="action" value="4" class="btn btn-primary">Next: Review →</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ── Step 4: Review & Create ─────────────────────────────── -->
+        <div class="step-panel {% if step == 4 %}visible{% endif %}" id="step4">
+            <h2 class="step-title">Review & Create</h2>
+            <p class="step-desc">Verify everything before creating your tenant.</p>
+            <form method="post" id="form4">{% csrf_token %}
+                <input type="hidden" name="org_name" value="{{ form_data.org_name }}">
+                <input type="hidden" name="schema_name" value="{{ form_data.schema_name }}">
+                <input type="hidden" name="domain_name" value="{{ form_data.domain_name }}">
+                <input type="hidden" name="admin_username" value="{{ form_data.admin_username }}">
+                <input type="hidden" name="admin_email" value="{{ form_data.admin_email }}">
+                <input type="hidden" name="admin_password" value="{{ form_data.admin_password }}">
+                <input type="hidden" name="accent_color" value="{{ form_data.accent_color }}">
+                <input type="hidden" name="tagline" value="{{ form_data.tagline }}">
+
+                <div class="review-section">
+                    <h4>Organization</h4>
+                    <div class="review-row">
+                        <span class="review-label">Name</span>
+                        <span class="review-value">{{ form_data.org_name }}</span>
+                    </div>
+                    <div class="review-row">
+                        <span class="review-label">Schema</span>
+                        <span class="review-value">{{ form_data.schema_name }}</span>
+                    </div>
+                    <div class="review-row">
+                        <span class="review-label">Domain</span>
+                        <span class="review-value">{{ form_data.domain_name }}</span>
+                    </div>
+                </div>
+
+                <div class="review-section">
+                    <h4>Admin Account</h4>
+                    <div class="review-row">
+                        <span class="review-label">Username</span>
+                        <span class="review-value">{{ form_data.admin_username }}</span>
+                    </div>
+                    <div class="review-row">
+                        <span class="review-label">Email</span>
+                        <span class="review-value">{{ form_data.admin_email }}</span>
+                    </div>
+                    <div class="review-row">
+                        <span class="review-label">Password</span>
+                        <span class="review-value">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+                    </div>
+                </div>
+
+                <div class="review-section">
+                    <h4>Branding</h4>
+                    <div class="review-row">
+                        <span class="review-label">Tagline</span>
+                        <span class="review-value">{{ form_data.tagline|default:"—" }}</span>
+                    </div>
+                    <div class="review-row">
+                        <span class="review-label">Accent Color</span>
+                        <span class="review-value"><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:{{ form_data.accent_color|default:'#0b3d91' }};vertical-align:middle;margin-right:6px"></span>{{ form_data.accent_color|default:"#0b3d91" }}</span>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button type="submit" name="action" value="3" class="btn btn-secondary">&larr; Back</button>
+                    <button type="submit" name="action" value="create" class="btn btn-primary" style="font-size:1.05rem;padding:1rem 2.5rem;">Create Organization 🚀</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

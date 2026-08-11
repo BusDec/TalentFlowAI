@@ -397,7 +397,7 @@
     <!-- Tenants Section -->
     <section class="tenants">
         <h2 class="section-title">Our Partner Organizations</h2>
-        <p class="section-subtitle">Click on an organization to view their recruitment portal</p>
+        <p class="section-subtitle">Click on an organization to view their recruitment portal or staff dashboard</p>
 
         {% for tenant in tenants %}
         <div class="tenant-card">
@@ -423,7 +423,10 @@
                         </div>
                     </div>
                 </div>
-                <a href="{{ tenant.portal_url }}/portal/" class="portal-link">Visit Portal →</a>
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                    <a href="{{ tenant.portal_url }}/portal/" class="portal-link">Candidate Portal →</a>
+                    <a href="{{ tenant.portal_url }}/login/" class="portal-link" style="background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.08));border:1px solid rgba(255,255,255,0.2);">Staff Login</a>
+                </div>
             </div>
 
             {% if tenant.advertisements %}
@@ -460,6 +463,13 @@
             <p>No organizations are currently recruiting. Check back soon!</p>
         </div>
         {% endfor %}
+    </section>
+
+    <!-- Onboard CTA -->
+    <section style="padding:5rem 2rem;background:linear-gradient(135deg,var(--tf-bg) 0%,var(--tf-bg-3) 100%);text-align:center;">
+        <h2 style="font-size:2rem;font-weight:800;margin-bottom:1rem;">Ready to Modernize Your Recruitment?</h2>
+        <p style="color:var(--tf-muted);max-width:550px;margin:0 auto 2rem;font-size:1.05rem;">Get your own isolated recruitment portal in minutes. AI-powered screening, government-compliant workflows, full audit trails.</p>
+        <a href="/onboarding/" style="display:inline-block;padding:1rem 2.5rem;background:linear-gradient(135deg,var(--tf-accent),var(--tf-accent-2));color:white;text-decoration:none;border-radius:12px;font-weight:700;font-size:1.1rem;transition:opacity 0.2s;">Onboard Your Organization →</a>
     </section>
 
     <!-- Footer -->
