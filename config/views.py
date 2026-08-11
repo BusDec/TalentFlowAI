@@ -18,6 +18,7 @@ from tenants.models import Client, Domain
 def landing_page(request):
     """Public landing page showing all tenants and their recruitment status."""
     tenants = []
+    all_drives = []  # Flat list of all active advertisements across tenants
     try:
         with schema_context(get_public_schema_name()):
             for client in Client.objects.filter(is_active=True).exclude(
@@ -40,25 +41,27 @@ def landing_page(request):
                             "-published_date"
                         )[:5]
                         for advt in advts:
+                            total_vacancies = sum(p.vacancies for p in advt.posts.all())
                             advt_data = {
+                                "id": advt.id,
                                 "number": advt.advt_number,
                                 "title": advt.title,
                                 "closing_date": advt.closing_date,
-                                "posts": [],
+                                "total_vacancies": total_vacancies,
+                                "posts": [
+                                    {"name": p.name, "code": p.post_code, "vacancies": p.vacancies}
+                                    for p in advt.posts.all()
+                                ],
                             }
-                            total_vacancies = 0
-                            for post in advt.posts.all():
-                                advt_data["posts"].append(
-                                    {
-                                        "name": post.name,
-                                        "code": post.post_code,
-                                        "vacancies": post.vacancies,
-                                    }
-                                )
-                                total_vacancies += post.vacancies
-                            advt_data["total_vacancies"] = total_vacancies
                             tenant_data["advertisements"].append(advt_data)
                             tenant_data["total_vacancies"] += total_vacancies
+
+                            # Collect for the global drives list
+                            all_drives.append({
+                                **advt_data,
+                                "org_name": client.name,
+                                "schema": client.schema_name,
+                            })
 
                         # Get application counts
                         tenant_data["total_applications"] = Application.objects.count()
@@ -73,7 +76,6 @@ def landing_page(request):
                         domain = Domain.objects.filter(tenant=client, is_primary=True).first()
                         if domain:
                             dom = domain.domain
-                            # Production domains use HTTPS; localhost uses HTTP
                             if "localhost" in dom or "127.0.0.1" in dom:
                                 tenant_data["portal_domain"] = dom
                                 tenant_data["portal_url"] = f"http://{dom}:8000"
@@ -83,13 +85,21 @@ def landing_page(request):
                         else:
                             tenant_data["portal_domain"] = f"{client.schema_name}.localhost:8000"
                             tenant_data["portal_url"] = f"http://{client.schema_name}.localhost:8000"
+
+                        # Attach portal_url to each drive for hyperlinks
+                        for d in all_drives:
+                            if d["schema"] == client.schema_name:
+                                d["portal_url"] = tenant_data["portal_url"]
                 except Exception:
                     pass
                 tenants.append(tenant_data)
     except Exception:
         pass
 
-    return render(request, "landing.html", {"tenants": tenants})
+    return render(request, "landing.html", {
+        "tenants": tenants,
+        "all_drives": sorted(all_drives, key=lambda d: d.get("closing_date") or "", reverse=True),
+    })
 
 
 # ── Tenant Onboarding Wizard ──────────────────────────────────────────────────

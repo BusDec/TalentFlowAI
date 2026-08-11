@@ -28,26 +28,45 @@
             line-height: 1.6;
         }
 
-        /* Hero Section */
+        /* ── Navigation ─────────────────────────────────────────── */
+        .tf-nav-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.9rem 2rem;
+            background: rgba(15,11,30,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .tf-nav-brand {
+            font-size: 1.15rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .tf-nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .tf-nav-links a {
+            color: var(--tf-muted); text-decoration: none; font-size: 0.9rem;
+            font-weight: 500; transition: color 0.2s;
+        }
+        .tf-nav-links a:hover { color: var(--tf-text); }
+        .tf-nav-cta {
+            padding: 0.55rem 1.25rem !important;
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
+            color: white !important; border-radius: 8px; font-weight: 600 !important;
+        }
+        .tf-nav-cta:hover { opacity: 0.9; }
+
+        /* ── Hero ───────────────────────────────────────────────── */
         .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2rem;
+            min-height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; padding: 6rem 2rem 4rem;
             background: linear-gradient(135deg, var(--tf-bg) 0%, var(--tf-bg-2) 50%, var(--tf-bg-3) 100%);
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
         }
         .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
             background: radial-gradient(circle, rgba(76,201,240,0.1) 0%, transparent 50%);
             animation: pulse 15s ease-in-out infinite;
         }
@@ -57,267 +76,235 @@
         }
         .hero-content { position: relative; z-index: 1; max-width: 800px; }
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
+            font-size: 3.5rem; font-weight: 800; margin-bottom: 1rem;
             background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
         .hero p {
-            font-size: 1.25rem;
-            color: var(--tf-muted);
-            margin-bottom: 2rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            font-size: 1.25rem; color: var(--tf-muted); margin-bottom: 2rem;
+            max-width: 600px; margin-left: auto; margin-right: auto;
         }
+        .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2.5rem; }
+        .hero-btns a {
+            padding: 0.85rem 2rem; border-radius: 10px; font-weight: 600;
+            text-decoration: none; font-size: 1rem; transition: opacity 0.2s, transform 0.1s;
+        }
+        .hero-btns a:active { transform: scale(0.97); }
+        .hero-btn-primary {
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2)); color: #fff;
+        }
+        .hero-btn-outline {
+            background: transparent; color: var(--tf-text);
+            border: 1.5px solid rgba(255,255,255,0.25);
+        }
+        .hero-btn-outline:hover { border-color: var(--tf-accent); color: var(--tf-accent); }
         .hero-stats {
-            display: flex;
-            gap: 3rem;
-            justify-content: center;
-            margin-top: 3rem;
+            display: flex; gap: 3rem; justify-content: center; margin-top: 2rem;
         }
-        .stat {
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--tf-accent);
-        }
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--tf-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
+        .stat { text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--tf-accent); }
+        .stat-label { font-size: 0.85rem; color: var(--tf-muted); text-transform: uppercase; letter-spacing: 0.1em; }
 
-        /* Problem Section */
-        .problems {
-            padding: 5rem 2rem;
-            background: var(--tf-bg-2);
-        }
+        /* ── Section common ─────────────────────────────────────── */
+        .section-pad { padding: 5rem 2rem; }
+        .section-dark { background: var(--tf-bg-2); }
         .section-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
+            text-align: center; font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;
         }
         .section-subtitle {
-            text-align: center;
-            color: var(--tf-muted);
-            margin-bottom: 3rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .problems-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .problem-card {
-            background: var(--tf-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .problem-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--tf-accent);
-        }
-        .problem-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        .problem-card h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.75rem;
-            color: var(--tf-text);
-        }
-        .problem-card p {
-            color: var(--tf-muted);
-            font-size: 0.95rem;
+            text-align: center; color: var(--tf-muted); margin-bottom: 3rem;
+            max-width: 600px; margin-left: auto; margin-right: auto;
         }
 
-        /* Solutions Section */
-        .solutions {
-            padding: 5rem 2rem;
-            background: var(--tf-bg);
+        /* ── Problems ───────────────────────────────────────────── */
+        .problems-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem; max-width: 1200px; margin: 0 auto;
         }
+        .problem-card {
+            background: var(--tf-bg); border-radius: 16px; padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, border-color 0.2s;
+        }
+        .problem-card:hover { transform: translateY(-4px); border-color: var(--tf-accent); }
+        .problem-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .problem-card h3 { font-size: 1.25rem; margin-bottom: 0.75rem; }
+        .problem-card p { color: var(--tf-muted); font-size: 0.95rem; }
+
+        /* ── Solutions ──────────────────────────────────────────── */
         .solutions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            max-width: 1200px;
-            margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem; max-width: 1200px; margin: 0 auto;
         }
         .solution-card {
             background: linear-gradient(135deg, rgba(76,201,240,0.1), rgba(123,97,255,0.1));
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 12px; padding: 1.5rem;
             border: 1px solid rgba(76,201,240,0.2);
         }
-        .solution-card h4 {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
-            color: var(--tf-accent);
-        }
-        .solution-card p {
-            color: var(--tf-muted);
-            font-size: 0.9rem;
-        }
+        .solution-card h4 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--tf-accent); }
+        .solution-card p { color: var(--tf-muted); font-size: 0.9rem; }
 
-        /* Tenants Section */
-        .tenants {
-            padding: 5rem 2rem;
-            background: var(--tf-bg-2);
+        /* ── Organizations grid ─────────────────────────────────── */
+        .org-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem; max-width: 1100px; margin: 0 auto;
         }
-        .tenant-card {
-            background: var(--tf-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            max-width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
+        .org-card {
+            background: var(--tf-bg); border-radius: 16px; padding: 1.75rem;
             border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column; gap: 1rem;
         }
-        .tenant-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
+        .org-card:hover {
+            transform: translateY(-4px); border-color: var(--tf-accent);
+            box-shadow: 0 8px 32px rgba(76,201,240,0.1);
         }
-        .tenant-name {
-            font-size: 1.5rem;
-            font-weight: 700;
+        .org-card-name { font-size: 1.35rem; font-weight: 700; }
+        .org-card-stats {
+            display: flex; gap: 1.25rem; flex-wrap: wrap;
         }
-        .tenant-stats {
-            display: flex;
-            gap: 1.5rem;
+        .org-card-stat { text-align: center; }
+        .org-card-stat-val { font-size: 1.25rem; font-weight: 700; color: var(--tf-accent); }
+        .org-card-stat-lbl { font-size: 0.7rem; color: var(--tf-muted); text-transform: uppercase; }
+        .org-card-links { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: auto; }
+        .org-card-links a {
+            padding: 0.6rem 1.1rem; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; text-decoration: none; transition: opacity 0.2s;
         }
-        .tenant-stat {
+        .org-link-portal {
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2)); color: #fff;
+        }
+        .org-link-staff {
+            background: rgba(255,255,255,0.08); color: var(--tf-text);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .org-link-staff:hover { border-color: var(--tf-accent); }
+
+        /* ── Recruitment Drives ─────────────────────────────────── */
+        .drives-container { max-width: 1100px; margin: 0 auto; }
+        .drive-card {
+            background: var(--tf-bg); border-radius: 16px; padding: 1.75rem;
+            margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s, border-color 0.2s;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            gap: 1.5rem; flex-wrap: wrap;
+        }
+        .drive-card:hover { transform: translateY(-2px); border-color: var(--tf-accent); }
+        .drive-main { flex: 1; min-width: 280px; }
+        .drive-org {
+            font-size: 0.8rem; font-weight: 600; color: var(--tf-accent);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem;
+        }
+        .drive-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .drive-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--tf-muted); }
+        .drive-meta strong { color: var(--tf-text); }
+        .drive-closing { color: var(--tf-warning) !important; font-weight: 600; }
+        .drive-posts {
+            display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;
+        }
+        .drive-post-chip {
+            background: rgba(76,201,240,0.12); padding: 0.35rem 0.85rem;
+            border-radius: 6px; font-size: 0.8rem;
+        }
+        .drive-post-chip strong { color: var(--tf-accent); }
+        .drive-actions {
+            display: flex; flex-direction: column; gap: 0.5rem;
+            align-items: flex-end; justify-content: center;
+        }
+        .drive-actions a {
+            padding: 0.65rem 1.25rem; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; text-decoration: none; transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .drive-apply {
+            background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2)); color: #fff;
+        }
+        .drive-view {
+            background: rgba(255,255,255,0.08); color: var(--tf-text);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .drive-view:hover { border-color: var(--tf-accent); }
+
+        /* ── Onboard CTA ────────────────────────────────────────── */
+        .cta-section {
             text-align: center;
+            background: linear-gradient(135deg, var(--tf-bg) 0%, var(--tf-bg-3) 100%);
         }
-        .tenant-stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--tf-accent);
+        .cta-section h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
+        .cta-section p {
+            color: var(--tf-muted); max-width: 550px; margin: 0 auto 2rem; font-size: 1.05rem;
         }
-        .tenant-stat-label {
-            font-size: 0.75rem;
-            color: var(--tf-muted);
-            text-transform: uppercase;
-        }
-        .portal-link {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
+        .cta-btn {
+            display: inline-block; padding: 1rem 2.5rem;
             background: linear-gradient(135deg, var(--tf-accent), var(--tf-accent-2));
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: opacity 0.2s;
+            color: white; text-decoration: none; border-radius: 12px;
+            font-weight: 700; font-size: 1.1rem; transition: opacity 0.2s;
         }
-        .portal-link:hover { opacity: 0.9; }
+        .cta-btn:hover { opacity: 0.9; }
 
-        .advt-list {
-            margin-top: 1rem;
-        }
-        .advt-item {
-            background: var(--tf-bg-2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        .advt-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .advt-number {
-            font-weight: 700;
-            color: var(--tf-accent);
-        }
-        .advt-title {
-            color: var(--tf-text);
-        }
-        .advt-closing {
-            font-size: 0.85rem;
-            color: var(--tf-warning);
-        }
-        .post-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-        .post-chip {
-            background: rgba(76,201,240,0.15);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
-        .post-chip strong {
-            color: var(--tf-accent);
-        }
-
-        /* Footer */
+        /* ── Footer ─────────────────────────────────────────────── */
         footer {
-            background: var(--tf-bg);
-            padding: 3rem 2rem;
-            text-align: center;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            background: var(--tf-bg); padding: 3rem 2rem;
+            text-align: center; border-top: 1px solid rgba(255,255,255,0.1);
         }
-        footer p {
-            color: var(--tf-muted);
-            font-size: 0.9rem;
-        }
+        footer p { color: var(--tf-muted); font-size: 0.9rem; }
 
-        /* Responsive */
+        /* ── Responsive ─────────────────────────────────────────── */
         @media (max-width: 768px) {
             .hero h1 { font-size: 2rem; }
             .hero-stats { flex-direction: column; gap: 1.5rem; }
-            .tenant-header { flex-direction: column; text-align: center; }
-            .tenant-stats { justify-content: center; }
+            .hero-btns { flex-direction: column; align-items: center; }
+            .drive-card { flex-direction: column; }
+            .drive-actions { flex-direction: row; align-items: stretch; }
+            .org-grid { grid-template-columns: 1fr; }
+            .tf-nav-links { gap: 0.75rem; }
+            .tf-nav-links a:not(.tf-nav-cta) { display: none; }
         }
     </style>
 </head>
 <body>
-    <!-- Hero Section -->
+    <!-- ── Fixed Nav ─────────────────────────────────────────────── -->
+    <nav class="tf-nav-bar">
+        <a href="/" class="tf-nav-brand">TalentFlow AI</a>
+        <div class="tf-nav-links">
+            <a href="#organizations">Organizations</a>
+            <a href="#drives">Recruitment Drives</a>
+            <a href="/login/">Staff Login</a>
+            <a href="/onboarding/" class="tf-nav-cta">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- ── Hero ──────────────────────────────────────────────────── -->
     <section class="hero">
         <div class="hero-content">
             <h1>TalentFlow AI</h1>
             <p>Intelligent recruitment platform powering public sector hiring across India. AI-driven screening, transparent processes, government-compliant workflows.</p>
+            <div class="hero-btns">
+                <a href="#drives" class="hero-btn-primary">View Open Drives ↓</a>
+                <a href="/onboarding/" class="hero-btn-outline">Onboard Your Organization</a>
+            </div>
             <div class="hero-stats">
                 <div class="stat">
                     <div class="stat-number">{{ tenants|length }}</div>
                     <div class="stat-label">Organizations</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">{% for t in tenants %}{{ t.total_vacancies|add:0 }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</div>
+                    <div class="stat-number">{{ all_drives|length }}</div>
+                    <div class="stat-label">Active Drives</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{% for t in tenants %}{{ t.total_vacancies }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</div>
                     <div class="stat-label">Open Positions</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">{% for t in tenants %}{{ t.total_applications|add:0 }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</div>
-                    <div class="stat-label">Applications Processed</div>
+                    <div class="stat-number">{% for t in tenants %}{{ t.total_applications }}{% if not forloop.last %}+{% endif %}{% empty %}0{% endfor %}</div>
+                    <div class="stat-label">Applications</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Problems Section -->
-    <section class="problems">
+    <!-- ── Problems ──────────────────────────────────────────────── -->
+    <section class="section-pad section-dark">
         <h2 class="section-title">The Recruitment Challenge</h2>
         <p class="section-subtitle">Public sector recruitment faces unique challenges that traditional systems can't solve</p>
         <div class="problems-grid">
@@ -343,19 +330,19 @@
             </div>
             <div class="problem-card">
                 <div class="problem-icon">🔒</div>
-                <h3>Data Security & Privacy</h3>
+                <h3>Data Security &amp; Privacy</h3>
                 <p>Aadhaar, PAN, and personal documents require DPDP Act compliance with encryption at rest and access controls.</p>
             </div>
             <div class="problem-card">
                 <div class="problem-icon">📝</div>
-                <h3>Audit & Transparency</h3>
+                <h3>Audit &amp; Transparency</h3>
                 <p>RTI requirements demand complete audit trails for every decision — who changed what, when, and why.</p>
             </div>
         </div>
     </section>
 
-    <!-- Solutions Section -->
-    <section class="solutions">
+    <!-- ── Solutions ─────────────────────────────────────────────── -->
+    <section class="section-pad">
         <h2 class="section-title">How TalentFlow Solves It</h2>
         <p class="section-subtitle">AI-powered automation with human oversight at every step</p>
         <div class="solutions-grid">
@@ -394,88 +381,93 @@
         </div>
     </section>
 
-    <!-- Tenants Section -->
-    <section class="tenants">
-        <h2 class="section-title">Our Partner Organizations</h2>
-        <p class="section-subtitle">Click on an organization to view their recruitment portal or staff dashboard</p>
+    <!-- ── Organizations Onboarded ───────────────────────────────── -->
+    <section id="organizations" class="section-pad section-dark">
+        <h2 class="section-title">Organizations Onboarded</h2>
+        <p class="section-subtitle">Government enterprises using TalentFlow AI for their recruitment operations</p>
 
-        {% for tenant in tenants %}
-        <div class="tenant-card">
-            <div class="tenant-header">
-                <div>
-                    <div class="tenant-name">{{ tenant.name }}</div>
-                    <div class="tenant-stats">
-                        <div class="tenant-stat">
-                            <div class="tenant-stat-value">{{ tenant.total_vacancies }}</div>
-                            <div class="tenant-stat-label">Vacancies</div>
-                        </div>
-                        <div class="tenant-stat">
-                            <div class="tenant-stat-value">{{ tenant.total_applications }}</div>
-                            <div class="tenant-stat-label">Applications</div>
-                        </div>
-                        <div class="tenant-stat">
-                            <div class="tenant-stat-value">{{ tenant.offered_count }}</div>
-                            <div class="tenant-stat-label">Offers Made</div>
-                        </div>
-                        <div class="tenant-stat">
-                            <div class="tenant-stat-value">{{ tenant.joined_count }}</div>
-                            <div class="tenant-stat-label">Joined</div>
-                        </div>
+        <div class="org-grid">
+            {% for tenant in tenants %}
+            <div class="org-card">
+                <div class="org-card-name">{{ tenant.name }}</div>
+                <div class="org-card-stats">
+                    <div class="org-card-stat">
+                        <div class="org-card-stat-val">{{ tenant.total_vacancies }}</div>
+                        <div class="org-card-stat-lbl">Vacancies</div>
+                    </div>
+                    <div class="org-card-stat">
+                        <div class="org-card-stat-val">{{ tenant.total_applications }}</div>
+                        <div class="org-card-stat-lbl">Applications</div>
+                    </div>
+                    <div class="org-card-stat">
+                        <div class="org-card-stat-val">{{ tenant.offered_count }}</div>
+                        <div class="org-card-stat-lbl">Offers</div>
+                    </div>
+                    <div class="org-card-stat">
+                        <div class="org-card-stat-val">{{ tenant.joined_count }}</div>
+                        <div class="org-card-stat-lbl">Joined</div>
                     </div>
                 </div>
-                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-                    <a href="{{ tenant.portal_url }}/portal/" class="portal-link">Candidate Portal →</a>
-                    <a href="{{ tenant.portal_url }}/login/" class="portal-link" style="background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0.08));border:1px solid rgba(255,255,255,0.2);">Staff Login</a>
+                <div class="org-card-links">
+                    <a href="{{ tenant.portal_url }}/portal/" class="org-link-portal">Candidate Portal →</a>
+                    <a href="{{ tenant.portal_url }}/login/" class="org-link-staff">Staff Login</a>
                 </div>
             </div>
+            {% empty %}
+            <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--tf-muted);">
+                <p>No organizations onboarded yet. <a href="/onboarding/" style="color:var(--tf-accent);">Be the first →</a></p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
 
-            {% if tenant.advertisements %}
-            <div class="advt-list">
-                <h4 style="margin-bottom: 1rem; color: var(--tf-muted);">Active Advertisements</h4>
-                {% for advt in tenant.advertisements %}
-                <div class="advt-item">
-                    <div class="advt-header">
-                        <div>
-                            <span class="advt-number">{{ advt.number }}</span>
-                            <span class="advt-title"> — {{ advt.title }}</span>
-                        </div>
-                        <span class="advt-closing">Closes: {{ advt.closing_date|date:"d M Y" }}</span>
+    <!-- ── Ongoing Recruitment Drives ────────────────────────────── -->
+    <section id="drives" class="section-pad">
+        <h2 class="section-title">Ongoing Recruitment Drives</h2>
+        <p class="section-subtitle">Active hiring campaigns across all partner organizations — click to view details or apply</p>
+
+        <div class="drives-container">
+            {% for drive in all_drives %}
+            <div class="drive-card">
+                <div class="drive-main">
+                    <div class="drive-org">{{ drive.org_name }}</div>
+                    <div class="drive-title">{{ drive.number }} — {{ drive.title }}</div>
+                    <div class="drive-meta">
+                        <span><strong>{{ drive.total_vacancies }}</strong> position{{ drive.total_vacancies|pluralize }}</span>
+                        <span class="drive-closing">Closes: {{ drive.closing_date|date:"d M Y" }}</span>
                     </div>
-                    <div class="post-list">
-                        {% for post in advt.posts %}
-                        <div class="post-chip">
-                            <strong>{{ post.code }}</strong> {{ post.name }} — {{ post.vacancies }} vacancy{{ post.vacancies|pluralize }}
+                    <div class="drive-posts">
+                        {% for post in drive.posts %}
+                        <div class="drive-post-chip">
+                            <strong>{{ post.code }}</strong> {{ post.name }} ({{ post.vacancies }})
                         </div>
                         {% endfor %}
                     </div>
-                    <div style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--tf-success);">
-                        Total: {{ advt.total_vacancies }} position{{ advt.total_vacancies|pluralize }}
-                    </div>
                 </div>
-                {% endfor %}
+                <div class="drive-actions">
+                    <a href="{{ drive.portal_url }}/portal/apply/{{ drive.id }}/" class="drive-apply">Apply Now →</a>
+                    <a href="{{ drive.portal_url }}/login/" class="drive-view">Staff View</a>
+                </div>
             </div>
-            {% else %}
-            <p style="color: var(--tf-muted); font-style: italic;">No active advertisements at this time.</p>
-            {% endif %}
+            {% empty %}
+            <div style="text-align:center;padding:3rem;color:var(--tf-muted);">
+                <p>No active recruitment drives at the moment. Check back soon!</p>
+            </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div style="text-align: center; padding: 3rem; color: var(--tf-muted);">
-            <p>No organizations are currently recruiting. Check back soon!</p>
-        </div>
-        {% endfor %}
     </section>
 
-    <!-- Onboard CTA -->
-    <section style="padding:5rem 2rem;background:linear-gradient(135deg,var(--tf-bg) 0%,var(--tf-bg-3) 100%);text-align:center;">
-        <h2 style="font-size:2rem;font-weight:800;margin-bottom:1rem;">Ready to Modernize Your Recruitment?</h2>
-        <p style="color:var(--tf-muted);max-width:550px;margin:0 auto 2rem;font-size:1.05rem;">Get your own isolated recruitment portal in minutes. AI-powered screening, government-compliant workflows, full audit trails.</p>
-        <a href="/onboarding/" style="display:inline-block;padding:1rem 2.5rem;background:linear-gradient(135deg,var(--tf-accent),var(--tf-accent-2));color:white;text-decoration:none;border-radius:12px;font-weight:700;font-size:1.1rem;transition:opacity 0.2s;">Onboard Your Organization →</a>
+    <!-- ── Onboard CTA ───────────────────────────────────────────── -->
+    <section class="section-pad cta-section">
+        <h2>Ready to Modernize Your Recruitment?</h2>
+        <p>Get your own isolated recruitment portal in minutes. AI-powered screening, government-compliant workflows, full audit trails.</p>
+        <a href="/onboarding/" class="cta-btn">Onboard Your Organization →</a>
     </section>
 
-    <!-- Footer -->
+    <!-- ── Footer ────────────────────────────────────────────────── -->
     <footer>
         <p>TalentFlow AI — Intelligent Recruitment Platform</p>
-        <p style="margin-top: 0.5rem; font-size: 0.8rem;">Built for the public sector. Transparent. Compliant. Efficient.</p>
+        <p style="margin-top:0.5rem;font-size:0.8rem;">Built for the public sector. Transparent. Compliant. Efficient.</p>
     </footer>
 </body>
 </html>
