@@ -1,86 +1,67 @@
 #!/bin/bash
-set -e
+# TalentFlowAI — Azure App Service startup script.
+# Runs on every container start. Must be idempotent.
 
 export DJANGO_SETTINGS_MODULE=config.settings
 
 echo "========================================"
 echo "TalentFlowAI Starting..."
 echo "========================================"
-echo "Working directory: $(pwd)"
-echo "Python: $(python --version 2>&1)"
-echo "PORT: ${PORT:-8000}"
-
-# Install dependencies
+echo "  Working directory: $(pwd)"
+echo "  Python:            $(python --version 2>&1)"
+echo "  PORT:              ${PORT:-8000}"
 echo ""
-echo "[1/6] Installing dependencies..."
-pip install --upgrade pip --quiet
-pip install -r requirements.txt --quiet
-echo "[1/6] Done."
 
-# Run shared (public-schema) migrations
+# ── 1. Install dependencies ──────────────────────────────────────────────────
+echo "[1/7] Installing dependencies..."
+pip install --upgrade pip --quiet 2>&1 | tail -1
+pip install -r requirements.txt --quiet 2>&1 | tail -3
+if [ $? -ne 0 ]; then
+    echo "  WARNING: pip install had errors — continuing with what's available"
+fi
+echo "[1/7] Done."
 echo ""
-echo "[2/6] Running shared migrations..."
-python manage.py migrate_schemas --shared --noinput
-echo "[2/6] Done."
 
-# Create neepco tenant + domain if they don't exist
+# ── 2. Shared (public-schema) migrations ─────────────────────────────────────
+echo "[2/7] Running shared migrations..."
+python manage.py migrate_schemas --shared --noinput 2>&1 | tail -5
+echo "[2/7] Done."
 echo ""
-echo "[3/6] Ensuring neepco tenant and domain exist..."
-python -c "
-import os, django, sys
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-django.setup()
 
-from django.db import connection
-from django_tenants.utils import schema_context, get_public_schema_name
-from tenants.models import Client, Domain
-
-# Ensure we're in the public schema
-connection.set_schema_to_public()
-
-# Create tenant if missing
-tenant, created = Client.objects.get_or_create(
-    schema_name='neepco',
-    defaults={'name': 'NEEPCO', 'code': 'neepco'}
-)
-if created:
-    tenant.create_schema(check_if_exists=True)
-    print(f'  Created neepco tenant (id={tenant.pk})')
-else:
-    print(f'  Neepco tenant already exists (id={tenant.pk})')
-
-# Register Azure domain
-domain_name = os.environ.get('AZURE_DOMAIN', 'tf-neepco-prod.azurewebsites.net')
-domain, d_created = Domain.objects.get_or_create(
-    domain=domain_name,
-    defaults={'tenant': tenant, 'is_primary': True}
-)
-if d_created:
-    print(f'  Created domain: {domain_name}')
-else:
-    print(f'  Domain already exists: {domain_name}')
-
-# Verify domain is linked to tenant
-assert domain.tenant_id == tenant.pk, 'Domain tenant mismatch!'
-print('  Domain verified OK')
-"
-echo "[3/6] Done."
-
-# Run all tenant schema migrations
+# ── 3. Create neepco tenant + domain ─────────────────────────────────────────
+echo "[3/7] Ensuring neepco tenant and domain..."
+python manage.py setup_tenant 2>&1
+echo "[3/7] Done."
 echo ""
-echo "[4/6] Running tenant migrations..."
-python manage.py migrate_schemas --noinput
-echo "[4/6] Done."
 
-# Collect static files
+# ── 4. Tenant schema migrations ──────────────────────────────────────────────
+echo "[4/7] Running tenant migrations..."
+python manage.py migrate_schemas --noinput 2>&1 | tail -5
+echo "[4/7] Done."
 echo ""
-echo "[5/6] Collecting static files..."
-python manage.py collectstatic --noinput 2>/dev/null || echo "  collectstatic skipped (no static files)"
-echo "[5/6] Done."
 
-# Start gunicorn
+# ── 5. Seed staff users ──────────────────────────────────────────────────────
+echo "[5/7] Seeding staff users..."
+python manage.py seed_staff_users 2>&1
+echo "[5/7] Done."
 echo ""
-echo "[6/6] Starting gunicorn on port ${PORT:-8000}..."
+
+# ── 6. Seed cloud test data (advertisements, posts, candidates, applications) ─
+echo "[6/7] Seeding test data..."
+python manage.py seed_cloud_data 2>&1
+echo "[6/7] Done."
+echo ""
+
+# ── 7. Collect static files ──────────────────────────────────────────────────
+echo "[7/7] Collecting static files..."
+python manage.py collectstatic --noinput 2>/dev/null
+echo "[7/7] Done."
+echo ""
+
+# ── Start gunicorn ────────────────────────────────────────────────────────────
+echo "========================================"
+echo "Starting gunicorn on port ${PORT:-8000}..."
+echo "========================================"
 exec gunicorn config.wsgi:application \
     --bind 0.0.0.0:${PORT:-8000} \
     --workers 2 \

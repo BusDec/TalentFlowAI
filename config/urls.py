@@ -3,8 +3,8 @@
 import json
 
 from django.contrib import admin
-from django.http import HttpResponse
-from django.urls import path, include
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import path, include, reverse
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.i18n import JavaScriptCatalog
@@ -21,11 +21,24 @@ def _health(request):
     )
 
 
+def _root(request):
+    """Public root: authenticated staff → dashboard, anonymous → landing."""
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("dashboard"))
+    return HttpResponseRedirect("/landing/")
+
+
+def _landing(request):
+    from config.views import landing_page
+    return landing_page(request)
+
+
 urlpatterns = [
     path("health/", _health, name="health"),
+    path("landing/", _landing, name="landing"),
     path("admin/", admin.site.urls),
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
-    path("landing/", lambda r: __import__("config.views", fromlist=["landing_page"]).landing_page(r), name="landing"),
+    path("", _root, name="root"),
     path("", include("recruitment.urls")),
     path("", include("accounts.urls")),
     path("", include("portal.urls")),

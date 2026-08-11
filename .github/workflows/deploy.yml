@@ -25,14 +25,16 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           startup-command: 'bash startup.sh'
 
+      # startup.sh takes 3-5 min (pip install + migrations + seeding)
       - name: Wait for app startup
-        run: sleep 60
+        run: |
+          echo "Waiting 5 min for startup.sh to complete..."
+          sleep 300
 
       - name: Smoke test
         run: |
-          for path in / /landing/ /login/; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-              "https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net${path}" \
-              --max-time 15 || echo "000")
+          BASE="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          for path in /health/ /landing/ /login/; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${BASE}${path}" --max-time 30 || echo "000")
             echo "$path → $STATUS"
           done
