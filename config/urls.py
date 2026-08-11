@@ -14,11 +14,11 @@ from config.views import landing_page
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
+    path("landing/", landing_page, name="landing"),
     path("", include("recruitment.urls")),
     path("", include("accounts.urls")),
     path("", include("portal.urls")),
     path("", include("profiles.urls")),
-    path("landing/", landing_page, name="landing"),
 ]
 
 if settings.DEBUG:
