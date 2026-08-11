@@ -12,12 +12,17 @@ echo "  Python:            $(python --version 2>&1)"
 echo "  PORT:              ${PORT:-8000}"
 echo ""
 
-# ── 1. Install dependencies ──────────────────────────────────────────────────
-echo "[1/7] Installing dependencies..."
-pip install --upgrade pip --quiet 2>&1 | tail -1
-pip install -r requirements.txt --quiet 2>&1 | tail -3
-if [ $? -ne 0 ]; then
-    echo "  WARNING: pip install had errors — continuing with what's available"
+# ── 1. Install dependencies (skip if Django already importable) ───────────────
+echo "[1/7] Checking dependencies..."
+if python -c "import django" 2>/dev/null; then
+    echo "  Django already installed — skipping pip install."
+else
+    echo "  Installing dependencies..."
+    pip install --upgrade pip --quiet 2>&1 | tail -1
+    pip install -r requirements.txt --quiet 2>&1 | tail -5
+    if [ $? -ne 0 ]; then
+        echo "  WARNING: pip install had errors."
+    fi
 fi
 echo "[1/7] Done."
 echo ""
@@ -28,7 +33,7 @@ python manage.py migrate_schemas --shared --noinput 2>&1 | tail -5
 echo "[2/7] Done."
 echo ""
 
-# ── 3. Create neepco tenant + domain ─────────────────────────────────────────
+# ── 3. Create neepco tenant + domain + OrgProfile ────────────────────────────
 echo "[3/7] Ensuring neepco tenant and domain..."
 python manage.py setup_tenant 2>&1
 echo "[3/7] Done."
@@ -46,7 +51,7 @@ python manage.py seed_staff_users 2>&1
 echo "[5/7] Done."
 echo ""
 
-# ── 6. Seed cloud test data (advertisements, posts, candidates, applications) ─
+# ── 6. Seed cloud test data ──────────────────────────────────────────────────
 echo "[6/7] Seeding test data..."
 python manage.py seed_cloud_data 2>&1
 echo "[6/7] Done."
