@@ -24,3 +24,15 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           startup-command: 'bash startup.sh'
+
+      - name: Wait for app startup
+        run: sleep 60
+
+      - name: Smoke test
+        run: |
+          for path in / /landing/ /login/; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              "https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net${path}" \
+              --max-time 15 || echo "000")
+            echo "$path → $STATUS"
+          done

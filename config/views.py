@@ -64,9 +64,18 @@ def landing_page(request):
                         from tenants.models import Domain
 
                         domain = Domain.objects.filter(tenant=client, is_primary=True).first()
-                        tenant_data["portal_domain"] = (
-                            domain.domain if domain else f"{client.schema_name}.localhost"
-                        )
+                        if domain:
+                            dom = domain.domain
+                            # Production domains use HTTPS; localhost uses HTTP
+                            if "localhost" in dom or "127.0.0.1" in dom:
+                                tenant_data["portal_domain"] = dom
+                                tenant_data["portal_url"] = f"http://{dom}:8000"
+                            else:
+                                tenant_data["portal_domain"] = dom
+                                tenant_data["portal_url"] = f"https://{dom}"
+                        else:
+                            tenant_data["portal_domain"] = f"{client.schema_name}.localhost:8000"
+                            tenant_data["portal_url"] = f"http://{client.schema_name}.localhost:8000"
                 except Exception:
                     pass
                 tenants.append(tenant_data)

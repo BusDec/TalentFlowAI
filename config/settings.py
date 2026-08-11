@@ -99,6 +99,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # ---------------------------------------------------------------------------
 # Database (PostgreSQL required for django-tenants)
 # ---------------------------------------------------------------------------
+_DB_SSLMODE = os.getenv("DB_SSLMODE", "")
 DATABASES = {
     "default": {
         "ENGINE": "django_tenants.postgresql_backend",
@@ -107,6 +108,7 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
+        **({"OPTIONS": {"sslmode": _DB_SSLMODE}} if _DB_SSLMODE else {}),
     }
 }
 
