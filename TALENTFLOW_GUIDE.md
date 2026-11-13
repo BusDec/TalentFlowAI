@@ -12,13 +12,13 @@ The hosted demo is a single-tenant deployment of the NEEPCO demo on Vercel:
 
 | Page | URL |
 |---|---|
-| **Landing page** | https://talentflow-ai.vercel.app/landing/ |
-| **HR Dashboard** | https://talentflow-ai.vercel.app/ |
-| **HR Login** | https://talentflow-ai.vercel.app/login/ |
-| **Django Admin** | https://talentflow-ai.vercel.app/admin/ |
-| **Candidate Portal** | https://talentflow-ai.vercel.app/portal/login/ |
-| **Candidate Register** | https://talentflow-ai.vercel.app/portal/register/ |
-| **Health + OCR check** | https://talentflow-ai.vercel.app/health/ |
+| **Landing page** | https://talentflow-ai-business-decisions-projects.vercel.app/landing/ |
+| **HR Dashboard** | https://talentflow-ai-business-decisions-projects.vercel.app/ |
+| **HR Login** | https://talentflow-ai-business-decisions-projects.vercel.app/login/ |
+| **Django Admin** | https://talentflow-ai-business-decisions-projects.vercel.app/admin/ |
+| **Candidate Portal** | https://talentflow-ai-business-decisions-projects.vercel.app/portal/login/ |
+| **Candidate Register** | https://talentflow-ai-business-decisions-projects.vercel.app/portal/register/ |
+| **Health + OCR check** | https://talentflow-ai-business-decisions-projects.vercel.app/health/ |
 
 Production stores shared tables in the `talentflow` schema and tenant tables
 in `tf_neepco` inside the existing Supabase project. See
