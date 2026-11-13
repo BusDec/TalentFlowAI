@@ -124,6 +124,7 @@ python manage.py migrate_schemas --noinput
 python manage.py seed_staff_users
 python manage.py seed_cloud_data
 python manage.py seed_portal_demo
+python manage.py seed_demo_data
 for cmd in simulate_roster_panel simulate_duplicates_consents \
            simulate_internal_posting simulate_workforce_planning simulate_talent_data; do
   python manage.py tenant_command "$cmd" --schema=tf_neepco
@@ -132,6 +133,21 @@ done
 
 Note: `setup_tenant` creates the `tf_neepco` schema and runs its migrations the
 first time. Re-running is idempotent.
+
+### Fill every workflow with demo data
+
+`seed_demo_data` adds the records that the base seeds do not cover — candidate
+profiles and academics, document verification, fee payments, DoPT rosters,
+requisitions, interview panels and scores, litigation, joining/probation,
+grievances, medical and police checks, communications, audit history, duplicate
+flags and notification templates. It is idempotent and uses generated
+placeholder PDFs, so no binary demo files need to be committed:
+
+```bash
+python manage.py seed_demo_data
+# or, when storage is not configured:
+python manage.py seed_demo_data --no-files
+```
 
 ## Deploying
 

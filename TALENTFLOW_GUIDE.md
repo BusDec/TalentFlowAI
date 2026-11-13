@@ -158,6 +158,12 @@ Run management commands inside the NEEPCO tenant:
 # Full data rebuild (all phases)
 python manage.py tenant_command simulate_all --schema=neepco
 
+# Fill every demo workflow (documents, fees, requisitions, interviews,
+# litigation, probation, grievances, medical/police checks, notifications).
+# Idempotent — safe to re-run; reads DEMO_TENANT_SCHEMA from the environment.
+python manage.py seed_demo_data
+python manage.py seed_demo_data --no-files   # skip placeholder PDF uploads
+
 # Individual simulations
 python manage.py tenant_command simulate_neepco_advt        --schema=neepco   # Phase I recruitment
 python manage.py tenant_command simulate_roster_panel       --schema=neepco   # roster + panels
@@ -194,7 +200,23 @@ python manage.py runserver 127.0.0.1:8000
 | Portal users | 5 |
 | Roster matrix rows | 60 |
 | Panel entries | 43 |
-| Consents | 10 |
+| Candidate profiles / academics | 70 / 234 |
+| Work experience / exam disclosures | 47 / 24 |
+| Documents / verification records | 40 / 40 |
+| Fee payments | 126 |
+| DoPT 100-point rosters | 12 |
+| Vacancy requisitions | 6 |
+| Interview panels / slots / scores | 4 / 15 / 36 |
+| Litigation cases | 4 |
+| Joining reports / probation records | 5 / 5 |
+| Grievances | 5 |
+| Medical exams / police verifications | 12 / 12 |
+| Communication logs | 248 |
+| Audit events | 209 |
+| Duplicate flags / eligibility overrides | 4 / 3 |
+| Consent records | 25 |
+| Notification templates | 6 |
+| Corrigenda | 2 |
 | Retirement forecast | 7 years |
 | Recruitment batches | 3 |
 | Skills | 12 |
