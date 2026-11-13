@@ -86,11 +86,11 @@ See `.env.production` for the full list. The important ones:
 
 ```
 DJANGO_DEBUG=False
-DJANGO_ALLOWED_HOSTS=talentflow-ai-business-decisions-projects.vercel.app,.vercel.app
-CSRF_TRUSTED_ORIGINS=https://talentflow-ai-business-decisions-projects.vercel.app,https://*.vercel.app
+DJANGO_ALLOWED_HOSTS=talentflow-ai-liard.vercel.app,.vercel.app
+CSRF_TRUSTED_ORIGINS=https://talentflow-ai-liard.vercel.app,https://*.vercel.app
 PUBLIC_SCHEMA_NAME=talentflow
 DEMO_TENANT_SCHEMA=tf_neepco
-PRIMARY_DOMAIN=talentflow-ai-business-decisions-projects.vercel.app
+PRIMARY_DOMAIN=talentflow-ai-liard.vercel.app
 DB_NAME=postgres
 DB_USER=talentflow_app.ovqmhbnrkdwuumpyxntf
 DB_HOST=aws-1-ap-south-1.pooler.supabase.com
