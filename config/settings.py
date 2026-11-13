@@ -200,15 +200,37 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Supabase Storage (S3-compatible). Generate an access key pair in the
-# Supabase dashboard: Storage -> S3. When these are unset, local disk is used.
+# Supabase Storage:
+#  - REST backend: publishable key + a private header enforced by an RLS policy
+#    on storage.objects. This is the default in production.
+#  - S3 backend: optional, if you later generate Storage -> S3 access keys.
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_STORAGE_ACCESS_TOKEN = os.getenv("SUPABASE_STORAGE_ACCESS_TOKEN", "")
+SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "talentflow-media")
 SUPABASE_S3_ENDPOINT = os.getenv("SUPABASE_S3_ENDPOINT", "")
 SUPABASE_S3_REGION = os.getenv("SUPABASE_S3_REGION", "ap-south-1")
-SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "talentflow-media")
 SUPABASE_S3_ACCESS_KEY = os.getenv("SUPABASE_S3_ACCESS_KEY_ID", "")
 SUPABASE_S3_SECRET_KEY = os.getenv("SUPABASE_S3_SECRET_ACCESS_KEY", "")
 
-if SUPABASE_S3_ENDPOINT and SUPABASE_S3_ACCESS_KEY and SUPABASE_S3_SECRET_KEY:
+_staticfiles_storage = {
+    "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+}
+
+if SUPABASE_URL and SUPABASE_ANON_KEY and SUPABASE_STORAGE_ACCESS_TOKEN:
+    STORAGES = {
+        "default": {
+            "BACKEND": "config.supabase_storage.SupabaseStorage",
+            "OPTIONS": {
+                "base_url": SUPABASE_URL,
+                "bucket_name": SUPABASE_STORAGE_BUCKET,
+                "api_key": SUPABASE_ANON_KEY,
+                "access_token": SUPABASE_STORAGE_ACCESS_TOKEN,
+            },
+        },
+        "staticfiles": _staticfiles_storage,
+    }
+elif SUPABASE_S3_ENDPOINT and SUPABASE_S3_ACCESS_KEY and SUPABASE_S3_SECRET_KEY:
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3.S3Storage",
@@ -226,9 +248,7 @@ if SUPABASE_S3_ENDPOINT and SUPABASE_S3_ACCESS_KEY and SUPABASE_S3_SECRET_KEY:
                 "file_overwrite": False,
             },
         },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
+        "staticfiles": _staticfiles_storage,
     }
 else:
     # Local disk for development and for build-time collectstatic.
@@ -236,9 +256,7 @@ else:
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
         },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
+        "staticfiles": _staticfiles_storage,
     }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

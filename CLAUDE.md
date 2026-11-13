@@ -63,13 +63,14 @@ The DB engine is `django_tenants.postgresql_backend` with `TenantSyncRouter`. Te
 Production runs on **Vercel Container Runtime** (`Dockerfile.vercel`, which installs
 Tesseract for OCR) plus an existing **Supabase** project. Shared tables live in
 the `talentflow` schema and tenant tables in `tf_neepco` — set by
-`PUBLIC_SCHEMA_NAME` and `DEMO_TENANT_SCHEMA`. Uploads use Supabase Storage (S3).
+`PUBLIC_SCHEMA_NAME` and `DEMO_TENANT_SCHEMA`. Uploads use Supabase Storage through
+the REST backend (`config/supabase_storage.py`; no S3 keys required).
 See `docs/VERCEL_SUPABASE_DEPLOYMENT.md`.
 
 ## Gotchas
 
 - **Access via hostname, never `127.0.0.1`** — django-tenants routes by domain, so `neepco.localhost:8000` for the demo tenant, `localhost:8000` for public. A hosts-file entry already exists on this machine. Production maps the Vercel hostname to `tf_neepco`.
-- **Remote storage:** never call `FileField.path` in code that may run in production. Use `agents.file_access.local_path(...)` so S3-backed files are downloaded to a temp file first.
+- **Remote storage:** never call `FileField.path` in code that may run in production. Use `agents.file_access.local_path(...)` so remote files are downloaded to a temp file first.
 - `.env` is git-ignored and holds the only secrets (LLM key, DB creds). `.env.example` is the reference. Never put API keys in code or chat.
 - `Post.category_breakup` is a JSON dict like `{"ur": 2, "ews": 0, ...}` — a distinct structure from `RosterMatrix` rows (which carry per-category vacancy counts and fill state).
 - LLM features silently degrade to deterministic mode without a key — this is intended, not a bug.

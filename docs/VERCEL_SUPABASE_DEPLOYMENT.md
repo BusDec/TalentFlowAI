@@ -8,7 +8,7 @@
 | Database | Existing Supabase project `ovqmhbnrkdwuumpyxntf` (`ap-south-1`) |
 | Shared tables | `talentflow` schema (not `public`) |
 | Tenant tables | `tf_neepco` schema |
-| Uploaded files | Supabase Storage bucket `talentflow-media` (private, signed URLs) |
+| Uploaded files | Supabase Storage bucket `talentflow-media` (public-read URLs; writes gated by RLS) |
 | Background tasks | Celery eager mode inside the request (no worker) |
 | Static files | WhiteNoise, collected at image build time |
 
@@ -36,16 +36,49 @@ GRANT ALL ON SCHEMA talentflow TO talentflow_app;
 ALTER ROLE talentflow_app SET search_path = talentflow, public;
 ```
 
-Create the private bucket:
+Create the bucket (public-read for demo file URLs):
 
 ```sql
 INSERT INTO storage.buckets (id, name, public)
-VALUES ('talentflow-media', 'talentflow-media', false)
+VALUES ('talentflow-media', 'talentflow-media', true)
 ON CONFLICT (id) DO NOTHING;
 ```
 
-Generate Storage → S3 access keys in the Supabase dashboard, then add them to
-Vercel as `SUPABASE_S3_ACCESS_KEY_ID` and `SUPABASE_S3_SECRET_ACCESS_KEY`.
+Uploads and deletes use the publishable/anon key plus a private
+`x-talentflow-storage-key` header. The header value is enforced by RLS policies
+on `storage.objects`, so the public anon key alone cannot write:
+
+```sql
+-- replace <token> with a long random value stored in Vercel
+CREATE POLICY "talentflow_media_insert" ON storage.objects
+  FOR INSERT TO anon
+  WITH CHECK (bucket_id = 'talentflow-media'
+    AND coalesce(current_setting('request.headers', true), '{}')::json->>'x-talentflow-storage-key' = '<token>');
+
+CREATE POLICY "talentflow_media_select" ON storage.objects
+  FOR SELECT TO anon USING (bucket_id = 'talentflow-media');
+
+CREATE POLICY "talentflow_media_update" ON storage.objects
+  FOR UPDATE TO anon
+  USING (bucket_id = 'talentflow-media'
+    AND coalesce(current_setting('request.headers', true), '{}')::json->>'x-talentflow-storage-key' = '<token>')
+  WITH CHECK (bucket_id = 'talentflow-media'
+    AND coalesce(current_setting('request.headers', true), '{}')::json->>'x-talentflow-storage-key' = '<token>');
+
+CREATE POLICY "talentflow_media_delete" ON storage.objects
+  FOR DELETE TO anon
+  USING (bucket_id = 'talentflow-media'
+    AND coalesce(current_setting('request.headers', true), '{}')::json->>'x-talentflow-storage-key' = '<token>');
+```
+
+No S3 keys are needed. The Django backend is
+`config.supabase_storage.SupabaseStorage`. It uploads/deletes through the
+Storage REST API and returns public object URLs. Keep the token private; the
+bucket is public-read for the demo.
+
+If you prefer S3 credentials later, generate Storage → S3 keys and set
+`SUPABASE_S3_ACCESS_KEY_ID` / `SUPABASE_S3_SECRET_ACCESS_KEY`; the settings
+fall back to the S3 backend only when the REST variables are unset.
 
 ## Environment variables (Vercel)
 
@@ -64,8 +97,9 @@ DB_HOST=aws-1-ap-south-1.pooler.supabase.com
 DB_PORT=5432
 DB_SSLMODE=require
 DB_CONN_MAX_AGE=0
-SUPABASE_S3_ENDPOINT=https://ovqmhbnrkdwuumpyxntf.storage.supabase.co/storage/v1/s3
-SUPABASE_S3_REGION=ap-south-1
+SUPABASE_URL=https://ovqmhbnrkdwuumpyxntf.supabase.co
+SUPABASE_ANON_KEY=<legacy-anon-key>
+SUPABASE_STORAGE_ACCESS_TOKEN=<private-header-token>
 SUPABASE_STORAGE_BUCKET=talentflow-media
 PORT=8000
 ```
@@ -152,5 +186,6 @@ Staff: `admin` / `admin123` (superuser), `a.sharma` / `employee123`, etc.
 | `ENOTFOUND tenant/user` on the pooler | Use the `aws-1-ap-south-1` host and the `talentflow_app.<project-ref>` username. |
 | `must be able to SET ROLE` when creating the schema | `GRANT talentflow_app TO postgres;` first. |
 | OCR returns `failed` | Check `/health/` for `ocr: true`; confirm the deploy used `Dockerfile.vercel`, not the native Python runtime. |
-| Media uploads 404 / signed URL fails | Confirm the S3 keys and bucket name in Vercel; the bucket is private by design. |
+| Media uploads fail with 403 | Confirm `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_STORAGE_ACCESS_TOKEN` and the RLS policies; the token must match. |
+| Media URL 404 | The bucket is public-read; verify `storage.buckets.public = true` and the object path. |
 | Large upload rejected | Vercel caps function request bodies at 4.5 MB. |
