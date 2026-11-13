@@ -1,6 +1,7 @@
 """Root URL configuration for TalentFlow AI."""
 
 import json
+import shutil
 
 from django.contrib import admin
 from django.http import HttpResponse, HttpResponseRedirect
@@ -14,9 +15,16 @@ handler403 = "accounts.views.access_denied"
 
 
 def _health(request):
-    """Lightweight health check — no DB, no tenant lookup."""
+    """Lightweight health check — no DB, no tenant lookup.
+
+    Reports whether the OCR engine is present so the deployed container can
+    be verified from outside.
+    """
     return HttpResponse(
-        json.dumps({"status": "ok"}),
+        json.dumps({
+            "status": "ok",
+            "ocr": shutil.which("tesseract") is not None,
+        }),
         content_type="application/json",
     )
 

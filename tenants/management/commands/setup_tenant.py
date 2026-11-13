@@ -1,14 +1,15 @@
-"""Create or verify the NEEPCO tenant, its Azure domain, and OrgProfile.
+"""Create or verify the demo tenant, its domains, and OrgProfile.
 
-Idempotent — safe to run on every startup. Handles:
-  - Creating the neepco tenant schema if it doesn't exist
-  - Registering the Azure domain (from AZURE_DOMAIN env or default)
-  - Registering localhost domain for local dev
+Idempotent — safe to run on every deployment. Handles:
+  - Creating the demo tenant schema if it doesn't exist
+  - Registering PRIMARY_DOMAIN (e.g. the Vercel hostname) when provided
+  - Registering neepco.localhost for local development
   - Ensuring OrgProfile exists in the tenant schema
 """
 
 import os
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
 
@@ -16,70 +17,83 @@ from tenants.models import Client, Domain
 
 
 class Command(BaseCommand):
-    help = "Create/verify NEEPCO tenant, domains, and OrgProfile."
+    help = "Create/verify the demo tenant, domains, and OrgProfile."
 
     def handle(self, *args, **options):
+        schema_name = settings.DEMO_TENANT_SCHEMA
         connection.set_schema_to_public()
 
         # ── Tenant ────────────────────────────────────────────────────────────
         tenant, created = Client.objects.get_or_create(
-            schema_name="neepco",
-            defaults={"name": "NEEPCO", "code": "neepco"},
+            schema_name=schema_name,
+            defaults={"name": "NEEPCO", "code": schema_name},
         )
         if created:
             tenant.create_schema(check_if_exists=True)
-            self.stdout.write(self.style.SUCCESS(f"  Created neepco tenant (id={tenant.pk})"))
+            self.stdout.write(self.style.SUCCESS(f"  Created {schema_name} tenant (id={tenant.pk})"))
         else:
-            self.stdout.write(f"  Neepco tenant exists (id={tenant.pk})")
+            self.stdout.write(f"  Tenant exists: {schema_name} (id={tenant.pk})")
 
-        # ── Azure domain ──────────────────────────────────────────────────────
-        azure_domain = os.environ.get("AZURE_DOMAIN", "tf-neepco-prod.azurewebsites.net")
-        dom, d_created = Domain.objects.get_or_create(
-            domain=azure_domain,
+        # ── Primary production domain (Vercel) ────────────────────────────────
+        primary_domain = os.environ.get("PRIMARY_DOMAIN", "").strip().lower()
+        if not primary_domain:
+            primary_domain = "neepco.localhost"
+
+        Domain.objects.filter(tenant=tenant, is_primary=True).exclude(
+            domain=primary_domain
+        ).update(is_primary=False)
+        dom, d_created = Domain.objects.update_or_create(
+            domain=primary_domain,
             defaults={"tenant": tenant, "is_primary": True},
         )
         if d_created:
-            self.stdout.write(self.style.SUCCESS(f"  Created domain: {azure_domain}"))
+            self.stdout.write(self.style.SUCCESS(f"  Created primary domain: {primary_domain}"))
         else:
-            # Ensure it points to the right tenant
-            if dom.tenant_id != tenant.pk:
-                dom.tenant = tenant
-                dom.save(update_fields=["tenant"])
-                self.stdout.write(self.style.WARNING(f"  Fixed domain {azure_domain} → neepco"))
-            else:
-                self.stdout.write(f"  Domain exists: {azure_domain}")
+            self.stdout.write(f"  Primary domain: {primary_domain}")
 
         # ── Localhost domain (for local dev) ──────────────────────────────────
         localhost_domain = "neepco.localhost"
-        loc, loc_created = Domain.objects.get_or_create(
-            domain=localhost_domain,
-            defaults={"tenant": tenant, "is_primary": False},
-        )
-        if loc_created:
-            self.stdout.write(self.style.SUCCESS(f"  Created domain: {localhost_domain}"))
-        else:
-            self.stdout.write(f"  Domain exists: {localhost_domain}")
+        if primary_domain != localhost_domain:
+            loc, loc_created = Domain.objects.get_or_create(
+                domain=localhost_domain,
+                defaults={"tenant": tenant, "is_primary": False},
+            )
+            if loc_created:
+                self.stdout.write(self.style.SUCCESS(f"  Created domain: {localhost_domain}"))
+            elif loc.tenant_id != tenant.pk:
+                loc.tenant = tenant
+                loc.save(update_fields=["tenant"])
+                self.stdout.write(self.style.WARNING(f"  Fixed domain {localhost_domain} → {schema_name}"))
+            else:
+                self.stdout.write(f"  Domain exists: {localhost_domain}")
 
         # ── OrgProfile in tenant schema ───────────────────────────────────────
         from django_tenants.utils import schema_context
 
-        with schema_context("neepco"):
+        with schema_context(schema_name):
             from recruitment.models import OrgProfile
 
+            profile_defaults = {
+                "name_en": tenant.name,
+                "name_hi": "नीपको",
+                "tagline_en": "Powering the North East",
+                "tagline_hi": "पूर्वोत्तर को ऊर्जा देना",
+                "address": "Brookland Compound, New Delhi — 110003",
+                "contact_email": "recruitment@neepco.co.in",
+                "website": "https://www.neepco.co.in",
+                "accent_color": "#0b3d91",
+            }
             profile, p_created = OrgProfile.objects.get_or_create(
-                defaults={
-                    "name_en": tenant.name,
-                    "name_hi": "नीपको",
-                    "tagline_en": "Powering the North East",
-                    "tagline_hi": "पूर्वोत्तर को ऊर्जा देना",
-                    "address": "Brookland Compound, New Delhi — 110003",
-                    "contact_email": "recruitment@neepco.co.in",
-                    "website": "https://www.neepco.co.in",
-                    "accent_color": "#0b3d91",
-                },
+                defaults=profile_defaults,
             )
             if p_created:
                 self.stdout.write(self.style.SUCCESS("  Created OrgProfile for NEEPCO"))
+            elif profile.name_en in ("", schema_name) and not profile.contact_email:
+                # Migration 0010 seeds a placeholder row from the schema name.
+                for field, value in profile_defaults.items():
+                    setattr(profile, field, value)
+                profile.save()
+                self.stdout.write(self.style.SUCCESS("  Filled placeholder OrgProfile for NEEPCO"))
             else:
                 self.stdout.write("  OrgProfile exists for NEEPCO")
 

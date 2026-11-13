@@ -17,8 +17,12 @@ load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-dev-only-change-me")
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in ("true", "1", "yes")
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if os.getenv("CSRF_TRUSTED_ORIGINS") else []
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",") if host.strip()]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 # Security settings for production
 if not DEBUG:
@@ -108,6 +112,10 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD", "postgres"),
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
+        # Serverless-friendly: do not keep stale connections between invocations.
+        "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "0")),
+        # Required when talking through connection poolers (Supavisor/PgBouncer).
+        "DISABLE_SERVER_SIDE_CURSORS": True,
         **({"OPTIONS": {"sslmode": _DB_SSLMODE}} if _DB_SSLMODE else {}),
     }
 }
@@ -130,6 +138,15 @@ RATELIMIT_USE_CACHE = "default"
 
 TENANT_MODEL = "tenants.Client"
 TENANT_DOMAIN_MODEL = "tenants.Domain"
+
+# Schema that holds shared apps (tenants, accounts, auth, sessions, admin).
+# Keep "public" for local dev; production uses a dedicated "talentflow" schema
+# so the app never mixes its tables with other projects on the same Supabase DB.
+PUBLIC_SCHEMA_NAME = os.getenv("PUBLIC_SCHEMA_NAME", "public")
+
+# Demo tenant schema. Production uses a prefixed name ("tf_neepco") so every
+# TalentFlow table is easy to identify in Supabase's Table Editor.
+DEMO_TENANT_SCHEMA = os.getenv("DEMO_TENANT_SCHEMA", "neepco")
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -174,37 +191,47 @@ USE_TZ = True
 # ---------------------------------------------------------------------------
 # Static / media
 # ---------------------------------------------------------------------------
-# ---------------------------------------------------------------------------
-# Static / media
-# ---------------------------------------------------------------------------
-STATIC_URL = "static/"
+# Absolute URL: Django's {% static %} tag returns STATIC_URL verbatim, so a
+# relative value ("static/") breaks nested pages such as /portal/login/.
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-AZURE_ACCOUNT_NAME = os.getenv("AZURE_STORAGE_ACCOUNT_NAME", "")
-AZURE_ACCOUNT_KEY = os.getenv("AZURE_STORAGE_KEY", "")
-AZURE_CONTAINER = os.getenv("AZURE_STORAGE_CONTAINER", "resumes")
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
-# Use Azure Storage if Azure credentials are provided in .env
-if AZURE_ACCOUNT_NAME and AZURE_ACCOUNT_KEY:
-    # Django 4.2+ Storage dictionary configuration
+# Supabase Storage (S3-compatible). Generate an access key pair in the
+# Supabase dashboard: Storage -> S3. When these are unset, local disk is used.
+SUPABASE_S3_ENDPOINT = os.getenv("SUPABASE_S3_ENDPOINT", "")
+SUPABASE_S3_REGION = os.getenv("SUPABASE_S3_REGION", "ap-south-1")
+SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "talentflow-media")
+SUPABASE_S3_ACCESS_KEY = os.getenv("SUPABASE_S3_ACCESS_KEY_ID", "")
+SUPABASE_S3_SECRET_KEY = os.getenv("SUPABASE_S3_SECRET_ACCESS_KEY", "")
+
+if SUPABASE_S3_ENDPOINT and SUPABASE_S3_ACCESS_KEY and SUPABASE_S3_SECRET_KEY:
     STORAGES = {
         "default": {
-            "BACKEND": "storages.backends.azure_storage.AzureStorage",
+            "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
-                "account_name": AZURE_ACCOUNT_NAME,
-                "account_key": AZURE_ACCOUNT_KEY,
-                "azure_container": AZURE_CONTAINER,
-                "expiration_secs": int(os.getenv("AZURE_URL_EXPIRATION_SECS", "3600")), # 1 hour temporary SAS URLs
+                "access_key": SUPABASE_S3_ACCESS_KEY,
+                "secret_key": SUPABASE_S3_SECRET_KEY,
+                "bucket_name": SUPABASE_STORAGE_BUCKET,
+                "endpoint_url": SUPABASE_S3_ENDPOINT,
+                "region_name": SUPABASE_S3_REGION,
+                "addressing_style": "path",
+                "signature_version": "s3v4",
+                # Private bucket: FileField.url returns a short-lived signed URL.
+                "default_acl": None,
+                "querystring_auth": True,
+                "file_overwrite": False,
             },
         },
         "staticfiles": {
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
-    MEDIA_URL = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/"
 else:
-    # Fallback to local disk for local development
+    # Local disk for development and for build-time collectstatic.
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -213,8 +240,6 @@ else:
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
-    MEDIA_URL = "media/"
-    MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

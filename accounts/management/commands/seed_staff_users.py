@@ -6,6 +6,9 @@ view HR surfaces. This command creates the sample staff users (idempotently)
 and grants them NEEPCO access so the HR / staff flows can be tested.
 """
 
+import os
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
@@ -20,10 +23,10 @@ STAFF = [
     ("k.nath", "Kabita Nath", "viewer"),
 ]
 
-STAFF_PASSWORD = "employee123"
+STAFF_PASSWORD = os.getenv("DEMO_STAFF_PASSWORD", "employee123")
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin123"
-TENANT_SCHEMA = "neepco"
+ADMIN_PASSWORD = os.getenv("DEMO_ADMIN_PASSWORD", "admin123")
+TENANT_SCHEMA = settings.DEMO_TENANT_SCHEMA
 
 
 class Command(BaseCommand):

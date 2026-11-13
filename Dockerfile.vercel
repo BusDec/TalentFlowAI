@@ -1,0 +1,38 @@
+# Vercel Container Runtime image for TalentFlow AI.
+#
+# The native Vercel Python runtime cannot install Tesseract, so the app runs as
+# a container image. This keeps OCR (English + Hindi), PyMuPDF, fpdf2 and the
+# existing Django settings working exactly as they did on Azure.
+
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORT=8000
+
+WORKDIR /app
+
+# System dependencies: Tesseract + language data for OCR, DejaVu fonts for
+# generated PDFs, libpq/gcc for psycopg2.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-hin \
+    fonts-dejavu-core \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Bake static files into the image. This only needs settings import (no DB),
+# so a throwaway secret is enough for the build step.
+RUN DJANGO_SECRET_KEY=build-only DJANGO_DEBUG=False \
+    python manage.py collectstatic --noinput
+
+EXPOSE 8000
+
+CMD ["gunicorn", "config.wsgi:application", "--config", "gunicorn.conf.py"]

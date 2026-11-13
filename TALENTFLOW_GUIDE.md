@@ -6,7 +6,27 @@ An agentic, multi-tenant recruitment portal built with **Django + django-tenants
 
 ## 1. Access URLs
 
-### NEEPCO Tenant (main demo)
+### Production (Vercel + Supabase)
+
+The hosted demo is a single-tenant deployment of the NEEPCO demo on Vercel:
+
+| Page | URL |
+|---|---|
+| **Landing page** | https://talentflow-ai.vercel.app/landing/ |
+| **HR Dashboard** | https://talentflow-ai.vercel.app/ |
+| **HR Login** | https://talentflow-ai.vercel.app/login/ |
+| **Django Admin** | https://talentflow-ai.vercel.app/admin/ |
+| **Candidate Portal** | https://talentflow-ai.vercel.app/portal/login/ |
+| **Candidate Register** | https://talentflow-ai.vercel.app/portal/register/ |
+| **Health + OCR check** | https://talentflow-ai.vercel.app/health/ |
+
+Production stores shared tables in the `talentflow` schema and tenant tables
+in `tf_neepco` inside the existing Supabase project. See
+`docs/VERCEL_SUPABASE_DEPLOYMENT.md` for the full deployment guide.
+
+### Local development
+
+#### NEEPCO Tenant (main demo)
 
 | Page | URL | Notes |
 |---|---|---|
@@ -124,7 +144,7 @@ LLM_MODEL=deepseek-chat
 | Multi-tenancy | django-tenants (schema-per-tenant, PostgreSQL) |
 | Database | PostgreSQL 16 (required) |
 | Frontend | Django templates + Bootstrap 5 + HTMX + Alpine.js |
-| OCR | pytesseract + Tesseract (local; install separately) |
+| OCR | pytesseract + Tesseract (installed in the Vercel container, English + Hindi) |
 | LLM | OpenAI-compatible client (DeepSeek default, swappable) |
 | i18n | English + Hindi (65 strings compiled) |
 
@@ -154,10 +174,11 @@ python manage.py runserver 127.0.0.1:8000
 
 ## 7. Important Config Notes
 
-- **Domain routing:** public = `localhost`, NEEPCO = `neepco.localhost` (hosts file entry added).
+- **Domain routing:** local public = `localhost`, local NEEPCO = `neepco.localhost`; production = the Vercel hostname mapped to the `tf_neepco` tenant.
+- **Schema routing:** local shared schema = `public`, local tenant = `neepco`; production shared = `talentflow`, tenant = `tf_neepco` (set via `PUBLIC_SCHEMA_NAME` / `DEMO_TENANT_SCHEMA`).
 - **LLM key** lives only in `.env` (git-ignored). Never paste API keys in chat/code.
 - **DigiLocker** is mocked (`DIGILOCKER_MOCK=True`). Flip to `False` when real credentials are ready.
-- **Tesseract** must be installed for resume OCR; until then resume parsing reports `failed`.
+- **Tesseract** is installed in the Vercel container (`Dockerfile.vercel`) with English + Hindi data. Locally, install it separately for OCR.
 - **Time zone:** `Asia/Kolkata`.
 
 ---
@@ -166,13 +187,14 @@ python manage.py runserver 127.0.0.1:8000
 
 | Data | Count |
 |---|---|
-| Advertisements | 1 (NEEPCO/02/2026) |
+| Advertisements | 1 (NEEPCO/02/2026, closes 31 Mar 2027) |
 | Posts | 12 |
-| Applications | ~105 |
-| Duplicate flags | ~30 |
+| Candidates | 70 |
+| Applications | 126 |
+| Portal users | 5 |
 | Roster matrix rows | 60 |
-| Panel entries | 38 |
-| Consents | ~7 |
+| Panel entries | 43 |
+| Consents | 10 |
 | Retirement forecast | 7 years |
 | Recruitment batches | 3 |
 | Skills | 12 |
@@ -184,10 +206,10 @@ python manage.py runserver 127.0.0.1:8000
 
 | Symptom | Fix |
 |---|---|
-| `No tenant for hostname "127.0.0.1"` | Use `neepco.localhost` or `localhost`, not the IP |
+| `No tenant for hostname "127.0.0.1"` | Use `neepco.localhost` or `localhost`, not the IP. In production, run `setup_tenant` with the Vercel hostname in `PRIMARY_DOMAIN` |
 | Logout "does nothing" | Uses POST form (Django 6 requirement) — works in browser |
 | 500 on roster | Ensure `RosterMatrix` rows exist (run `simulate_roster_panel`) |
-| Resume parse fails | Install Tesseract + set `TESSDATA_PREFIX` |
+| Resume parse fails | Install Tesseract + set `TESSDATA_PREFIX` locally; the Vercel container already includes it (verify `/health/` shows `ocr: true`) |
 | Port 8000 busy | Kill stale python: `Get-Process python \| Stop-Process -Force` |
 
 ---

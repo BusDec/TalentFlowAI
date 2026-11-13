@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from agents.doc_intel import extract_document
 from agents.duplicate_detection import flag_duplicates
+from agents.file_access import local_path
 from agents.resume_evaluator import evaluate_resume
 from agents.resume_parser import parse_resume
 from .models import Application, Document, Resume
@@ -27,7 +28,9 @@ def parse_resume_task(resume_id):
     resume.save(update_fields=["parse_status"])
 
     try:
-        parsed, confidence, method = parse_resume(resume.file.path)
+        # The file may live on remote storage (Supabase S3); parse a local copy.
+        with local_path(resume.file) as path:
+            parsed, confidence, method = parse_resume(path)
         if method == "ocr_failed" or not parsed:
             resume.parse_status = "failed"
             resume.parsed_json = {}
@@ -82,7 +85,8 @@ def parse_document_task(document_id):
     if document is None:
         return
     try:
-        result = extract_document(document.file.path)
+        with local_path(document.file) as path:
+            result = extract_document(path)
         if result["doc_type"] not in ("unknown", "resume"):
             document.doc_type = result["doc_type"]
         document.extracted_data = result

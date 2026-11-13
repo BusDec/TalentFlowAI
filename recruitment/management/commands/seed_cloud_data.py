@@ -10,6 +10,7 @@ Idempotent — safe to run on every startup. Creates:
 import random
 from datetime import date, timedelta
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
 
@@ -155,19 +156,22 @@ class Command(BaseCommand):
     help = "Seed NEEPCO test data (advertisement, posts, candidates, applications). Idempotent."
 
     def handle(self, *args, **options):
-        # Run inside the neepco tenant schema
+        # Run inside the configured demo tenant schema.
+        schema_name = settings.DEMO_TENANT_SCHEMA
         connection.set_schema_to_public()
         from tenants.models import Client
 
         try:
-            tenant = Client.objects.get(schema_name="neepco")
+            tenant = Client.objects.get(schema_name=schema_name)
         except Client.DoesNotExist:
-            self.stdout.write(self.style.ERROR("  neepco tenant not found. Run setup_tenant first."))
+            self.stdout.write(self.style.ERROR(
+                f"  {schema_name} tenant not found. Run setup_tenant first."
+            ))
             return
 
         from django_tenants.utils import schema_context
 
-        with schema_context("neepco"):
+        with schema_context(schema_name):
             self._seed()
 
     def _seed(self):
@@ -177,8 +181,8 @@ class Command(BaseCommand):
             defaults={
                 "title": "Recruitment of Executives in various disciplines",
                 "description": NEEPCO_PROFILE,
-                "published_date": date(2026, 6, 15),
-                "closing_date": date(2026, 9, 30),
+                "published_date": date(2026, 11, 1),
+                "closing_date": date(2027, 3, 31),
                 "is_active": True,
                 "health_text": "Must be in good mental and bodily health and free from any bodily defect likely to interfere with the efficient performance of duties.",
                 "how_to_apply": "Apply online through the NEEPCO recruitment portal before the closing date.",
